@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
@@ -22,14 +23,7 @@ class NavDrawer extends StatelessWidget {
             children: <Widget>[
               DrawerHeader(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColorDark,
-                      Theme.of(context).primaryColorLight,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: kBackgroundGradient,
                 ),
                 child: Container(
                   width: double.infinity,
@@ -100,15 +94,21 @@ class NavitemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      selected: selected,
-      leading: Icon(
-        icon,
+    return ListTileTheme(
+      iconColor: Theme.of(context).primaryColorDark,
+      textColor: Theme.of(context).primaryColorDark,
+      selectedColor: Theme.of(context).primaryColorLight,
+      style: ListTileStyle.drawer,
+      child: ListTile(
+        selected: selected,
+        leading: Icon(
+          icon,
+        ),
+        title: Text(title),
+        onTap: () {
+          Navigator.pushNamed(context, route);
+        },
       ),
-      title: Text(title),
-      onTap: () {
-        Navigator.pushNamed(context, route);
-      },
     );
   }
 }

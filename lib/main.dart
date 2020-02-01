@@ -18,6 +18,29 @@ class MyApp extends StatelessWidget {
         primaryColorDark: Colors.purple.shade900,
         primaryColorLight: Colors.purple.shade600,
         accentColor: Colors.purple,
+        disabledColor: Colors.purple.shade100,
+        textTheme: TextTheme(
+          title: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0,
+          ),
+          body1: TextStyle(
+            color: Colors.purple.shade900,
+            fontSize: 16.0,
+          ),
+          body2: TextStyle(
+            color: Colors.purple.shade600,
+            fontSize: 16.0,
+          ),
+          display1: TextStyle(
+            color: Colors.purple.shade900,
+            fontSize: 15.0,
+          ),
+          display2: TextStyle(
+            color: Colors.purple.shade600,
+            fontSize: 15.0,
+          ),
+        ),
       ),
       initialRoute: MealCheckScreen.id,
       routes: {

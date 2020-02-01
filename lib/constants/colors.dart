@@ -14,14 +14,13 @@ const lightBlue = Color(0xFFA6CDE5);
 const darkYellow = Color(0xFFFCFC94);
 const lightYellow = Color(0xFFFAFFCB);
 
+const primaryColorDark = Color(0xFF4A148C);
+const primaryColorLight = Color(0xFF8E24AA);
+
 const kBackgroundGradient = LinearGradient(
   colors: [
-    darkSkyBlue,
-    palePink,
-  ],
-  stops: [
-    0.3,
-    1.0,
+    primaryColorDark,
+    primaryColorLight,
   ],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
