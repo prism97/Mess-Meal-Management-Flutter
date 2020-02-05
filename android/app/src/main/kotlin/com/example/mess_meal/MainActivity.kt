@@ -1,4 +1,4 @@
-package com.example.mess_meal
+package com.prism.mess_meal
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

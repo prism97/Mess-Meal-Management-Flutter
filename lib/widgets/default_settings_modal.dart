@@ -35,7 +35,7 @@ class DefaultSettingsModal extends StatelessWidget {
             RaisedButton(
               elevation: kElevation,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(kBorderRadius),
               ),
               color: Theme.of(context).accentColor,
               textColor: Colors.white,

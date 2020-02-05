@@ -4,6 +4,8 @@ import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
+import 'package:mess_meal/screens/signup_screen.dart';
+import 'package:mess_meal/screens/start_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -42,9 +44,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: MealCheckScreen.id,
+      initialRoute: StartScreen.id,
       routes: {
+        StartScreen.id: (context) => StartScreen(),
         LoginScreen.id: (context) => LoginScreen(),
+        SignupScreen.id: (context) => SignupScreen(),
         MealCheckScreen.id: (context) => MealCheckScreen(),
         MealListScreen.id: (context) => MealListScreen(),
         BudgetScreen.id: (context) => BudgetScreen(),
