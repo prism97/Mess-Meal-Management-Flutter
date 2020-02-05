@@ -31,11 +31,15 @@ class StartScreen extends StatelessWidget {
             ),
             BasicWhiteButton(
               text: 'Login',
-              destination: LoginScreen.id,
+              onPressed: () {
+                Navigator.pushNamed(context, LoginScreen.id);
+              },
             ),
             BasicWhiteButton(
               text: 'Signup',
-              destination: SignupScreen.id,
+              onPressed: () {
+                Navigator.pushNamed(context, SignupScreen.id);
+              },
             ),
           ],
         ),
