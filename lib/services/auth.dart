@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/services/database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -9,12 +10,19 @@ class AuthService {
     return user != null ? User(uid: user.uid) : null;
   }
 
+  // auth change user stream
+  Stream<User> get user {
+    return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
+  }
+
   // sign up with email and password
   Future signUp(String email, String password) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
+
+      await DatabaseService(uid: user.uid).createUserData();
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
@@ -36,4 +44,12 @@ class AuthService {
   }
 
   // log out
+  Future logOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
 }

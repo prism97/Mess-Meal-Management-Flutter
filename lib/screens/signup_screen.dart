@@ -2,7 +2,9 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/screens/login_screen.dart';
+import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 
@@ -27,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomPadding: false,
       body: Container(
         padding: EdgeInsets.only(
           top: 150.0,
@@ -106,9 +109,22 @@ class _SignupScreenState extends State<SignupScreen> {
                         if (result == null) {
                           final snackBar = SnackBar(
                             content: Text(
-                                'Signup failed! Please provide valid input.'),
+                              'Signup failed! Please provide valid input.',
+                              style: Theme.of(context).textTheme.body1,
+                            ),
+                            backgroundColor: Theme.of(context).disabledColor,
+                            elevation: kElevation,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(kBorderRadius),
+                                topRight: Radius.circular(kBorderRadius),
+                              ),
+                            ),
                           );
                           _scaffoldKey.currentState.showSnackBar(snackBar);
+                        } else {
+                          Navigator.popAndPushNamed(
+                              context, MealCheckScreen.id);
                         }
                       }
                     },
@@ -116,32 +132,27 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Already have an account?',
-                      style: TextStyle(
-                        color: Theme.of(context).disabledColor,
-                      ),
-                    ),
-                    RawMaterialButton(
-                      child: Text(
-                        'Log In!',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.popAndPushNamed(context, LoginScreen.id);
-                      },
-                    )
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Already have an account?',
+                  style: TextStyle(
+                    color: Theme.of(context).disabledColor,
+                  ),
                 ),
-              ),
+                RawMaterialButton(
+                  child: Text(
+                    'Log In!',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, LoginScreen.id);
+                  },
+                )
+              ],
             ),
           ],
         ),

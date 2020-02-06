@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
-import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
+import 'package:mess_meal/services/auth.dart';
 
 class NavDrawer extends StatelessWidget {
   final String currentRoute;
+  final _auth = AuthService();
 
   NavDrawer({@required this.currentRoute});
 
@@ -40,25 +41,33 @@ class NavDrawer extends StatelessWidget {
               NavitemTile(
                 title: 'Daily Meal',
                 icon: FontAwesomeIcons.calendarCheck,
-                route: MealCheckScreen.id,
+                onTap: () {
+                  Navigator.pushNamed(context, MealCheckScreen.id);
+                },
                 selected: currentRoute == MealCheckScreen.id,
               ),
               NavitemTile(
                 title: 'Meal List',
                 icon: FontAwesomeIcons.clipboardList,
-                route: MealListScreen.id,
+                onTap: () {
+                  Navigator.pushNamed(context, MealListScreen.id);
+                },
                 selected: currentRoute == MealListScreen.id,
               ),
               NavitemTile(
                 title: 'Budget',
                 icon: FontAwesomeIcons.calculator,
-                route: BudgetScreen.id,
+                onTap: () {
+                  Navigator.pushNamed(context, BudgetScreen.id);
+                },
                 selected: currentRoute == BudgetScreen.id,
               ),
               NavitemTile(
                 title: 'Manager',
                 icon: FontAwesomeIcons.userTie,
-                route: ManagerScreen.id,
+                onTap: () {
+                  Navigator.pushNamed(context, ManagerScreen.id);
+                },
                 selected: currentRoute == ManagerScreen.id,
               ),
               Divider(),
@@ -68,7 +77,10 @@ class NavDrawer extends StatelessWidget {
                   child: NavitemTile(
                     icon: FontAwesomeIcons.signOutAlt,
                     title: 'Log Out',
-                    route: LoginScreen.id,
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await _auth.logOut();
+                    },
                   ),
                 ),
               ),
@@ -83,13 +95,13 @@ class NavDrawer extends StatelessWidget {
 class NavitemTile extends StatelessWidget {
   final String title;
   final IconData icon;
-  final String route;
+  final Function onTap;
   final bool selected;
 
   NavitemTile(
       {@required this.title,
       @required this.icon,
-      @required this.route,
+      @required this.onTap,
       this.selected = false});
 
   @override
@@ -105,9 +117,7 @@ class NavitemTile extends StatelessWidget {
           icon,
         ),
         title: Text(title),
-        onTap: () {
-          Navigator.pushNamed(context, route);
-        },
+        onTap: onTap,
       ),
     );
   }

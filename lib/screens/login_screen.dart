@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/screens/signup_screen.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
@@ -21,12 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
   // text field states
   String email = '';
   String password = '';
-  String error = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomPadding: false,
       body: Container(
         padding: EdgeInsets.only(
           top: 150.0,
@@ -106,7 +107,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (result == null) {
                           final snackBar = SnackBar(
                             content: Text(
-                                'Login failed! Please provide valid input.'),
+                              'Login failed! Invalid credentials.',
+                              style: Theme.of(context).textTheme.body1,
+                            ),
+                            backgroundColor: Theme.of(context).disabledColor,
+                            elevation: kElevation,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(kBorderRadius),
+                                topRight: Radius.circular(kBorderRadius),
+                              ),
+                            ),
                           );
                           _scaffoldKey.currentState.showSnackBar(snackBar);
                         }
@@ -116,32 +127,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Don\'t have an account?',
-                      style: TextStyle(
-                        color: Theme.of(context).disabledColor,
-                      ),
-                    ),
-                    RawMaterialButton(
-                      child: Text(
-                        'Sign Up!',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.popAndPushNamed(context, SignupScreen.id);
-                      },
-                    )
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Don\'t have an account?',
+                  style: TextStyle(
+                    color: Theme.of(context).disabledColor,
+                  ),
                 ),
-              ),
+                RawMaterialButton(
+                  child: Text(
+                    'Sign Up!',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, SignupScreen.id);
+                  },
+                )
+              ],
             ),
           ],
         ),

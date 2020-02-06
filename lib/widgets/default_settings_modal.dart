@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/models/default_meal.dart';
 import 'package:mess_meal/widgets/daily_meal_card.dart';
-import 'package:provider/provider.dart';
 
 class DefaultSettingsModal extends StatelessWidget {
   @override
@@ -28,22 +25,7 @@ class DefaultSettingsModal extends StatelessWidget {
                 fontSize: 20.0,
               ),
             ),
-            ChangeNotifierProvider<DefaultMeal>.value(
-              value: DefaultMeal.getInstance(),
-              child: DailyMealCard(),
-            ),
-            RaisedButton(
-              elevation: kElevation,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(kBorderRadius),
-              ),
-              color: Theme.of(context).accentColor,
-              textColor: Colors.white,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
+            DailyMealCard(isDefault: true),
           ],
         ),
       ),

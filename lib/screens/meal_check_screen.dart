@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mess_meal/models/default_meal.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/daily_meal_card.dart';
 import 'package:mess_meal/widgets/default_settings_modal.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 import 'package:mess_meal/widgets/custom_calendar.dart';
-import 'package:provider/provider.dart';
 
 class MealCheckScreen extends StatefulWidget {
   static const String id = 'meal_check_screen';
@@ -45,36 +43,33 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<DefaultMeal>.value(
-      value: DefaultMeal.getInstance(),
-      child: Scaffold(
-        drawer: NavDrawer(
-          currentRoute: MealCheckScreen.id,
+    return Scaffold(
+      drawer: NavDrawer(
+        currentRoute: MealCheckScreen.id,
+      ),
+      appBar: CustomAppBar(title: 'Check your daily meal'),
+      body: Container(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CustomCalendar(
+              calendarController: _calendarController,
+              showMealCard: showMealCard,
+            ),
+            _dailyMealCard,
+          ],
         ),
-        appBar: CustomAppBar(title: 'Check your daily meal'),
-        body: Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              CustomCalendar(
-                calendarController: _calendarController,
-                showMealCard: showMealCard,
-              ),
-              _dailyMealCard,
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) => DefaultSettingsModal(),
-            );
-          },
-          child: Icon(
-            FontAwesomeIcons.cog,
-          ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => DefaultSettingsModal(),
+          );
+        },
+        child: Icon(
+          FontAwesomeIcons.cog,
         ),
       ),
     );
