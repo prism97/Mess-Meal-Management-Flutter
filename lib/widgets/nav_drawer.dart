@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
 import 'package:mess_meal/services/auth.dart';
+import 'package:provider/provider.dart';
 
 class NavDrawer extends StatelessWidget {
   final String currentRoute;
@@ -28,13 +30,23 @@ class NavDrawer extends StatelessWidget {
                 ),
                 child: Container(
                   width: double.infinity,
-                  child: Text(
-                    'Mess Meal',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.white,
-                    ),
+                  padding: EdgeInsets.only(bottom: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Mess Meal',
+                        style: Theme.of(context).textTheme.title,
+                      ),
+                      Text(
+                        Provider.of<User>(context).email,
+                        style: Theme.of(context)
+                            .textTheme
+                            .display1
+                            .copyWith(color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
               ),

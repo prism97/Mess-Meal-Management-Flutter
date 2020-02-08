@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mess_meal/models/meal_data.dart';
 import 'package:mess_meal/models/user.dart';
 
 class DatabaseService {
@@ -43,5 +44,58 @@ class DatabaseService {
 
   Stream<UserData> get userData {
     return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
+  }
+
+  createNewMealData(
+      DateTime date, bool breakfast, bool lunch, bool dinner) async {
+    final _date = DateTime(date.year, date.month, date.day);
+    await userCollection.document(uid).collection('meals').document().setData({
+      'date': _date,
+      'meal': <String, bool>{
+        'breakfast': breakfast,
+        'lunch': lunch,
+        'dinner': dinner
+      },
+    });
+  }
+
+  updateMealData(DateTime date, bool breakfast, bool lunch, bool dinner) async {
+    final _date = DateTime(date.year, date.month, date.day);
+    final snapshot = await queryMealData(_date);
+    final doc = snapshot.documents.first;
+    final docId = doc.documentID;
+
+    await userCollection
+        .document(uid)
+        .collection('meals')
+        .document(docId)
+        .updateData({
+      'meal': <String, bool>{
+        'breakfast': breakfast,
+        'lunch': lunch,
+        'dinner': dinner
+      },
+    });
+  }
+
+  MealData _mealDataFromSnapshot(QuerySnapshot snapshot) {
+    if (snapshot.documents.isNotEmpty) {
+      final doc = snapshot.documents.first;
+      return MealData(Map<String, bool>.from(doc.data['meal']));
+    }
+    return null;
+  }
+
+  Future<MealData> getMealData(DateTime date) async {
+    final _date = DateTime(date.year, date.month, date.day);
+    return _mealDataFromSnapshot(await queryMealData(_date));
+  }
+
+  Future<QuerySnapshot> queryMealData(DateTime date) async {
+    return await userCollection
+        .document(uid)
+        .collection('meals')
+        .where('date', isEqualTo: date)
+        .getDocuments();
   }
 }

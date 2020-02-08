@@ -7,12 +7,18 @@ class AuthService {
 
   // create User object from FirebaseUser
   User _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? User(uid: user.uid) : null;
+    return user != null ? User(uid: user.uid, email: user.email) : null;
   }
 
   // auth change user stream
   Stream<User> get user {
     return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
+  }
+
+  // get current user's uid
+  Future<String> getCurrentUserId() async {
+    final _user = await _auth.currentUser();
+    return _user.uid;
   }
 
   // sign up with email and password

@@ -18,7 +18,7 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
   CalendarController _calendarController;
   DailyMealCard _dailyMealCard;
 
-  void showMealCard(DateTime date, List<dynamic> events) {
+  void showMealCard(DateTime date) {
     setState(() {
       _dailyMealCard = DailyMealCard(
         date: date,
