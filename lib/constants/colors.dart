@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 const primaryColorDark = Color(0xFF4A148C);
 const primaryColorLight = Color(0xFF8E24AA);
+const accentColor = Colors.purple;
 
 const kBackgroundGradient = LinearGradient(
   colors: [

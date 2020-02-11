@@ -30,6 +30,8 @@ dependencies:
   provider: ^4.0.2
   firebase_auth: ^0.15.4
   cloud_firestore: ^0.13.0+1
+  firebase_core: ^0.4.3+3
+  flutter_spinkit: ^4.1.1+1
 
 dev_dependencies:
   flutter_test:

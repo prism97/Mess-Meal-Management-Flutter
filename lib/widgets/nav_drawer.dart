@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
+import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
@@ -51,7 +52,7 @@ class NavDrawer extends StatelessWidget {
                 ),
               ),
               NavitemTile(
-                title: 'Daily Meal',
+                title: 'Check Meal',
                 icon: FontAwesomeIcons.calendarCheck,
                 onTap: () {
                   Navigator.pushNamed(context, MealCheckScreen.id);
@@ -59,7 +60,7 @@ class NavDrawer extends StatelessWidget {
                 selected: currentRoute == MealCheckScreen.id,
               ),
               NavitemTile(
-                title: 'Meal List',
+                title: 'Today\'s Meal',
                 icon: FontAwesomeIcons.clipboardList,
                 onTap: () {
                   Navigator.pushNamed(context, MealListScreen.id);
@@ -89,9 +90,10 @@ class NavDrawer extends StatelessWidget {
                   child: NavitemTile(
                     icon: FontAwesomeIcons.signOutAlt,
                     title: 'Log Out',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await _auth.logOut();
+                    onTap: () {
+                      _auth.logOut().whenComplete(() {
+                        Navigator.of(context).pushNamed(LoginScreen.id);
+                      });
                     },
                   ),
                 ),

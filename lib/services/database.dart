@@ -98,4 +98,35 @@ class DatabaseService {
         .where('date', isEqualTo: date)
         .getDocuments();
   }
+
+  // list of users who checked today's breakfast
+  Future<List<String>> mealTakers(String mealName) async {
+    final today = DateTime.now();
+    final _date = DateTime(today.year, today.month, today.day);
+
+    final usersSnapshot = await userCollection.getDocuments();
+    final users = usersSnapshot.documents;
+
+    List<String> mealUsers = [];
+
+    users.forEach((user) async {
+      await userCollection
+          .document(user.documentID)
+          .collection('meals')
+          .where('date', isEqualTo: _date)
+          .getDocuments()
+          .then((userMeal) {
+        if (userMeal.documents.isEmpty) {
+          if (user.data['default_meal'][mealName]) {
+            mealUsers.add(user.documentID);
+          }
+        } else {
+          if (userMeal.documents.first.data['meal'][mealName]) {
+            mealUsers.add(user.documentID);
+          }
+        }
+      });
+    });
+    return mealUsers;
+  }
 }
