@@ -8,7 +8,7 @@ class DatabaseService {
   DatabaseService({this.uid});
 
   // collection reference
-  final CollectionReference userCollection =
+  static final CollectionReference userCollection =
       Firestore.instance.collection('users');
 
   createUserData() async {
@@ -44,6 +44,11 @@ class DatabaseService {
 
   Stream<UserData> get userData {
     return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
+  }
+
+  Future<List<String>> get userRoles async {
+    final userDoc = await userCollection.document(uid).get();
+    return List<String>.from(userDoc.data['roles'] ?? []);
   }
 
   createNewMealData(
@@ -99,34 +104,42 @@ class DatabaseService {
         .getDocuments();
   }
 
-  // list of users who checked today's breakfast
-  Future<List<String>> mealTakers(String mealName) async {
+  // list of users who subscribed for today's breakfast, lunch and dinner
+  static Future<Map<String, List<String>>> mealTakersGrouped() async {
     final today = DateTime.now();
     final _date = DateTime(today.year, today.month, today.day);
 
     final usersSnapshot = await userCollection.getDocuments();
     final users = usersSnapshot.documents;
 
-    List<String> mealUsers = [];
+    Map<String, List<String>> mealUsers = {
+      'breakfast': [],
+      'lunch': [],
+      'dinner': [],
+    };
 
-    users.forEach((user) async {
-      await userCollection
+    for (var user in users) {
+      final userMeal = await userCollection
           .document(user.documentID)
           .collection('meals')
           .where('date', isEqualTo: _date)
-          .getDocuments()
-          .then((userMeal) {
-        if (userMeal.documents.isEmpty) {
-          if (user.data['default_meal'][mealName]) {
-            mealUsers.add(user.documentID);
-          }
-        } else {
-          if (userMeal.documents.first.data['meal'][mealName]) {
-            mealUsers.add(user.documentID);
-          }
-        }
-      });
-    });
+          .getDocuments();
+
+      final mealDoc = userMeal.documents;
+      final defaultMeal = user.data['default_meal'];
+      final docId = user.documentID;
+
+      if (mealDoc.isEmpty) {
+        if (defaultMeal['breakfast']) mealUsers['breakfast'].add(docId);
+        if (defaultMeal['lunch']) mealUsers['lunch'].add(docId);
+        if (defaultMeal['dinner']) mealUsers['dinner'].add(docId);
+      } else {
+        final meal = mealDoc.first.data['meal'];
+        if (meal['breakfast']) mealUsers['breakfast'].add(docId);
+        if (meal['lunch']) mealUsers['lunch'].add(docId);
+        if (meal['dinner']) mealUsers['dinner'].add(docId);
+      }
+    }
     return mealUsers;
   }
 }

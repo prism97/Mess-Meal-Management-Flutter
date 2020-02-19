@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mess_meal/constants/custom_theme.dart';
 import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/screen_selector.dart';
+import 'package:mess_meal/screens/admin_screen.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           MealListScreen.id: (context) => MealListScreen(),
           BudgetScreen.id: (context) => BudgetScreen(),
           ManagerScreen.id: (context) => ManagerScreen(),
+          AdminScreen.id: (context) => AdminScreen(),
         },
       ),
     );

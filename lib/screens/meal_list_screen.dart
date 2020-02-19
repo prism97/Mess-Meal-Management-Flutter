@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/loading.dart';
@@ -22,11 +21,11 @@ class _MealListScreenState extends State<MealListScreen> {
   bool loading = true;
 
   Future<void> fetchMealData() async {
-    final String _uid = await AuthService().getCurrentUserId();
-    final db = DatabaseService(uid: _uid);
-    _breakfast = await db.mealTakers('breakfast');
-    _lunch = await db.mealTakers('lunch');
-    _dinner = await db.mealTakers('dinner'); // TODO: not loading
+    final meals = await DatabaseService.mealTakersGrouped();
+
+    _breakfast = meals['breakfast'];
+    _lunch = meals['lunch'];
+    _dinner = meals['dinner'];
     return;
   }
 
