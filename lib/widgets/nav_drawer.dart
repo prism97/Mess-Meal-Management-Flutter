@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/screens/admin_screen.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
-import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
@@ -19,9 +17,7 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User>(context);
-    final userRoles = Provider.of<List<String>>(context);
-    final admin = userRoles.contains('admin');
+    bool admin = Provider.of<List<String>>(context).contains('admin');
 
     return SizedBox(
       width: MediaQuery.of(context).size.width / 1.5,
@@ -44,13 +40,6 @@ class NavDrawer extends StatelessWidget {
                       Text(
                         'Mess Meal',
                         style: Theme.of(context).textTheme.title,
-                      ),
-                      Text(
-                        user.email,
-                        style: Theme.of(context)
-                            .textTheme
-                            .display1
-                            .copyWith(color: Colors.white),
                       ),
                     ],
                   ),
@@ -109,9 +98,8 @@ class NavDrawer extends StatelessWidget {
                     icon: FontAwesomeIcons.signOutAlt,
                     title: 'Log Out',
                     onTap: () {
-                      _auth.logOut().whenComplete(() {
-                        Navigator.of(context).pushNamed(LoginScreen.id);
-                      });
+                      _auth.logOut();
+                      Navigator.pop(context);
                     },
                   ),
                 ),

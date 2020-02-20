@@ -20,8 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // text field states
-  String email = '';
-  String password = '';
+  String _email = '';
+  String _password = '';
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       hintText: 'email',
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (val) => !EmailValidator.validate(email)
+                    validator: (val) => !EmailValidator.validate(_email)
                         ? 'Enter a valid email address'
                         : null,
                     onChanged: (val) {
-                      setState(() => email = val);
+                      setState(() => _email = val);
                     },
                   ),
                   SizedBox(
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? 'Enter a password at least 6 characters long'
                         : null,
                     onChanged: (val) {
-                      setState(() => password = val);
+                      setState(() => _password = val);
                     },
                   ),
                   SizedBox(
@@ -102,8 +102,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     text: 'Login',
                     onPressed: () async {
                       FocusScope.of(context).unfocus();
-                      if (_formKey.currentState.validate()) {
-                        dynamic result = await _auth.logIn(email, password);
+
+                      final formState = _formKey.currentState;
+                      if (formState.validate()) {
+                        formState.save();
+                        final result = await _auth.logIn(_email, _password);
                         if (result == null) {
                           final snackBar = SnackBar(
                             content: Text(

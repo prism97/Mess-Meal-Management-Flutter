@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
-import 'package:provider/provider.dart';
 
 class DailyMealCard extends StatefulWidget {
   final DateTime date;
@@ -18,6 +19,8 @@ class DailyMealCard extends StatefulWidget {
 class _DailyMealCardState extends State<DailyMealCard> {
   Map<String, bool> mealChecks;
   bool mealExists;
+  DatabaseService db;
+  bool _loading = true;
 
   void _onBreakfastChanged(bool newValue) {
     setState(() {
@@ -39,7 +42,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
 
   Future<void> fetchMeal() async {
     final String _uid = await AuthService().getCurrentUserId();
-    final db = DatabaseService(uid: _uid);
+    db = DatabaseService(uid: _uid);
     if (!widget.isDefault) {
       final result = await db.getMealData(widget.date);
       if (result != null) {
@@ -59,7 +62,9 @@ class _DailyMealCardState extends State<DailyMealCard> {
     mealChecks = {};
     mealExists = false;
     fetchMeal().whenComplete(() {
-      setState(() {});
+      setState(() {
+        _loading = false;
+      });
     });
   }
 
@@ -68,15 +73,21 @@ class _DailyMealCardState extends State<DailyMealCard> {
     super.didUpdateWidget(oldWidget);
     mealChecks = {};
     mealExists = false;
+    if (!widget.isDefault) {
+      setState(() {
+        _loading = true;
+      });
+    }
+
     fetchMeal().whenComplete(() {
-      setState(() {});
+      setState(() {
+        _loading = false;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User>(context);
-    final db = DatabaseService(uid: user.uid);
     Map<String, bool> _currentDefaultMeal = {};
 
     DateTime now = DateTime.now();
@@ -100,131 +111,149 @@ class _DailyMealCardState extends State<DailyMealCard> {
         now.day == widget.date.day &&
         now.isAfter(lunchDinnerTime);
 
-    return StreamBuilder<UserData>(
-      stream: db.userData,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          _currentDefaultMeal = snapshot.data.defaultMeal;
-        }
+    return _loading
+        ? Padding(
+            padding: const EdgeInsets.only(top: 50.0),
+            child: SpinKitCircle(
+              color: primaryColorDark,
+              size: 50.0,
+            ),
+          )
+        : StreamBuilder<UserData>(
+            stream: db.userData,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                _currentDefaultMeal = snapshot.data.defaultMeal;
+              }
 
-        return Column(
-          children: <Widget>[
-            Card(
-              margin: EdgeInsets.symmetric(vertical: 10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              color: Colors.white,
-              elevation: kElevation,
-              child: Column(
+              return Column(
                 children: <Widget>[
-                  Text(!widget.isDefault ? widget.date.toString() : ''),
-                  ListTile(
-                    contentPadding: EdgeInsets.only(left: 20.0),
-                    title: Text(
-                      'Breakfast',
-                      style: Theme.of(context).textTheme.body1,
+                  Card(
+                    margin: EdgeInsets.symmetric(vertical: 10.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                    trailing: Switch(
-                      inactiveThumbColor: Theme.of(context).primaryColorLight,
-                      inactiveTrackColor: Theme.of(context).disabledColor,
-                      value: mealExists
-                          ? mealChecks['breakfast']
-                          : ((mealChecks['breakfast'] ??
-                                  _currentDefaultMeal['breakfast']) ??
-                              true),
-                      onChanged: breakfastChangeNotAllowed
-                          ? null
-                          : _onBreakfastChanged,
+                    color: Colors.white,
+                    elevation: kElevation,
+                    child: Column(
+                      children: <Widget>[
+                        Text(!widget.isDefault ? widget.date.toString() : ''),
+                        ListTile(
+                          contentPadding: EdgeInsets.only(left: 20.0),
+                          title: Text(
+                            'Breakfast',
+                            style: Theme.of(context).textTheme.body1,
+                          ),
+                          trailing: Switch(
+                            inactiveThumbColor:
+                                Theme.of(context).primaryColorLight,
+                            inactiveTrackColor: Theme.of(context).disabledColor,
+                            value: mealExists
+                                ? mealChecks['breakfast']
+                                : ((mealChecks['breakfast'] ??
+                                        _currentDefaultMeal['breakfast']) ??
+                                    true),
+                            onChanged: breakfastChangeNotAllowed
+                                ? null
+                                : _onBreakfastChanged,
+                          ),
+                        ),
+                        Divider(
+                          height: 1.0,
+                          indent: 10.0,
+                          endIndent: 10.0,
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.only(left: 20.0),
+                          title: Text(
+                            'Lunch',
+                            style: Theme.of(context).textTheme.body1,
+                          ),
+                          trailing: Switch(
+                            inactiveThumbColor:
+                                Theme.of(context).primaryColorLight,
+                            inactiveTrackColor: Theme.of(context).disabledColor,
+                            value: mealExists
+                                ? mealChecks['lunch']
+                                : ((mealChecks['lunch'] ??
+                                        _currentDefaultMeal['lunch']) ??
+                                    true),
+                            onChanged: lunchDinnerChangeNotAllowed
+                                ? null
+                                : _onLunchChanged,
+                          ),
+                        ),
+                        Divider(
+                          height: 1.0,
+                          indent: 10.0,
+                          endIndent: 10.0,
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.only(left: 20.0),
+                          title: Text(
+                            'Dinner',
+                            style: Theme.of(context).textTheme.body1,
+                          ),
+                          trailing: Switch(
+                            inactiveThumbColor:
+                                Theme.of(context).primaryColorLight,
+                            inactiveTrackColor: Theme.of(context).disabledColor,
+                            value: mealExists
+                                ? mealChecks['dinner']
+                                : ((mealChecks['dinner'] ??
+                                        _currentDefaultMeal['dinner']) ??
+                                    false),
+                            onChanged: lunchDinnerChangeNotAllowed
+                                ? null
+                                : _onDinnerChanged,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Divider(
-                    height: 1.0,
-                    indent: 10.0,
-                    endIndent: 10.0,
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.only(left: 20.0),
-                    title: Text(
-                      'Lunch',
-                      style: Theme.of(context).textTheme.body1,
+                  RaisedButton(
+                    elevation: kElevation,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kBorderRadius),
                     ),
-                    trailing: Switch(
-                      inactiveThumbColor: Theme.of(context).primaryColorLight,
-                      inactiveTrackColor: Theme.of(context).disabledColor,
-                      value: mealExists
-                          ? mealChecks['lunch']
-                          : ((mealChecks['lunch'] ??
-                                  _currentDefaultMeal['lunch']) ??
-                              true),
-                      onChanged:
-                          lunchDinnerChangeNotAllowed ? null : _onLunchChanged,
-                    ),
-                  ),
-                  Divider(
-                    height: 1.0,
-                    indent: 10.0,
-                    endIndent: 10.0,
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.only(left: 20.0),
-                    title: Text(
-                      'Dinner',
-                      style: Theme.of(context).textTheme.body1,
-                    ),
-                    trailing: Switch(
-                      inactiveThumbColor: Theme.of(context).primaryColorLight,
-                      inactiveTrackColor: Theme.of(context).disabledColor,
-                      value: mealExists
-                          ? mealChecks['dinner']
-                          : ((mealChecks['dinner'] ??
-                                  _currentDefaultMeal['dinner']) ??
-                              false),
-                      onChanged:
-                          lunchDinnerChangeNotAllowed ? null : _onDinnerChanged,
-                    ),
+                    color: Theme.of(context).accentColor,
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      if (widget.isDefault) {
+                        await db.updateUserDefaultMeal(
+                            mealChecks['breakfast'] ??
+                                _currentDefaultMeal['breakfast'],
+                            mealChecks['lunch'] ?? _currentDefaultMeal['lunch'],
+                            mealChecks['dinner'] ??
+                                _currentDefaultMeal['dinner']);
+                        Navigator.pop(context);
+                      } else {
+                        if (!mealExists) {
+                          await db.createNewMealData(
+                              widget.date,
+                              mealChecks['breakfast'] ??
+                                  _currentDefaultMeal['breakfast'],
+                              mealChecks['lunch'] ??
+                                  _currentDefaultMeal['lunch'],
+                              mealChecks['dinner'] ??
+                                  _currentDefaultMeal['dinner']);
+                        } else {
+                          await db.updateMealData(
+                              widget.date,
+                              mealChecks['breakfast'] ??
+                                  _currentDefaultMeal['breakfast'],
+                              mealChecks['lunch'] ??
+                                  _currentDefaultMeal['lunch'],
+                              mealChecks['dinner'] ??
+                                  _currentDefaultMeal['dinner']);
+                        }
+                      }
+                    },
+                    child: Text('Save'),
                   ),
                 ],
-              ),
-            ),
-            RaisedButton(
-              elevation: kElevation,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(kBorderRadius),
-              ),
-              color: Theme.of(context).accentColor,
-              textColor: Colors.white,
-              onPressed: () async {
-                if (widget.isDefault) {
-                  await db.updateUserDefaultMeal(
-                      mealChecks['breakfast'] ??
-                          _currentDefaultMeal['breakfast'],
-                      mealChecks['lunch'] ?? _currentDefaultMeal['lunch'],
-                      mealChecks['dinner'] ?? _currentDefaultMeal['dinner']);
-                  Navigator.pop(context);
-                } else {
-                  if (!mealExists) {
-                    await db.createNewMealData(
-                        widget.date,
-                        mealChecks['breakfast'] ??
-                            _currentDefaultMeal['breakfast'],
-                        mealChecks['lunch'] ?? _currentDefaultMeal['lunch'],
-                        mealChecks['dinner'] ?? _currentDefaultMeal['dinner']);
-                  } else {
-                    await db.updateMealData(
-                        widget.date,
-                        mealChecks['breakfast'] ??
-                            _currentDefaultMeal['breakfast'],
-                        mealChecks['lunch'] ?? _currentDefaultMeal['lunch'],
-                        mealChecks['dinner'] ?? _currentDefaultMeal['dinner']);
-                  }
-                }
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
+              );
+            },
+          );
   }
 }

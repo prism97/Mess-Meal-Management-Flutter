@@ -29,6 +29,7 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
   @override
   void initState() {
     super.initState();
+
     _calendarController = CalendarController();
     _dailyMealCard = DailyMealCard(
       date: DateTime.now(),

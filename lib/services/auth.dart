@@ -21,6 +21,12 @@ class AuthService {
     return _user.uid;
   }
 
+  // get current user's email
+  Future<String> getCurrentUserEmail() async {
+    final _user = await _auth.currentUser();
+    return _user.email;
+  }
+
   // sign up with email and password
   Future signUp(String email, String password) async {
     try {
