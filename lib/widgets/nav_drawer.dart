@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/screens/admin_screen.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
 import 'package:mess_meal/services/auth.dart';
-import 'package:provider/provider.dart';
 
 class NavDrawer extends StatelessWidget {
   final String currentRoute;
@@ -17,8 +15,6 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool admin = Provider.of<List<String>>(context).contains('admin');
-
     return SizedBox(
       width: MediaQuery.of(context).size.width / 1.5,
       child: Drawer(
@@ -45,17 +41,14 @@ class NavDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              admin
-                  ? Container()
-                  : NavitemTile(
-                      title: 'Check Meal',
-                      icon: FontAwesomeIcons.calendarCheck,
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                            context, MealCheckScreen.id);
-                      },
-                      selected: currentRoute == MealCheckScreen.id,
-                    ),
+              NavitemTile(
+                title: 'Check Meal',
+                icon: FontAwesomeIcons.calendarCheck,
+                onTap: () {
+                  Navigator.pushReplacementNamed(context, MealCheckScreen.id);
+                },
+                selected: currentRoute == MealCheckScreen.id,
+              ),
               NavitemTile(
                 title: 'Today\'s Meal',
                 icon: FontAwesomeIcons.clipboardList,
@@ -80,16 +73,6 @@ class NavDrawer extends StatelessWidget {
                 },
                 selected: currentRoute == ManagerScreen.id,
               ),
-              admin
-                  ? NavitemTile(
-                      title: 'Admin',
-                      icon: FontAwesomeIcons.userCog,
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, AdminScreen.id);
-                      },
-                      selected: currentRoute == AdminScreen.id,
-                    )
-                  : Container(),
               Divider(),
               Expanded(
                 child: Align(

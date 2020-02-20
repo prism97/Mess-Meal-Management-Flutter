@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mess_meal/screens/admin_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
+import 'package:mess_meal/screens/meal_list_screen.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/loading.dart';
-import 'package:provider/provider.dart';
 
 class ScreenSelector extends StatefulWidget {
   @override
@@ -13,16 +13,13 @@ class ScreenSelector extends StatefulWidget {
 
 class _ScreenSelectorState extends State<ScreenSelector> {
   bool _loading = true;
-  bool _isAdmin = false;
   List<String> _roles = [];
+  DatabaseService db;
 
   Future<void> checkAdmin() async {
     final uid = await AuthService().getCurrentUserId();
-    final db = DatabaseService(uid: uid);
+    db = DatabaseService(uid: uid);
     _roles = await db.userRoles;
-    if (_roles.contains('admin')) {
-      _isAdmin = true;
-    }
   }
 
   @override
@@ -37,12 +34,14 @@ class _ScreenSelectorState extends State<ScreenSelector> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: fix provider so that every screen can access it
     return _loading
         ? Loading()
-        : Provider<List<String>>(
-            create: (context) => _roles,
-            child: _isAdmin ? AdminScreen() : MealCheckScreen(),
-          );
+        : (_roles.contains('admin')
+            ? AdminScreen()
+            : (_roles.contains('messboy')
+                ? MealListScreen(
+                    isMessboy: true,
+                  )
+                : MealCheckScreen()));
   }
 }

@@ -46,21 +46,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// return StreamProvider<User>.value(
-//       value: AuthService().user,
-//       child: MaterialApp(
-//         debugShowCheckedModeBanner: false,
-//         theme: themeData,
-//         home: ScreenSelector(),
-//         routes: {
-//           LoginScreen.id: (context) => LoginScreen(),
-//           SignupScreen.id: (context) => SignupScreen(),
-//           MealCheckScreen.id: (context) => MealCheckScreen(),
-//           MealListScreen.id: (context) => MealListScreen(),
-//           BudgetScreen.id: (context) => BudgetScreen(),
-//           ManagerScreen.id: (context) => ManagerScreen(),
-//           AdminScreen.id: (context) => AdminScreen(),
-//         },
-//       ),
-//     );
