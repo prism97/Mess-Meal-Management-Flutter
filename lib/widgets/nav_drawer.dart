@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/screens/budget_screen.dart';
+import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
@@ -82,7 +83,12 @@ class NavDrawer extends StatelessWidget {
                     title: 'Log Out',
                     onTap: () {
                       _auth.logOut();
+                      // Navigator.pop(context);
                       Navigator.pop(context);
+                      Navigator.pushReplacementNamed(context, LoginScreen.id);
+                      // TODO: logout not changing screen for normal users
+                      // Navigator.popUntil(
+                      // context, ModalRoute.withName(LoginScreen.id));
                     },
                   ),
                 ),

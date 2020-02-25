@@ -11,15 +11,10 @@ class DatabaseService {
   static final CollectionReference userCollection =
       Firestore.instance.collection('users');
 
-  createUserData() async {
-    await userCollection.document(uid).setData({
-      'default_meal': <String, bool>{
-        'breakfast': true,
-        'lunch': true,
-        'dinner': true
-      },
-      'current_fortnight_meal_amount': 0
-    });
+  static createUserData(int studentId, String name, String email) async {
+    await userCollection
+        .document()
+        .setData({'studentId': studentId, 'name': name, 'email': email});
   }
 
   Future updateUserDefaultMeal(bool breakfast, bool lunch, bool dinner) async {
@@ -119,25 +114,28 @@ class DatabaseService {
     };
 
     for (var user in users) {
-      final userMeal = await userCollection
-          .document(user.documentID)
-          .collection('meals')
-          .where('date', isEqualTo: _date)
-          .getDocuments();
+      final roles = List<String>.from(user.data['roles'] ?? []);
+      if (!roles.contains('admin') && !roles.contains('messboy')) {
+        final userMeal = await userCollection
+            .document(user.documentID)
+            .collection('meals')
+            .where('date', isEqualTo: _date)
+            .getDocuments();
 
-      final mealDoc = userMeal.documents;
-      final defaultMeal = user.data['default_meal'];
-      final docId = user.documentID;
+        final mealDoc = userMeal.documents;
+        final defaultMeal = user.data['default_meal'];
+        final name = user.data['name'];
 
-      if (mealDoc.isEmpty) {
-        if (defaultMeal['breakfast']) mealUsers['breakfast'].add(docId);
-        if (defaultMeal['lunch']) mealUsers['lunch'].add(docId);
-        if (defaultMeal['dinner']) mealUsers['dinner'].add(docId);
-      } else {
-        final meal = mealDoc.first.data['meal'];
-        if (meal['breakfast']) mealUsers['breakfast'].add(docId);
-        if (meal['lunch']) mealUsers['lunch'].add(docId);
-        if (meal['dinner']) mealUsers['dinner'].add(docId);
+        if (mealDoc.isEmpty) {
+          if (defaultMeal['breakfast']) mealUsers['breakfast'].add(name);
+          if (defaultMeal['lunch']) mealUsers['lunch'].add(name);
+          if (defaultMeal['dinner']) mealUsers['dinner'].add(name);
+        } else {
+          final meal = mealDoc.first.data['meal'];
+          if (meal['breakfast']) mealUsers['breakfast'].add(name);
+          if (meal['lunch']) mealUsers['lunch'].add(name);
+          if (meal['dinner']) mealUsers['dinner'].add(name);
+        }
       }
     }
     return mealUsers;

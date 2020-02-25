@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mess_meal/models/user.dart';
-import 'package:mess_meal/services/database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -34,7 +33,7 @@ class AuthService {
           email: email, password: password);
       FirebaseUser user = result.user;
 
-      await DatabaseService(uid: user.uid).createUserData();
+      // await DatabaseService(uid: user.uid).createUserData();
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());

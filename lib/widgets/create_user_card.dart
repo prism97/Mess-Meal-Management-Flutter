@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 
 class CreateUserCard extends StatefulWidget {
@@ -114,12 +115,15 @@ class _CreateUserCardState extends State<CreateUserCard> {
                       ),
                       BasicWhiteButton(
                         text: 'Create',
-                        onPressed: () {
+                        onPressed: () async {
                           FocusScope.of(context).unfocus();
 
                           final formState = _formKey.currentState;
                           if (formState.validate()) {
                             formState.save();
+                            await DatabaseService.createUserData(
+                                _sid, _name, _email);
+                            print('user created');
                           }
                         },
                       ),
