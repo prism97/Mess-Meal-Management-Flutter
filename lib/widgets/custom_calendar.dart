@@ -12,25 +12,10 @@ class CustomCalendar extends StatelessWidget {
   final CalendarController calendarController;
   final Function showMealCard;
 
-  bool disablePassedDays(DateTime date) {
-    DateTime today = DateTime.now();
-    DateTime currentDay = DateTime(
-      today.year,
-      today.month,
-      today.day,
-    );
-
-    if (date.isBefore(currentDay)) {
-      return false;
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
       initialSelectedDay: DateTime.now(),
-      enabledDayPredicate: disablePassedDays,
       calendarController: calendarController,
       availableCalendarFormats: {
         CalendarFormat.week: '',

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/screens/signup_screen.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 
@@ -139,17 +138,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Theme.of(context).disabledColor,
                   ),
                 ),
-                RawMaterialButton(
-                  child: Text(
-                    'Sign Up!',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.popAndPushNamed(context, SignupScreen.id);
-                  },
-                )
               ],
             ),
           ],

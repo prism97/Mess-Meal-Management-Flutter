@@ -91,25 +91,27 @@ class _DailyMealCardState extends State<DailyMealCard> {
     Map<String, bool> _currentDefaultMeal = {};
 
     DateTime now = DateTime.now();
-    DateTime breakfastTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      6,
-    );
-    DateTime lunchDinnerTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      9,
-    );
-    bool breakfastChangeNotAllowed = !widget.isDefault &&
-        now.day == widget.date.day &&
-        now.isAfter(breakfastTime);
+    DateTime breakfastTime = widget.isDefault
+        ? DateTime.now()
+        : DateTime(
+            widget.date.year,
+            widget.date.month,
+            widget.date.day,
+            6,
+          );
+    DateTime lunchDinnerTime = widget.isDefault
+        ? DateTime.now()
+        : DateTime(
+            widget.date.year,
+            widget.date.month,
+            widget.date.day,
+            9,
+          );
+    bool breakfastChangeNotAllowed =
+        !widget.isDefault && now.isAfter(breakfastTime);
 
-    bool lunchDinnerChangeNotAllowed = !widget.isDefault &&
-        now.day == widget.date.day &&
-        now.isAfter(lunchDinnerTime);
+    bool lunchDinnerChangeNotAllowed =
+        !widget.isDefault && now.isAfter(lunchDinnerTime);
 
     return _loading
         ? Padding(
@@ -211,46 +213,49 @@ class _DailyMealCardState extends State<DailyMealCard> {
                       ],
                     ),
                   ),
-                  RaisedButton(
-                    elevation: kElevation,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(kBorderRadius),
-                    ),
-                    color: Theme.of(context).accentColor,
-                    textColor: Colors.white,
-                    onPressed: () async {
-                      if (widget.isDefault) {
-                        await db.updateUserDefaultMeal(
-                            mealChecks['breakfast'] ??
-                                _currentDefaultMeal['breakfast'],
-                            mealChecks['lunch'] ?? _currentDefaultMeal['lunch'],
-                            mealChecks['dinner'] ??
-                                _currentDefaultMeal['dinner']);
-                        Navigator.pop(context);
-                      } else {
-                        if (!mealExists) {
-                          await db.createNewMealData(
-                              widget.date,
-                              mealChecks['breakfast'] ??
-                                  _currentDefaultMeal['breakfast'],
-                              mealChecks['lunch'] ??
-                                  _currentDefaultMeal['lunch'],
-                              mealChecks['dinner'] ??
-                                  _currentDefaultMeal['dinner']);
-                        } else {
-                          await db.updateMealData(
-                              widget.date,
-                              mealChecks['breakfast'] ??
-                                  _currentDefaultMeal['breakfast'],
-                              mealChecks['lunch'] ??
-                                  _currentDefaultMeal['lunch'],
-                              mealChecks['dinner'] ??
-                                  _currentDefaultMeal['dinner']);
-                        }
-                      }
-                    },
-                    child: Text('Save'),
-                  ),
+                  (breakfastChangeNotAllowed && lunchDinnerChangeNotAllowed)
+                      ? Container()
+                      : RaisedButton(
+                          elevation: kElevation,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(kBorderRadius),
+                          ),
+                          color: Theme.of(context).accentColor,
+                          textColor: Colors.white,
+                          onPressed: () async {
+                            if (widget.isDefault) {
+                              await db.updateUserDefaultMeal(
+                                  mealChecks['breakfast'] ??
+                                      _currentDefaultMeal['breakfast'],
+                                  mealChecks['lunch'] ??
+                                      _currentDefaultMeal['lunch'],
+                                  mealChecks['dinner'] ??
+                                      _currentDefaultMeal['dinner']);
+                              Navigator.pop(context);
+                            } else {
+                              if (!mealExists) {
+                                await db.createNewMealData(
+                                    widget.date,
+                                    mealChecks['breakfast'] ??
+                                        _currentDefaultMeal['breakfast'],
+                                    mealChecks['lunch'] ??
+                                        _currentDefaultMeal['lunch'],
+                                    mealChecks['dinner'] ??
+                                        _currentDefaultMeal['dinner']);
+                              } else {
+                                await db.updateMealData(
+                                    widget.date,
+                                    mealChecks['breakfast'] ??
+                                        _currentDefaultMeal['breakfast'],
+                                    mealChecks['lunch'] ??
+                                        _currentDefaultMeal['lunch'],
+                                    mealChecks['dinner'] ??
+                                        _currentDefaultMeal['dinner']);
+                              }
+                            }
+                          },
+                          child: Text('Save'),
+                        ),
                 ],
               );
             },

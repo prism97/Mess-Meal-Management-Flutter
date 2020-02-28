@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/create_user_card.dart';
+import 'package:mess_meal/widgets/current_manager_card.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 
 class AdminScreen extends StatelessWidget {
@@ -15,7 +16,11 @@ class AdminScreen extends StatelessWidget {
       appBar: CustomAppBar(title: 'Admin'),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            CurrentManagerCard(
+              admin: true,
+            ),
             CreateUserCard(),
             BasicWhiteButton(
               text: 'Logout',

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:mess_meal/models/meal_data.dart';
 import 'package:mess_meal/models/user.dart';
 
@@ -11,10 +12,40 @@ class DatabaseService {
   static final CollectionReference userCollection =
       Firestore.instance.collection('users');
 
+  static final CollectionReference systemCollection =
+      Firestore.instance.collection('system');
+
+  static final CollectionReference managerCollection =
+      Firestore.instance.collection('managers');
+
   static createUserData(int studentId, String name, String email) async {
     await userCollection
         .document()
         .setData({'studentId': studentId, 'name': name, 'email': email});
+  }
+
+  static Future<void> createManagerData(DateTime date) async {
+    await managerCollection.document().setData({'start_date': date});
+  }
+
+  static Future<Map<String, String>> getManagerData() async {
+    final systemManagerDoc =
+        await systemCollection.document('currentManager').get();
+    final managerId = systemManagerDoc.data['managerId'];
+    final userId = systemManagerDoc.data['userId'];
+
+    final managerDoc = await managerCollection.document(managerId).get();
+    final userDoc = await userCollection.document(userId).get();
+    final startDate = (managerDoc.data['start_date'] as Timestamp).toDate();
+    final workPeriod = DateTime.now().difference(startDate).inDays;
+
+    return {
+      'name': userDoc.data['name'],
+      'studentId': userDoc.data['studentId'].toString(),
+      'startDate': DateFormat.yMMMd().format(startDate),
+      'workPeriod': workPeriod.toString(),
+      'cost': managerDoc.data['cost'].toString()
+    };
   }
 
   Future updateUserDefaultMeal(bool breakfast, bool lunch, bool dinner) async {

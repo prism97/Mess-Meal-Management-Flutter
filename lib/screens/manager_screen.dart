@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mess_meal/widgets/current_manager_card.dart';
+import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 
 class ManagerScreen extends StatelessWidget {
@@ -10,8 +12,16 @@ class ManagerScreen extends StatelessWidget {
       drawer: NavDrawer(
         currentRoute: id,
       ),
-      appBar: AppBar(),
-      body: Container(),
+      appBar: CustomAppBar(
+        title: 'Manager',
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            CurrentManagerCard(),
+          ],
+        ),
+      ),
     );
   }
 }
