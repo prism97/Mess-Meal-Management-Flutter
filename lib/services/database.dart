@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:mess_meal/models/meal_data.dart';
 import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/services/auth.dart';
 
 class DatabaseService {
   final String uid;
+  static bool manager = false;
 
   DatabaseService({this.uid});
 
@@ -26,6 +28,27 @@ class DatabaseService {
 
   static Future<void> createManagerData(DateTime date) async {
     await managerCollection.document().setData({'start_date': date});
+  }
+
+  static Future<bool> isManager() async {
+    final managerDoc = await systemCollection.document('currentManager').get();
+    final managerId = managerDoc.data['userId'].toString();
+    final uid = await AuthService().getCurrentUserId();
+
+    if (managerId.compareTo(uid) == 0) {
+      manager = true;
+      return true;
+    }
+    return false;
+  }
+
+  static Future<void> updateManagerCost(int cost) async {
+    final systemManagerDoc =
+        await systemCollection.document('currentManager').get();
+    final managerId = systemManagerDoc.data['managerId'];
+    await managerCollection
+        .document(managerId)
+        .setData({'cost': cost}, merge: true);
   }
 
   static Future<Map<String, String>> getManagerData() async {

@@ -6,6 +6,7 @@ import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
 import 'package:mess_meal/services/auth.dart';
+import 'package:mess_meal/services/database.dart';
 
 class NavDrawer extends StatelessWidget {
   final String currentRoute;
@@ -49,14 +50,17 @@ class NavDrawer extends StatelessWidget {
                 },
                 selected: currentRoute == MealCheckScreen.id,
               ),
-              NavitemTile(
-                title: 'Today\'s Meal',
-                icon: FontAwesomeIcons.clipboardList,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, MealListScreen.id);
-                },
-                selected: currentRoute == MealListScreen.id,
-              ),
+              DatabaseService.manager
+                  ? NavitemTile(
+                      title: 'Today\'s Meal',
+                      icon: FontAwesomeIcons.clipboardList,
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                            context, MealListScreen.id);
+                      },
+                      selected: currentRoute == MealListScreen.id,
+                    )
+                  : Container(),
               NavitemTile(
                 title: 'Manager',
                 icon: FontAwesomeIcons.userTie,
@@ -75,7 +79,7 @@ class NavDrawer extends StatelessWidget {
                     onTap: () {
                       _auth.logOut();
                       // Navigator.pop(context);
-                      Navigator.pop(context);
+                      Navigator.popAndPushNamed(context, LoginScreen.id);
                       // Navigator.pushReplacementNamed(context, LoginScreen.id);
                       // TODO: logout not changing screen for normal users
                       // Navigator.popUntil(

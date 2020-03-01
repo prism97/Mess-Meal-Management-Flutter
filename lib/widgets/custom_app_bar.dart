@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/screens/login_screen.dart';
+import 'package:mess_meal/services/auth.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -18,6 +21,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.body1,
           ),
+          // actions: <Widget>[
+          //   RawMaterialButton(
+          //     child: Icon(FontAwesomeIcons.signOutAlt),
+          //     onPressed: () {
+          //       AuthService().logOut();
+          //       Navigator.pushReplacementNamed(context, LoginScreen.id);
+          //     },
+          //   ),
+          // ],
           elevation: kElevation,
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
