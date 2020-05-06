@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:mess_meal/models/meal_data.dart';
 import 'package:mess_meal/models/user.dart';
-import 'package:mess_meal/services/auth.dart';
 
 class DatabaseService {
   final String uid;
-  static bool manager = false;
+
+  static bool isAdmin = false;
+  static bool isManager = false;
+  static bool isMessboy = false;
 
   DatabaseService({this.uid});
 
-  // collection reference
+  // collection references
   static final CollectionReference userCollection =
       Firestore.instance.collection('users');
 
@@ -20,6 +21,31 @@ class DatabaseService {
   static final CollectionReference managerCollection =
       Firestore.instance.collection('managers');
 
+  static final CollectionReference mealAmountCollection =
+      Firestore.instance.collection('mealAmounts');
+
+  // role checks
+  Future<void> checkRoles() async {
+    final managerDoc = await systemCollection.document('currentManager').get();
+    final managerId = managerDoc.data['userId'].toString();
+
+    if (managerId.compareTo(this.uid) == 0) {
+      isManager = true;
+      print('manager');
+    }
+
+    final userDoc = await userCollection.document(this.uid).get();
+    final userRoles = List<String>.from(userDoc.data['roles'] ?? []);
+    if (userRoles.contains('admin')) {
+      isAdmin = true;
+      print('admin');
+    } else if (userRoles.contains('messboy')) {
+      isMessboy = true;
+      print('messboy');
+    }
+  }
+
+  // data creation
   static createUserData(int studentId, String name, String email) async {
     await userCollection
         .document()
@@ -28,18 +54,6 @@ class DatabaseService {
 
   static Future<void> createManagerData(DateTime date) async {
     await managerCollection.document().setData({'start_date': date});
-  }
-
-  static Future<bool> isManager() async {
-    final managerDoc = await systemCollection.document('currentManager').get();
-    final managerId = managerDoc.data['userId'].toString();
-    final uid = await AuthService().getCurrentUserId();
-
-    if (managerId.compareTo(uid) == 0) {
-      manager = true;
-      return true;
-    }
-    return false;
   }
 
   static Future<void> updateManagerCost(int cost) async {
@@ -71,14 +85,29 @@ class DatabaseService {
     };
   }
 
-  Future updateUserDefaultMeal(bool breakfast, bool lunch, bool dinner) async {
-    return await userCollection.document(uid).updateData({
+  // default meal functions
+  Future<void> createUserDefaultMeal(
+      bool breakfast, bool lunch, bool dinner) async {
+    await userCollection.document(uid).collection('defaultMeals').add({
+      'start_date': DateTime.now(),
       'default_meal': <String, bool>{
         'breakfast': breakfast,
         'lunch': lunch,
         'dinner': dinner
       }
     });
+  }
+
+  Future<void> updateUserDefaultMeal(
+      bool breakfast, bool lunch, bool dinner) async {
+    await userCollection.document(uid).updateData({
+      'default_meal': <String, bool>{
+        'breakfast': breakfast,
+        'lunch': lunch,
+        'dinner': dinner
+      }
+    });
+    await createUserDefaultMeal(breakfast, lunch, dinner);
   }
 
   // user data from snapshot
@@ -95,15 +124,10 @@ class DatabaseService {
     return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
   }
 
-  Future<List<String>> get userRoles async {
-    final userDoc = await userCollection.document(uid).get();
-    return List<String>.from(userDoc.data['roles'] ?? []);
-  }
-
-  createNewMealData(
+  Future<void> createNewMealData(
       DateTime date, bool breakfast, bool lunch, bool dinner) async {
     final _date = DateTime(date.year, date.month, date.day);
-    await userCollection.document(uid).collection('meals').document().setData({
+    await userCollection.document(uid).collection('meals').add({
       'date': _date,
       'meal': <String, bool>{
         'breakfast': breakfast,
@@ -113,7 +137,8 @@ class DatabaseService {
     });
   }
 
-  updateMealData(DateTime date, bool breakfast, bool lunch, bool dinner) async {
+  Future<void> updateMealData(
+      DateTime date, bool breakfast, bool lunch, bool dinner) async {
     final _date = DateTime(date.year, date.month, date.day);
     final snapshot = await queryMealData(_date);
     final doc = snapshot.documents.first;
@@ -132,17 +157,16 @@ class DatabaseService {
     });
   }
 
-  MealData _mealDataFromSnapshot(QuerySnapshot snapshot) {
+  // get a user's meal settings for a given date
+  Future<Map<String, bool>> getMealData(DateTime date) async {
+    final _date = DateTime(date.year, date.month, date.day);
+
+    QuerySnapshot snapshot = await queryMealData(_date);
     if (snapshot.documents.isNotEmpty) {
       final doc = snapshot.documents.first;
-      return MealData(Map<String, bool>.from(doc.data['meal']));
+      return Map<String, bool>.from(doc.data['meal']);
     }
     return null;
-  }
-
-  Future<MealData> getMealData(DateTime date) async {
-    final _date = DateTime(date.year, date.month, date.day);
-    return _mealDataFromSnapshot(await queryMealData(_date));
   }
 
   Future<QuerySnapshot> queryMealData(DateTime date) async {
@@ -193,5 +217,124 @@ class DatabaseService {
       }
     }
     return mealUsers;
+  }
+
+  // meal amount functions
+  Future<Map<String, num>> getMealAmount(DateTime date) async {
+    final _date = DateTime(date.year, date.month, date.day);
+
+    QuerySnapshot snapshot = await mealAmountCollection
+        .where('date', isEqualTo: _date)
+        .getDocuments();
+    if (snapshot.documents.isNotEmpty) {
+      final doc = snapshot.documents.first;
+      return Map<String, num>.from(doc.data['amounts']);
+    }
+    return null;
+  }
+
+  Future<void> createMealAmount(
+      DateTime date, num breakfast, num lunch, num dinner) async {
+    final _date = DateTime(date.year, date.month, date.day);
+
+    await mealAmountCollection.add({
+      'date': _date,
+      'meal': <String, num>{
+        'breakfast': breakfast,
+        'lunch': lunch,
+        'dinner': dinner
+      }
+    });
+  }
+
+  Future<void> updateMealAmount(
+      DateTime date, num breakfast, num lunch, num dinner) async {
+    final _date = DateTime(date.year, date.month, date.day);
+    final snapshot = await mealAmountCollection
+        .where('date', isEqualTo: _date)
+        .getDocuments();
+    final doc = snapshot.documents.first;
+    final docId = doc.documentID;
+
+    await mealAmountCollection.document(docId).updateData({
+      'meal': <String, num>{
+        'breakfast': breakfast,
+        'lunch': lunch,
+        'dinner': dinner
+      }
+    });
+  }
+
+  // budget and cost calculation functions
+  Future<Map<String, num>> mealAmountCalc() async {
+    int breakfast = 0;
+    int lunch = 0;
+    int dinner = 0;
+    double total = 0.0;
+    Map<String, bool> meal;
+
+    final mealCollection =
+        userCollection.document(this.uid).collection('meals');
+    final defaultMealCollection =
+        userCollection.document(this.uid).collection('defaultMeals');
+
+    DateTime todayFull = DateTime.now();
+    DateTime today = DateTime(todayFull.year, todayFull.month, todayFull.day);
+    DateTime firstDayFull = today.subtract(Duration(days: 30));
+    DateTime firstDay =
+        DateTime(firstDayFull.year, firstDayFull.month, firstDayFull.day);
+    DateTime currentDay = firstDay;
+    while (today.compareTo(currentDay) != 0) {
+      final mealSnapshot = await mealCollection
+          .where('date', isEqualTo: currentDay)
+          .limit(1)
+          .getDocuments();
+      if (mealSnapshot.documents.isNotEmpty) {
+        final mealDoc = mealSnapshot.documents.first;
+        meal = Map<String, bool>.from(mealDoc.data['meal']);
+      } else {
+        final defaultMealSnapshot = await defaultMealCollection
+            .where('start_date', isLessThanOrEqualTo: currentDay)
+            .orderBy('start_date', descending: true)
+            .limit(1)
+            .getDocuments();
+        if (defaultMealSnapshot.documents.isNotEmpty) {
+          final defaultMealDoc = defaultMealSnapshot.documents.first;
+          meal = Map<String, bool>.from(defaultMealDoc.data['default_meal']);
+        } else {
+          final userDoc = await userCollection.document(this.uid).get();
+          meal = Map<String, bool>.from(userDoc.data['default_meal']);
+        }
+      }
+
+      Map<String, num> mealAmount = await getMealAmount(currentDay);
+      if (mealAmount == null) {
+        mealAmount = {
+          'breakfast': 0.5,
+          'lunch': (currentDay.weekday == 5) ? 2.5 : 1.0,
+          'dinner': (currentDay.weekday == 2) ? 1.5 : 1.0,
+        };
+      }
+      if (meal['breakfast']) {
+        breakfast++;
+        total += mealAmount['breakfast'];
+      }
+      if (meal['lunch']) {
+        lunch++;
+        total += mealAmount['lunch'];
+      }
+      if (meal['dinner']) {
+        dinner++;
+        total += mealAmount['dinner'];
+      }
+      currentDay = currentDay.add(Duration(days: 1));
+    }
+
+    return {
+      'breakfast': breakfast,
+      'lunch': lunch,
+      'dinner': dinner,
+      'total_meal_amount': total
+    };
   }
 }

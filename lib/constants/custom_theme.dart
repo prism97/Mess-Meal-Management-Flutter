@@ -65,4 +65,23 @@ ThemeData themeData = ThemeData(
       fontSize: 15.0,
     ),
   ),
+  chipTheme: ChipThemeData(
+    backgroundColor: Colors.purple.shade300,
+    disabledColor: Colors.purple.shade100,
+    selectedColor: Colors.purple.shade600,
+    secondarySelectedColor: Colors.purple.shade600,
+    labelPadding: EdgeInsets.all(0.0),
+    padding: EdgeInsets.all(6.0),
+    shape: CircleBorder(),
+    labelStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 12.0,
+    ),
+    secondaryLabelStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 12.0,
+    ),
+    brightness: Brightness.light,
+    elevation: kElevation,
+  ),
 );

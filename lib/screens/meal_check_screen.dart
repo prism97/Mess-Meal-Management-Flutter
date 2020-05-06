@@ -49,17 +49,20 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
         currentRoute: MealCheckScreen.id,
       ),
       appBar: CustomAppBar(title: 'Check your daily meal'),
-      body: Container(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            CustomCalendar(
-              calendarController: _calendarController,
-              showMealCard: showMealCard,
-            ),
-            _dailyMealCard,
-          ],
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              CustomCalendar(
+                calendarController: _calendarController,
+                showMealCard: showMealCard,
+              ),
+              _dailyMealCard,
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

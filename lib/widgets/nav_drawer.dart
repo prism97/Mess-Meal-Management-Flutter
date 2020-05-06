@@ -5,6 +5,7 @@ import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
+import 'package:mess_meal/screens/stats_screen.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 
@@ -50,7 +51,7 @@ class NavDrawer extends StatelessWidget {
                 },
                 selected: currentRoute == MealCheckScreen.id,
               ),
-              DatabaseService.manager
+              DatabaseService.isManager
                   ? NavitemTile(
                       title: 'Today\'s Meal',
                       icon: FontAwesomeIcons.clipboardList,
@@ -69,6 +70,14 @@ class NavDrawer extends StatelessWidget {
                 },
                 selected: currentRoute == ManagerScreen.id,
               ),
+              NavitemTile(
+                title: 'Stats',
+                icon: FontAwesomeIcons.chartBar,
+                onTap: () {
+                  Navigator.pushReplacementNamed(context, StatsScreen.id);
+                },
+                selected: currentRoute == StatsScreen.id,
+              ),
               Divider(),
               Expanded(
                 child: Align(
@@ -76,14 +85,10 @@ class NavDrawer extends StatelessWidget {
                   child: NavitemTile(
                     icon: FontAwesomeIcons.signOutAlt,
                     title: 'Log Out',
-                    onTap: () {
-                      _auth.logOut();
-                      // Navigator.pop(context);
+                    onTap: () async {
+                      await _auth.logOut();
+
                       Navigator.popAndPushNamed(context, LoginScreen.id);
-                      // Navigator.pushReplacementNamed(context, LoginScreen.id);
-                      // TODO: logout not changing screen for normal users
-                      // Navigator.popUntil(
-                      // context, ModalRoute.withName(LoginScreen.id));
                     },
                   ),
                 ),

@@ -17,7 +17,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
   final _formKey = GlobalKey<FormState>();
 
   Future<void> checkManager() async {
-    if (DatabaseService.manager) {
+    if (DatabaseService.isManager) {
       _manager = true;
       final result = await DatabaseService.getManagerData();
       _cost = int.parse(result['cost']);
