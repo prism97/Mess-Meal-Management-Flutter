@@ -271,7 +271,6 @@ class DatabaseService {
     int lunch = 0;
     int dinner = 0;
     double total = 0.0;
-    Map<String, bool> meal;
 
     final mealCollection =
         userCollection.document(this.uid).collection('meals');
@@ -283,52 +282,146 @@ class DatabaseService {
     DateTime firstDayFull = today.subtract(Duration(days: 30));
     DateTime firstDay =
         DateTime(firstDayFull.year, firstDayFull.month, firstDayFull.day);
-    DateTime currentDay = firstDay;
-    while (today.compareTo(currentDay) != 0) {
-      final mealSnapshot = await mealCollection
-          .where('date', isEqualTo: currentDay)
-          .limit(1)
-          .getDocuments();
-      if (mealSnapshot.documents.isNotEmpty) {
-        final mealDoc = mealSnapshot.documents.first;
-        meal = Map<String, bool>.from(mealDoc.data['meal']);
+
+    final afterSnapshot = await defaultMealCollection
+        .where('start_date', isGreaterThanOrEqualTo: firstDay)
+        .orderBy('start_date')
+        .getDocuments();
+    final beforeSnapshot = await defaultMealCollection
+        .where('start_date', isLessThanOrEqualTo: firstDay)
+        .orderBy('start_date', descending: true)
+        .limit(1)
+        .getDocuments();
+
+    final mealMap = Map<DateTime, Map<String, bool>>();
+
+    if (afterSnapshot.documents.isEmpty) {
+      if (beforeSnapshot.documents.isEmpty) {
+        var day = firstDay;
+        while (day.isBefore(today)) {
+          mealMap[day] = {'breakfast': true, 'lunch': true, 'dinner': true};
+          day = day.add(Duration(days: 1));
+        }
       } else {
-        final defaultMealSnapshot = await defaultMealCollection
-            .where('start_date', isLessThanOrEqualTo: currentDay)
-            .orderBy('start_date', descending: true)
-            .limit(1)
-            .getDocuments();
-        if (defaultMealSnapshot.documents.isNotEmpty) {
-          final defaultMealDoc = defaultMealSnapshot.documents.first;
-          meal = Map<String, bool>.from(defaultMealDoc.data['default_meal']);
-        } else {
-          final userDoc = await userCollection.document(this.uid).get();
-          meal = Map<String, bool>.from(userDoc.data['default_meal']);
+        final defaultMeal = beforeSnapshot.documents.first.data['default_meal'];
+        var day = firstDay;
+        while (day.isBefore(today)) {
+          mealMap[day] = {
+            'breakfast': defaultMeal['breakfast'],
+            'lunch': defaultMeal['lunch'],
+            'dinner': defaultMeal['dinner']
+          };
+          day = day.add(Duration(days: 1));
+        }
+      }
+    } else {
+      final docs = afterSnapshot.documents;
+      DateTime afterStartDay;
+      if (docs.length == 1) {
+        DateTime day = docs.first.data['start_date'];
+        if (day.hour >= 9) {
+          day = day.add(Duration(days: 1));
+        }
+        day = DateTime(day.year, day.month, day.day);
+
+        afterStartDay = day;
+        final defaultMeal = docs.first.data['default_meal'];
+        while (day.isBefore(today)) {
+          mealMap[day] = {
+            'breakfast': defaultMeal['breakfast'],
+            'lunch': defaultMeal['lunch'],
+            'dinner': defaultMeal['dinner']
+          };
+          day = day.add(Duration(days: 1));
+        }
+      } else {
+        var i = 0;
+
+        afterStartDay = docs.first.data['start_date'].toDate();
+        while (i < docs.length) {
+          DateTime currentDay = docs.elementAt(i).data['start_date'].toDate();
+          if (currentDay.hour >= 9) {
+            currentDay = currentDay.add(Duration(days: 1));
+          }
+          currentDay =
+              DateTime(currentDay.year, currentDay.month, currentDay.day);
+
+          DateTime nextDay;
+          if (i + 1 < docs.length) {
+            nextDay = docs.elementAt(i + 1).data['start_date'].toDate();
+          } else {
+            nextDay = today;
+          }
+
+          var defaultMeal = docs.elementAt(i).data['default_meal'];
+          var day = currentDay;
+          while (day.isBefore(nextDay)) {
+            mealMap[day] = {
+              'breakfast': defaultMeal['breakfast'],
+              'lunch': defaultMeal['lunch'],
+              'dinner': defaultMeal['dinner']
+            };
+            day = day.add(Duration(days: 1));
+          }
+          i++;
         }
       }
 
-      Map<String, num> mealAmount = await getMealAmount(currentDay);
-      if (mealAmount == null) {
-        mealAmount = {
-          'breakfast': 0.5,
-          'lunch': (currentDay.weekday == 5) ? 2.5 : 1.0,
-          'dinner': (currentDay.weekday == 2) ? 1.5 : 1.0,
-        };
+      var defaultMeal;
+      if (beforeSnapshot.documents.isEmpty) {
+        defaultMeal = {'breakfast': true, 'lunch': true, 'dinner': true};
+      } else {
+        defaultMeal = beforeSnapshot.documents.first.data['default_meal'];
       }
+      DateTime day = firstDay;
+      while (day.isBefore(afterStartDay)) {
+        mealMap[day] = {
+          'breakfast': defaultMeal['breakfast'],
+          'lunch': defaultMeal['lunch'],
+          'dinner': defaultMeal['dinner']
+        };
+        day = day.add(Duration(days: 1));
+      }
+    }
+
+    final mealSnapshot = await mealCollection
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThan: today)
+        .getDocuments();
+    mealSnapshot.documents.forEach((doc) {
+      DateTime date = doc.data['date'].toDate();
+      final meal = Map<String, bool>.from(doc.data['meal']);
+      mealMap.update(date, (defMeal) => meal);
+    });
+
+    mealMap.forEach((date, meal) {
       if (meal['breakfast']) {
         breakfast++;
-        total += mealAmount['breakfast'];
+        total += 0.5;
       }
       if (meal['lunch']) {
         lunch++;
-        total += mealAmount['lunch'];
+        total += date.weekday == 5 ? 2.5 : 1.0;
       }
       if (meal['dinner']) {
         dinner++;
-        total += mealAmount['dinner'];
+        total += date.weekday == 2 ? 1.5 : 1.0;
       }
-      currentDay = currentDay.add(Duration(days: 1));
-    }
+    });
+
+    final mealAmountSnapshot = await mealAmountCollection
+        .where('date', isGreaterThanOrEqualTo: firstDay)
+        .where('date', isLessThan: today)
+        .getDocuments();
+    mealAmountSnapshot.documents.forEach((doc) {
+      DateTime date = doc.data['date'].toDate();
+      final amounts = Map<String, num>.from(doc.data['meal']);
+      total = total - 0.5 + amounts['breakfast'];
+      final lunchAmt = date.weekday == 5 ? 2.5 : 1.0;
+      total = total - lunchAmt + amounts['lunch'];
+      final dinnerAmt = date.weekday == 2 ? 1.5 : 1.0;
+      total = total - dinnerAmt + amounts['dinner'];
+    });
 
     return {
       'breakfast': breakfast,
