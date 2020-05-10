@@ -32,7 +32,7 @@ class _CreateUserCardState extends State<CreateUserCard> {
       child: ExpansionTile(
         title: Text(
           'Create New User',
-          style: Theme.of(context).textTheme.body2,
+          style: Theme.of(context).textTheme.bodyText2,
         ),
         children: <Widget>[
           Container(

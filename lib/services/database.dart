@@ -319,7 +319,7 @@ class DatabaseService {
       DateTime afterStartDay;
       if (docs.length == 1) {
         DateTime day = docs.first.data['start_date'];
-        if (day.hour >= 9) {
+        if (day.hour >= 6) {
           day = day.add(Duration(days: 1));
         }
         day = DateTime(day.year, day.month, day.day);
@@ -340,7 +340,7 @@ class DatabaseService {
         afterStartDay = docs.first.data['start_date'].toDate();
         while (i < docs.length) {
           DateTime currentDay = docs.elementAt(i).data['start_date'].toDate();
-          if (currentDay.hour >= 9) {
+          if (currentDay.hour >= 6) {
             currentDay = currentDay.add(Duration(days: 1));
           }
           currentDay =

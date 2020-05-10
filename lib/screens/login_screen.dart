@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Mess Meal',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.headline6,
               ),
               Form(
                 key: _formKey,
@@ -130,7 +130,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   final snackBar = SnackBar(
                                     content: Text(
                                       'Login failed! Invalid credentials.',
-                                      style: Theme.of(context).textTheme.body1,
+                                      style:
+                                          Theme.of(context).textTheme.bodyText1,
                                     ),
                                     backgroundColor:
                                         Theme.of(context).disabledColor,
@@ -146,10 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _scaffoldKey.currentState
                                       .showSnackBar(snackBar);
                                 } else {
-                                  if (DatabaseService.isAdmin) {
-                                    Navigator.pushReplacementNamed(
-                                        context, AdminScreen.id);
-                                  } else if (DatabaseService.isMessboy) {
+                                  if (DatabaseService.isMessboy) {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(

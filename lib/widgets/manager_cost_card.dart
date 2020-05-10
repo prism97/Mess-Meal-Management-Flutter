@@ -51,7 +51,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                 children: <Widget>[
                   Text(
                     'Cost',
-                    style: Theme.of(context).textTheme.title,
+                    style: Theme.of(context).textTheme.headline6,
                   ),
                   Divider(
                     color: Colors.white,

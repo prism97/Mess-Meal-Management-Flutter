@@ -33,7 +33,7 @@ class CustomCalendar extends StatelessWidget {
             right: Radius.circular(20.0),
           ),
         ),
-        titleTextStyle: Theme.of(context).textTheme.title,
+        titleTextStyle: Theme.of(context).textTheme.headline6,
         leftChevronIcon: Icon(
           FontAwesomeIcons.chevronCircleLeft,
           color: Colors.white,
@@ -46,12 +46,12 @@ class CustomCalendar extends StatelessWidget {
       calendarStyle: CalendarStyle(
         selectedColor: Theme.of(context).accentColor,
         todayColor: Theme.of(context).disabledColor,
-        weekdayStyle: Theme.of(context).textTheme.body1,
-        weekendStyle: Theme.of(context).textTheme.body2,
+        weekdayStyle: Theme.of(context).textTheme.bodyText1,
+        weekendStyle: Theme.of(context).textTheme.bodyText2,
       ),
       daysOfWeekStyle: DaysOfWeekStyle(
-        weekdayStyle: Theme.of(context).textTheme.display1,
-        weekendStyle: Theme.of(context).textTheme.display2,
+        weekdayStyle: Theme.of(context).textTheme.subtitle1,
+        weekendStyle: Theme.of(context).textTheme.subtitle2,
       ),
       onDaySelected: (date, events) {
         showMealCard(date);

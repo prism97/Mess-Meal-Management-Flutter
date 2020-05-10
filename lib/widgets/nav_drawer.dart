@@ -37,7 +37,7 @@ class NavDrawer extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         'Mess Meal',
-                        style: Theme.of(context).textTheme.title,
+                        style: Theme.of(context).textTheme.headline6,
                       ),
                     ],
                   ),

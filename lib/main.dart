@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mess_meal/constants/custom_theme.dart';
 import 'package:mess_meal/screens/admin_screen.dart';
+import 'package:mess_meal/screens/landing_screen.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
@@ -11,13 +12,14 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: themeData,
-      // home: _getHomeScreen(),
       routes: {
+        LandingScreen.id: (context) => LandingScreen(),
         LoginScreen.id: (context) => LoginScreen(),
         MealCheckScreen.id: (context) => MealCheckScreen(),
         MealListScreen.id: (context) => MealListScreen(),
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
         AdminScreen.id: (context) => AdminScreen(),
         StatsScreen.id: (context) => StatsScreen(),
       },
-      initialRoute: LoginScreen.id,
+      initialRoute: LandingScreen.id,
     );
   }
 }

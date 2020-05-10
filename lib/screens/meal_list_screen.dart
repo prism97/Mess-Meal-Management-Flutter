@@ -6,7 +6,6 @@ import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
-import 'package:mess_meal/widgets/loading.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 
 class MealListScreen extends StatefulWidget {
@@ -23,7 +22,7 @@ class _MealListScreenState extends State<MealListScreen> {
   List<String> _breakfast;
   List<String> _lunch;
   List<String> _dinner;
-  bool loading = true;
+  bool _loading = true;
 
   Future<void> fetchMealData() async {
     final meals = await DatabaseService.mealTakersGrouped();
@@ -39,52 +38,54 @@ class _MealListScreenState extends State<MealListScreen> {
     super.initState();
     fetchMealData().whenComplete(() {
       setState(() {
-        loading = false;
+        _loading = false;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return loading
-        ? Loading()
-        : Scaffold(
-            drawer: widget.isMessboy
-                ? null
-                : NavDrawer(
-                    currentRoute: MealListScreen.id,
+    return Scaffold(
+      drawer: widget.isMessboy
+          ? null
+          : NavDrawer(
+              currentRoute: MealListScreen.id,
+            ),
+      appBar: CustomAppBar(title: 'Today\'s Meal'),
+      body:
+          (_loading || _breakfast == null || _lunch == null || _dinner == null)
+              ? SpinKitFadingCircle(
+                  color: primaryColorDark,
+                  size: 40.0,
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      MealListCard(
+                        mealName: 'Breakfast',
+                        users: _breakfast,
+                      ),
+                      MealListCard(
+                        users: _lunch,
+                        mealName: 'Lunch',
+                      ),
+                      MealListCard(
+                        users: _dinner,
+                        mealName: 'Dinner',
+                      ),
+                      widget.isMessboy
+                          ? BasicWhiteButton(
+                              text: 'Logout',
+                              onPressed: () {
+                                final auth = AuthService();
+                                auth.logOut();
+                              },
+                            )
+                          : Container(),
+                    ],
                   ),
-            appBar: CustomAppBar(title: 'Today\'s Meal'),
-            body: (_breakfast == null || _lunch == null || _dinner == null)
-                ? SpinKitCircle(color: primaryColorDark)
-                : SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        MealListCard(
-                          mealName: 'Breakfast',
-                          users: _breakfast,
-                        ),
-                        MealListCard(
-                          users: _lunch,
-                          mealName: 'Lunch',
-                        ),
-                        MealListCard(
-                          users: _dinner,
-                          mealName: 'Dinner',
-                        ),
-                        widget.isMessboy
-                            ? BasicWhiteButton(
-                                text: 'Logout',
-                                onPressed: () {
-                                  final auth = AuthService();
-                                  auth.logOut();
-                                },
-                              )
-                            : Container(),
-                      ],
-                    ),
-                  ),
-          );
+                ),
+    );
   }
 }
 
@@ -106,7 +107,7 @@ class MealListCard extends StatelessWidget {
           ListTile(
             title: Text(
               mealName,
-              style: Theme.of(context).textTheme.body1,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
             trailing: CircleAvatar(
               backgroundColor: primaryColorLight,
@@ -120,9 +121,27 @@ class MealListCard extends StatelessWidget {
           ExpansionTile(
             title: Text(
               'subscribers',
-              style: Theme.of(context).textTheme.body1,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
-            children: users.map((user) => Text(user)).toList(),
+            children: users
+                .map(
+                  (user) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 16.0,
+                        ),
+                        child: Text(
+                          user,
+                        ),
+                      ),
+                      Divider(),
+                    ],
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),

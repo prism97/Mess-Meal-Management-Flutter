@@ -33,6 +33,7 @@ dependencies:
   firebase_core: ^0.4.3+3
   flutter_spinkit: ^4.1.1+1
   intl: ^0.16.1
+  easy_dialog: ^1.0.5
 
 dev_dependencies:
   flutter_test:

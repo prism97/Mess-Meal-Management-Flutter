@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/services/database.dart';
@@ -23,11 +24,13 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
 
   Future<void> getManagerInfo() async {
     final result = await DatabaseService.getManagerData();
-    _name = result['name'];
-    _studentId = result['studentId'];
-    _startDate = result['startDate'];
-    _workPeriod = result['workPeriod'];
-    _cost = result['cost'];
+    setState(() {
+      _name = result['name'];
+      _studentId = result['studentId'];
+      _startDate = result['startDate'];
+      _workPeriod = result['workPeriod'];
+      _cost = result['cost'];
+    });
   }
 
   @override
@@ -57,7 +60,7 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
           children: <Widget>[
             Text(
               'Current Manager',
-              style: Theme.of(context).textTheme.body2,
+              style: Theme.of(context).textTheme.bodyText2,
             ),
             _loading
                 ? Padding(
@@ -105,18 +108,27 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                     .copyWith(color: Colors.white),
                               ),
                               onPressed: () async {
-                                setState(() {
-                                  _loading = true;
-                                });
-                                await DatabaseService.createManagerData(
-                                    DateTime.now());
-                                Future.delayed(const Duration(seconds: 10), () {
-                                  getManagerInfo().whenComplete(() {
-                                    setState(() {
-                                      _loading = false;
+                                if (int.parse(_workPeriod) > 15) {
+                                  setState(() {
+                                    _loading = true;
+                                  });
+                                  await DatabaseService.createManagerData(
+                                      DateTime.now());
+                                  Future.delayed(const Duration(seconds: 10),
+                                      () {
+                                    getManagerInfo().whenComplete(() {
+                                      setState(() {
+                                        _loading = false;
+                                      });
                                     });
                                   });
-                                });
+                                } else {
+                                  EasyDialog(
+                                    description: Text(
+                                      'Minimum work period of a manager is 15 days',
+                                    ),
+                                  ).show(context);
+                                }
                               },
                             )
                           : Container(),

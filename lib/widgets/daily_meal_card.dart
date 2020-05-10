@@ -120,7 +120,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
     Map<String, bool> _currentDefaultMeal = {};
 
     DateTime now = DateTime.now();
-    DateTime breakfastTime = widget.isDefault
+    DateTime updateTime = widget.isDefault
         ? DateTime.now()
         : DateTime(
             widget.date.year,
@@ -128,19 +128,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
             widget.date.day,
             6,
           );
-    DateTime lunchDinnerTime = widget.isDefault
-        ? DateTime.now()
-        : DateTime(
-            widget.date.year,
-            widget.date.month,
-            widget.date.day,
-            9,
-          );
-    bool breakfastChangeNotAllowed =
-        !widget.isDefault && now.isAfter(breakfastTime);
-
-    bool lunchDinnerChangeNotAllowed =
-        !widget.isDefault && now.isAfter(lunchDinnerTime);
+    bool changeNotAllowed = !widget.isDefault && now.isAfter(updateTime);
 
     return _loading
         ? Padding(
@@ -174,12 +162,12 @@ class _DailyMealCardState extends State<DailyMealCard> {
                             contentPadding: EdgeInsets.only(left: 20.0),
                             title: Text(
                               'Breakfast',
-                              style: Theme.of(context).textTheme.body1,
+                              style: Theme.of(context).textTheme.bodyText1,
                             ),
                             subtitle: widget.isDefault
                                 ? null
                                 : (DatabaseService.isManager &&
-                                        !breakfastChangeNotAllowed)
+                                        !changeNotAllowed)
                                     ? Wrap(
                                         children: kMealAmounts
                                             .map(
@@ -232,9 +220,8 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                   : ((mealChecks['breakfast'] ??
                                           _currentDefaultMeal['breakfast']) ??
                                       true),
-                              onChanged: breakfastChangeNotAllowed
-                                  ? null
-                                  : _onBreakfastChanged,
+                              onChanged:
+                                  changeNotAllowed ? null : _onBreakfastChanged,
                             ),
                           ),
                           Divider(
@@ -246,12 +233,12 @@ class _DailyMealCardState extends State<DailyMealCard> {
                             contentPadding: EdgeInsets.only(left: 20.0),
                             title: Text(
                               'Lunch',
-                              style: Theme.of(context).textTheme.body1,
+                              style: Theme.of(context).textTheme.bodyText1,
                             ),
                             subtitle: widget.isDefault
                                 ? null
                                 : (DatabaseService.isManager &&
-                                        !lunchDinnerChangeNotAllowed)
+                                        !changeNotAllowed)
                                     ? Wrap(
                                         children: kMealAmounts
                                             .map(
@@ -303,9 +290,8 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                   : ((mealChecks['lunch'] ??
                                           _currentDefaultMeal['lunch']) ??
                                       true),
-                              onChanged: lunchDinnerChangeNotAllowed
-                                  ? null
-                                  : _onLunchChanged,
+                              onChanged:
+                                  changeNotAllowed ? null : _onLunchChanged,
                             ),
                           ),
                           Divider(
@@ -317,12 +303,12 @@ class _DailyMealCardState extends State<DailyMealCard> {
                             contentPadding: EdgeInsets.only(left: 20.0),
                             title: Text(
                               'Dinner',
-                              style: Theme.of(context).textTheme.body1,
+                              style: Theme.of(context).textTheme.bodyText1,
                             ),
                             subtitle: widget.isDefault
                                 ? null
                                 : (DatabaseService.isManager &&
-                                        !lunchDinnerChangeNotAllowed)
+                                        !changeNotAllowed)
                                     ? Wrap(
                                         children: kMealAmounts
                                             .map(
@@ -374,16 +360,15 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                   : ((mealChecks['dinner'] ??
                                           _currentDefaultMeal['dinner']) ??
                                       false),
-                              onChanged: lunchDinnerChangeNotAllowed
-                                  ? null
-                                  : _onDinnerChanged,
+                              onChanged:
+                                  changeNotAllowed ? null : _onDinnerChanged,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  (breakfastChangeNotAllowed && lunchDinnerChangeNotAllowed)
+                  changeNotAllowed
                       ? Container()
                       : (_saveLoading
                           ? Padding(

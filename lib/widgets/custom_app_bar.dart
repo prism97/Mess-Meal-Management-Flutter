@@ -16,7 +16,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           title: Text(
             title,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.body1,
+            style: Theme.of(context).textTheme.bodyText1,
           ),
           elevation: kElevation,
           backgroundColor: Colors.white,

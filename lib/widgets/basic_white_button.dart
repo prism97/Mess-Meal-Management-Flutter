@@ -18,7 +18,7 @@ class BasicWhiteButton extends StatelessWidget {
         color: Colors.white,
         child: Text(
           text,
-          style: Theme.of(context).textTheme.body1,
+          style: Theme.of(context).textTheme.bodyText1,
         ),
         onPressed: onPressed,
         elevation: kElevation,

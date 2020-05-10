@@ -8,6 +8,12 @@ ThemeData themeData = ThemeData(
   accentColor: Colors.purple,
   disabledColor: Colors.purple.shade100,
   cursorColor: Colors.white,
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    elevation: 20.0,
+    backgroundColor: Colors.purple.shade100,
+    unselectedItemColor: Colors.white,
+    selectedItemColor: Colors.purple.shade600,
+  ),
   inputDecorationTheme: InputDecorationTheme(
     hintStyle: TextStyle(
       color: Colors.purple.shade100,
@@ -44,23 +50,23 @@ ThemeData themeData = ThemeData(
     ),
   ),
   textTheme: TextTheme(
-    title: TextStyle(
+    headline6: TextStyle(
       color: Colors.white,
       fontSize: 20.0,
     ),
-    body1: TextStyle(
+    bodyText1: TextStyle(
       color: Colors.purple.shade900,
       fontSize: 16.0,
     ),
-    body2: TextStyle(
+    bodyText2: TextStyle(
       color: Colors.purple.shade600,
       fontSize: 16.0,
     ),
-    display1: TextStyle(
+    subtitle1: TextStyle(
       color: Colors.purple.shade900,
       fontSize: 15.0,
     ),
-    display2: TextStyle(
+    subtitle2: TextStyle(
       color: Colors.purple.shade600,
       fontSize: 15.0,
     ),
