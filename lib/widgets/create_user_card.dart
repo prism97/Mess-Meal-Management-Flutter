@@ -66,7 +66,7 @@ class _CreateUserCardState extends State<CreateUserCard> {
                         ),
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.digitsOnly
                         ],
                         validator: (val) => val.length != 7
                             ? 'Student ID must have 7 digits'

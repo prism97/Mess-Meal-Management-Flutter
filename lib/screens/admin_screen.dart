@@ -40,19 +40,19 @@ class AdminScreen extends StatelessWidget {
             items: [
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.users),
-                title: Text('Users'),
+                label: 'Users',
               ),
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.userCog),
-                title: Text('Manager'),
+                label: 'Manager',
               ),
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.calculator),
-                title: Text('Budget'),
+                label: 'Budget',
               ),
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.signOutAlt),
-                title: Text('Logout'),
+                label: 'Logout',
               ),
             ],
             onTap: (index) async {
