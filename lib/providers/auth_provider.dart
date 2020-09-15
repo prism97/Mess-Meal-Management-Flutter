@@ -5,23 +5,17 @@ import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/user.dart';
 
-/*
-The UI depends on the Status
-- Uninitialized - Checking user is logged or not, the Splash Screen will be shown
-- Authenticated - User is authenticated successfully, Home Page will be shown
-- Authenticating - Sign In button just been pressed, progress bar will be shown
-- Unauthenticated - User is not authenticated, login page will be shown
-- Registering - User just pressed registering, progress bar will be shown
- */
-
 class AuthProvider extends ChangeNotifier {
   //Firebase Auth object
   FirebaseAuth _auth;
+  String _uid;
 
   //Default status
   AuthStatus _status = AuthStatus.Uninitialized;
 
   Stream<AuthStatus> get status => Stream.value(_status);
+
+  String get uid => _uid;
 
   Stream<User> get user => _auth.onAuthStateChanged.asyncMap(_userFromFirebase);
 
@@ -38,18 +32,24 @@ class AuthProvider extends ChangeNotifier {
     if (firebaseUser == null) {
       return null;
     }
+
     final userDocument = await Firestore.instance
         .collection('users')
         .document(firebaseUser.uid)
         .get();
-    final user = userDocument.data;
+    if (userDocument == null) {
+      _status = AuthStatus.Unregistered;
+      return null;
+    }
 
+    _status = AuthStatus.Authenticated;
+    final user = userDocument.data;
     return User(
       uid: user[userDocument.documentID],
       email: user['email'],
       name: user['name'],
-      studentId: user['studentId'],
-      role: UserRoleExtension.fromString(user['role']),
+      managerSerial: user['managerSerial'],
+      isConvener: user['isConvener'],
       defaultMeal: Meal.fromMap(user['defaultMeal']),
     );
   }
@@ -57,37 +57,18 @@ class AuthProvider extends ChangeNotifier {
   //Method to detect live auth changes such as user sign in and sign out
   Future<void> onAuthStateChanged(FirebaseUser firebaseUser) async {
     if (firebaseUser == null) {
+      _uid = null;
       _status = AuthStatus.Unauthenticated;
     } else {
+      _uid = firebaseUser.uid;
       _userFromFirebase(firebaseUser);
-      _status = AuthStatus.Authenticated;
     }
     notifyListeners();
-  }
-
-  //Method for new user registration using email and password
-  Future<User> registerWithEmailAndPassword(
-      String email, String password) async {
-    try {
-      _status = AuthStatus.Registering;
-      notifyListeners();
-      final AuthResult result = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-
-      return _userFromFirebase(result.user);
-    } catch (e) {
-      print("Error on the new user registration = " + e.toString());
-      _status = AuthStatus.Unauthenticated;
-      notifyListeners();
-      return null;
-    }
   }
 
   //Method to handle user sign in using email and password
   Future<bool> signInWithEmailAndPassword(String email, String password) async {
     try {
-      _status = AuthStatus.Authenticating;
-      notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return true;
     } catch (e) {

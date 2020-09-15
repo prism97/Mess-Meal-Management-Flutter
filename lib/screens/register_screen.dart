@@ -1,35 +1,38 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/enums.dart';
-import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
-import 'package:mess_meal/screens/meal_check_screen.dart';
-import 'package:mess_meal/screens/register_screen.dart';
+import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  static const String id = 'login_screen';
+class RegisterScreen extends StatefulWidget {
+  static const String id = 'register_screen';
+  final String email;
+
+  const RegisterScreen({@required this.email});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loading = false;
 
   // text field states
-  String _email = '';
-  String _password = '';
+  String _name = '';
 
   @override
   Widget build(BuildContext context) {
+    final db = Provider.of<FirestoreDatabase>(context);
+    final auth = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: true,
@@ -53,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
+                  children: [
                     SizedBox(
                       height: 40.0,
                     ),
@@ -66,36 +69,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           FontAwesomeIcons.solidEnvelope,
                           color: Theme.of(context).disabledColor,
                         ),
-                        hintText: 'email',
+                        hintText: 'display name',
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (val) => !EmailValidator.validate(_email)
-                          ? 'Enter a valid email address'
+                      keyboardType: TextInputType.name,
+                      validator: (val) => val == null
+                          ? 'Enter a display name for your account'
                           : null,
                       onChanged: (val) {
-                        setState(() => _email = val);
-                      },
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    TextFormField(
-                      obscureText: true,
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          FontAwesomeIcons.lock,
-                          color: Theme.of(context).disabledColor,
-                        ),
-                        hintText: 'password',
-                      ),
-                      validator: (val) => val.length < 6
-                          ? 'Enter a password at least 6 characters long'
-                          : null,
-                      onChanged: (val) {
-                        setState(() => _password = val);
+                        setState(() => _name = val);
                       },
                     ),
                     SizedBox(
@@ -114,27 +95,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (context, snapshot) {
                               var status = snapshot.data;
 
-                              if (status == AuthStatus.Authenticated) {
+                              if (status == AuthStatus.Unregistered) {
                                 SchedulerBinding.instance
                                     .addPostFrameCallback((_) {
                                   Navigator.pushReplacementNamed(
-                                      context, MealCheckScreen.id);
-                                });
-                              } else if (status == AuthStatus.Unregistered) {
-                                SchedulerBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          RegisterScreen(email: _email),
-                                    ),
-                                  );
+                                      context, RegisterScreen.id);
                                 });
                               }
 
                               return BasicWhiteButton(
-                                text: 'Login',
+                                text: 'Save',
                                 onPressed: () async {
                                   FocusScope.of(context).unfocus();
 
@@ -144,22 +114,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                     setState(() {
                                       _loading = true;
                                     });
-                                    final result =
-                                        await Provider.of<AuthProvider>(context)
-                                            .signInWithEmailAndPassword(
-                                                _email, _password);
+                                    // create user document & send password reset email
+                                    final managerSerial =
+                                        await db.updateManagerSerials();
+                                    final User user = User(
+                                      uid: db.uid,
+                                      email: this.widget.email,
+                                      name: _name,
+                                      managerSerial: managerSerial,
+                                    );
+                                    await db.createUser(user);
+                                    await auth.sendPasswordResetEmail(
+                                        this.widget.email);
 
-                                    if (!result) {
-                                      setState(() {
-                                        _loading = false;
-                                      });
-                                      showErrorSnackBar();
-                                    }
+                                    // if (!result) {
+                                    //   setState(() {
+                                    //     _loading = false;
+                                    //   });
+                                    //   showErrorSnackBar();
+                                    // }
+
                                   }
                                 },
                               );
-                            },
-                          ),
+                            }),
                   ],
                 ),
               ),
@@ -168,23 +146,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  void showErrorSnackBar() {
-    final snackBar = SnackBar(
-      content: Text(
-        'Login failed! Invalid credentials.',
-        style: Theme.of(context).textTheme.bodyText1,
-      ),
-      backgroundColor: Theme.of(context).disabledColor,
-      elevation: kElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(kBorderRadius),
-          topRight: Radius.circular(kBorderRadius),
-        ),
-      ),
-    );
-    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }

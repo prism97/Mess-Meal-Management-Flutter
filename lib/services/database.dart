@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:mess_meal/models/user.dart';
 
 class DatabaseService {
   final String uid;
@@ -111,18 +110,18 @@ class DatabaseService {
   }
 
   // user data from snapshot
-  UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-    return UserData(
-      uid: uid,
-      defaultMeal: Map<String, bool>.from(snapshot.data['default_meal']),
-      currentFortnightMealAmount:
-          snapshot.data['current_fortnight_meal_amount'],
-    );
-  }
+  // User _userDataFromSnapshot(DocumentSnapshot snapshot) {
+  //   return User(
+  //     uid: uid,
+  //     defaultMeal: Map<String, bool>.from(snapshot.data['default_meal']),
+  //     currentFortnightMealAmount:
+  //         snapshot.data['current_fortnight_meal_amount'],
+  //   );
+  // }
 
-  Stream<UserData> get userData {
-    return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
-  }
+  // Stream<User> get userData {
+  //   return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
+  // }
 
   Future<void> createNewMealData(
       DateTime date, bool breakfast, bool lunch, bool dinner) async {

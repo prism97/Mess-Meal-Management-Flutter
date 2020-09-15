@@ -8,6 +8,7 @@ import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
 import 'package:mess_meal/screens/stats_screen.dart';
+import 'package:mess_meal/services/firestore_database.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
@@ -18,8 +19,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: authProvider,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: authProvider,
+        ),
+        ProxyProvider<AuthProvider, FirestoreDatabase>(
+          update: (context, authProvider, firestoreDatabase) =>
+              FirestoreDatabase(uid: authProvider.uid),
+        ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: themeData,

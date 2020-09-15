@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/models/user.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/login_screen.dart';
@@ -21,7 +20,6 @@ class NavDrawer extends StatelessWidget {
     return StreamBuilder<User>(
       stream: Provider.of<AuthProvider>(context).user,
       builder: (context, snapshot) {
-        var role = snapshot.hasData ? snapshot.data.role : UserRole.Member;
         return SizedBox(
           width: MediaQuery.of(context).size.width / 1.5,
           child: Drawer(
@@ -72,7 +70,7 @@ class NavDrawer extends StatelessWidget {
                     },
                     selected: currentRoute == MealCheckScreen.id,
                   ),
-                  role == UserRole.Manager
+                  snapshot.data.isManager()
                       ? NavitemTile(
                           title: 'Today\'s Meal',
                           icon: FontAwesomeIcons.clipboardList,
