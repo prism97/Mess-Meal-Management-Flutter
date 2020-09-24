@@ -12,9 +12,9 @@ class FirestoreService {
   static final instance = FirestoreService._();
 
   Future<Map<String, dynamic>> getData({@required String path}) async {
-    final reference = Firestore.instance.document(path);
+    final reference = FirebaseFirestore.instance.doc(path);
     final document = await reference.get();
-    return document.data;
+    return document.data();
   }
 
   Future<void> setData({
@@ -22,9 +22,9 @@ class FirestoreService {
     @required Map<String, dynamic> data,
     bool merge = false,
   }) async {
-    final reference = Firestore.instance.document(path);
+    final reference = FirebaseFirestore.instance.doc(path);
     print('$path: $data');
-    await reference.setData(data, merge: merge);
+    await reference.set(data, SetOptions(merge: merge));
   }
 
   // Future<void> bulkSet({
@@ -42,7 +42,7 @@ class FirestoreService {
   // }
 
   Future<void> deleteData({@required String path}) async {
-    final reference = Firestore.instance.document(path);
+    final reference = FirebaseFirestore.instance.doc(path);
     print('delete: $path');
     await reference.delete();
   }
@@ -53,13 +53,13 @@ class FirestoreService {
     Query queryBuilder(Query query),
     int sort(T lhs, T rhs),
   }) async {
-    Query query = Firestore.instance.collection(path);
+    Query query = FirebaseFirestore.instance.collection(path);
     if (queryBuilder != null) {
       query = queryBuilder(query);
     }
-    final QuerySnapshot snapshot = await query.getDocuments();
-    final result = snapshot.documents
-        .map((snapshot) => builder(snapshot.data, snapshot.documentID))
+    final QuerySnapshot snapshot = await query.get();
+    final result = snapshot.docs
+        .map((snapshot) => builder(snapshot.data(), snapshot.id))
         .where((value) => value != null)
         .toList();
 
@@ -73,9 +73,8 @@ class FirestoreService {
     @required String path,
     @required T builder(Map<String, dynamic> data, String documentID),
   }) {
-    final DocumentReference reference = Firestore.instance.document(path);
+    final DocumentReference reference = FirebaseFirestore.instance.doc(path);
     final Stream<DocumentSnapshot> snapshots = reference.snapshots();
-    return snapshots
-        .map((snapshot) => builder(snapshot.data, snapshot.documentID));
+    return snapshots.map((snapshot) => builder(snapshot.data(), snapshot.id));
   }
 }

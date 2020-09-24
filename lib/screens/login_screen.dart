@@ -1,14 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
-import 'package:mess_meal/screens/meal_check_screen.dart';
-import 'package:mess_meal/screens/register_screen.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loading = false;
+  bool _success = false;
 
   // text field states
   String _email = '';
@@ -109,55 +106,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               size: 25.0,
                             ),
                           )
-                        : StreamBuilder<AuthStatus>(
-                            stream: Provider.of<AuthProvider>(context).status,
-                            builder: (context, snapshot) {
-                              var status = snapshot.data;
+                        : BasicWhiteButton(
+                            text: 'Login',
+                            onPressed: () async {
+                              FocusScope.of(context).unfocus();
 
-                              if (status == AuthStatus.Authenticated) {
-                                SchedulerBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  Navigator.pushReplacementNamed(
-                                      context, MealCheckScreen.id);
+                              final formState = _formKey.currentState;
+                              if (formState.validate()) {
+                                formState.save();
+                                setState(() {
+                                  _loading = true;
                                 });
-                              } else if (status == AuthStatus.Unregistered) {
-                                SchedulerBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          RegisterScreen(email: _email),
-                                    ),
-                                  );
-                                });
+                                _success = await Provider.of<AuthProvider>(
+                                        context,
+                                        listen: false)
+                                    .signInWithEmailAndPassword(
+                                        _email, _password);
+
+                                if (!_success) {
+                                  setState(() {
+                                    _loading = false;
+                                  });
+                                  showErrorSnackBar();
+                                }
                               }
-
-                              return BasicWhiteButton(
-                                text: 'Login',
-                                onPressed: () async {
-                                  FocusScope.of(context).unfocus();
-
-                                  final formState = _formKey.currentState;
-                                  if (formState.validate()) {
-                                    formState.save();
-                                    setState(() {
-                                      _loading = true;
-                                    });
-                                    final result =
-                                        await Provider.of<AuthProvider>(context)
-                                            .signInWithEmailAndPassword(
-                                                _email, _password);
-
-                                    if (!result) {
-                                      setState(() {
-                                        _loading = false;
-                                      });
-                                      showErrorSnackBar();
-                                    }
-                                  }
-                                },
-                              );
                             },
                           ),
                   ],

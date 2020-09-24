@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
@@ -17,7 +17,7 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User>(
+    return StreamBuilder<Member>(
       stream: Provider.of<AuthProvider>(context).user,
       builder: (context, snapshot) {
         return SizedBox(
@@ -70,7 +70,7 @@ class NavDrawer extends StatelessWidget {
                     },
                     selected: currentRoute == MealCheckScreen.id,
                   ),
-                  snapshot.data.isManager()
+                  snapshot.hasData && snapshot.data.isManager()
                       ? NavitemTile(
                           title: 'Today\'s Meal',
                           icon: FontAwesomeIcons.clipboardList,

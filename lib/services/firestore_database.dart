@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mess_meal/models/meal.dart';
-import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/services/firestore_path.dart';
 import 'package:mess_meal/services/firestore_service.dart';
 import 'package:meta/meta.dart';
@@ -26,8 +26,14 @@ class FirestoreDatabase {
   final _firestoreService = FirestoreService.instance;
 
   // create new user (member)
-  createUser(User user) async => await _firestoreService.setData(
-      path: FirestorePath.user(user.uid), data: user.toMap());
+  createUser(Member user) async {
+    await _firestoreService.setData(
+        path: FirestorePath.user(user.uid), data: user.toMap());
+
+    // increment user count by 1
+    await _firestoreService.setData(
+        path: FirestorePath.counts(), data: {'users': FieldValue.increment(1)});
+  }
 
   Future<int> _getUserCount() async {
     final data = await _firestoreService.getData(path: FirestorePath.counts());
@@ -43,14 +49,16 @@ class FirestoreDatabase {
     int newUserManagerSerial;
     final users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
-      builder: (data, documentId) => User.fromMap(data, documentId),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
       queryBuilder: (query) => query.where('manager_serial', isGreaterThan: 4),
     );
 
     users.forEach((user) {
       _firestoreService.setData(
         path: FirestorePath.user(user.uid),
-        data: {'managerSerial': user.managerSerial + 1},
+        data: {
+          'managerSerial': FieldValue.increment(1)
+        }, //  user.managerSerial + 1
         merge: true,
       );
     });
@@ -87,27 +95,27 @@ class FirestoreDatabase {
 
   //Method to mark all todoModel to be complete
   Future<void> setAllTodoComplete() async {
-    final batchUpdate = Firestore.instance.batch();
+    final batchUpdate = FirebaseFirestore.instance.batch();
 
-    final querySnapshot = await Firestore.instance
+    final querySnapshot = await FirebaseFirestore.instance
         .collection(FirestorePath.meals(uid))
-        .getDocuments();
+        .get();
 
-    for (DocumentSnapshot ds in querySnapshot.documents) {
-      batchUpdate.updateData(ds.reference, {'complete': true});
+    for (DocumentSnapshot ds in querySnapshot.docs) {
+      batchUpdate.update(ds.reference, {'complete': true});
     }
     await batchUpdate.commit();
   }
 
   Future<void> deleteAllTodoWithComplete() async {
-    final batchDelete = Firestore.instance.batch();
+    final batchDelete = FirebaseFirestore.instance.batch();
 
-    final querySnapshot = await Firestore.instance
+    final querySnapshot = await FirebaseFirestore.instance
         .collection(FirestorePath.meals(uid))
         .where('complete', isEqualTo: true)
-        .getDocuments();
+        .get();
 
-    for (DocumentSnapshot ds in querySnapshot.documents) {
+    for (DocumentSnapshot ds in querySnapshot.docs) {
       batchDelete.delete(ds.reference);
     }
     await batchDelete.commit();

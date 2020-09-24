@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:mess_meal/models/meal.dart';
 
-class User {
+class Member {
   final String uid;
   final String email;
   final String name;
@@ -9,21 +9,21 @@ class User {
   bool isConvener;
   Meal defaultMeal;
 
-  User({
+  Member({
     @required this.uid,
     @required this.email,
     @required this.name,
     @required this.managerSerial,
     this.isConvener = false,
-    this.defaultMeal,
+    @required this.defaultMeal,
   });
 
-  factory User.fromMap(Map<String, dynamic> data, String documentId) {
+  factory Member.fromMap(Map<String, dynamic> data, String documentId) {
     if (data == null) {
       return null;
     }
 
-    return User(
+    return Member(
       uid: documentId,
       email: data['email'],
       name: data['name'],

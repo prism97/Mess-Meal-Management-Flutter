@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/models/meal.dart';
-import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/models/member.dart';
 
 class AuthProvider extends ChangeNotifier {
   //Firebase Auth object
   FirebaseAuth _auth;
   String _uid;
+  String _email;
 
   //Default status
   AuthStatus _status = AuthStatus.Uninitialized;
@@ -17,52 +18,59 @@ class AuthProvider extends ChangeNotifier {
 
   String get uid => _uid;
 
-  Stream<User> get user => _auth.onAuthStateChanged.asyncMap(_userFromFirebase);
+  String get email => _email;
+
+  Stream<Member> get user =>
+      _auth.authStateChanges().asyncMap(_userFromFirebase);
 
   AuthProvider() {
     //initialise object
     _auth = FirebaseAuth.instance;
 
     //listener for authentication changes such as user sign in and sign out
-    _auth.onAuthStateChanged.listen(onAuthStateChanged);
+    _auth.authStateChanges().listen(onAuthStateChanged);
   }
 
-  //Create user object based on the given FirebaseUser
-  Future<User> _userFromFirebase(FirebaseUser firebaseUser) async {
+  //Create member object based on the given FirebaseUser
+  Future<Member> _userFromFirebase(User firebaseUser) async {
     if (firebaseUser == null) {
       return null;
     }
 
-    final userDocument = await Firestore.instance
+    final userDocument = await FirebaseFirestore.instance
         .collection('users')
-        .document(firebaseUser.uid)
+        .doc(firebaseUser.uid)
         .get();
-    if (userDocument == null) {
+
+    if (!userDocument.exists) {
       _status = AuthStatus.Unregistered;
       return null;
     }
 
     _status = AuthStatus.Authenticated;
-    final user = userDocument.data;
-    return User(
-      uid: user[userDocument.documentID],
+    final user = userDocument.data();
+    return Member(
+      uid: user[userDocument.id],
       email: user['email'],
       name: user['name'],
       managerSerial: user['managerSerial'],
       isConvener: user['isConvener'],
-      defaultMeal: Meal.fromMap(user['defaultMeal']),
+      defaultMeal: Meal.fromMap(Map<String, bool>.from(user['defaultMeal'])),
     );
   }
 
   //Method to detect live auth changes such as user sign in and sign out
-  Future<void> onAuthStateChanged(FirebaseUser firebaseUser) async {
+  Future<void> onAuthStateChanged(User firebaseUser) async {
     if (firebaseUser == null) {
       _uid = null;
+      _email = null;
       _status = AuthStatus.Unauthenticated;
     } else {
       _uid = firebaseUser.uid;
-      _userFromFirebase(firebaseUser);
+      _email = firebaseUser.email;
+      await _userFromFirebase(firebaseUser);
     }
+    print('auth change $_status');
     notifyListeners();
   }
 

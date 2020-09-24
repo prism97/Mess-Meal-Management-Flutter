@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
@@ -140,7 +140,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
               size: 50.0,
             ),
           )
-        : StreamBuilder<User>(
+        : StreamBuilder<Member>(
             stream: Provider.of<AuthProvider>(context).user,
             builder: (context, snapshot) {
               if (snapshot.hasData) {

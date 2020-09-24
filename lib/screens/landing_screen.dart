@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
+import 'package:mess_meal/screens/register_screen.dart';
+import 'package:mess_meal/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -19,39 +18,13 @@ class LandingScreen extends StatelessWidget {
         var status = snapshot.data;
 
         if (status == AuthStatus.Unauthenticated) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacementNamed(context, LoginScreen.id);
-          });
+          return LoginScreen();
+        } else if (status == AuthStatus.Unregistered) {
+          return RegisterScreen();
         } else if (status == AuthStatus.Authenticated) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacementNamed(context, MealCheckScreen.id);
-          });
+          return MealCheckScreen();
         }
-
-        return SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: kBackgroundGradient,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SpinKitWave(
-                  color: Colors.white,
-                  size: 40.0,
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Text(
-                  'Mess Meal',
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-              ],
-            ),
-          ),
-        );
+        return SplashScreen();
       },
     );
   }

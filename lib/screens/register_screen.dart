@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/constants/enums.dart';
-import 'package:mess_meal/models/user.dart';
+import 'package:mess_meal/models/meal.dart';
+import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
@@ -12,9 +11,6 @@ import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String id = 'register_screen';
-  final String email;
-
-  const RegisterScreen({@required this.email});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -25,13 +21,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loading = false;
 
-  // text field states
+// text field states
   String _name = '';
 
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<FirestoreDatabase>(context);
     final auth = Provider.of<AuthProvider>(context);
+    final _email = auth.email;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -90,54 +87,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               size: 25.0,
                             ),
                           )
-                        : StreamBuilder<AuthStatus>(
-                            stream: Provider.of<AuthProvider>(context).status,
-                            builder: (context, snapshot) {
-                              var status = snapshot.data;
+                        : BasicWhiteButton(
+                            text: 'Save',
+                            onPressed: () async {
+                              FocusScope.of(context).unfocus();
 
-                              if (status == AuthStatus.Unregistered) {
-                                SchedulerBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  Navigator.pushReplacementNamed(
-                                      context, RegisterScreen.id);
+                              final formState = _formKey.currentState;
+                              if (formState.validate()) {
+                                formState.save();
+                                setState(() {
+                                  _loading = true;
                                 });
+                                // create user document & send password reset email
+                                final managerSerial =
+                                    await db.updateManagerSerials();
+
+                                final Member user = Member(
+                                  uid: db.uid,
+                                  email: _email,
+                                  name: _name,
+                                  managerSerial: managerSerial,
+                                  defaultMeal: Meal(
+                                    breakfast: true,
+                                    lunch: true,
+                                    dinner: true,
+                                  ),
+                                );
+
+                                await db.createUser(user);
+                                await auth.sendPasswordResetEmail(_email);
+                                await auth.signOut();
+
+                                // TODO: show success dialog
+
+                                // if (!result) {
+                                //   setState(() {
+                                //     _loading = false;
+                                //   });
+                                //   showErrorSnackBar();
+                                // }
+
                               }
-
-                              return BasicWhiteButton(
-                                text: 'Save',
-                                onPressed: () async {
-                                  FocusScope.of(context).unfocus();
-
-                                  final formState = _formKey.currentState;
-                                  if (formState.validate()) {
-                                    formState.save();
-                                    setState(() {
-                                      _loading = true;
-                                    });
-                                    // create user document & send password reset email
-                                    final managerSerial =
-                                        await db.updateManagerSerials();
-                                    final User user = User(
-                                      uid: db.uid,
-                                      email: this.widget.email,
-                                      name: _name,
-                                      managerSerial: managerSerial,
-                                    );
-                                    await db.createUser(user);
-                                    await auth.sendPasswordResetEmail(
-                                        this.widget.email);
-
-                                    // if (!result) {
-                                    //   setState(() {
-                                    //     _loading = false;
-                                    //   });
-                                    //   showErrorSnackBar();
-                                    // }
-
-                                  }
-                                },
-                              );
-                            }),
+                            },
+                          ),
                   ],
                 ),
               ),
