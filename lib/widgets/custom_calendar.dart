@@ -16,6 +16,12 @@ class CustomCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return TableCalendar(
       initialSelectedDay: DateTime.now(),
+      startDay: DateTime.now().subtract(
+        Duration(days: 15),
+      ),
+      endDay: DateTime.now().add(
+        Duration(days: 15),
+      ),
       calendarController: calendarController,
       availableCalendarFormats: {
         CalendarFormat.week: '',

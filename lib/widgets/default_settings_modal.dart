@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mess_meal/widgets/daily_meal_card.dart';
+import 'package:mess_meal/widgets/default_meal_card.dart';
 
 class DefaultSettingsModal extends StatelessWidget {
   @override
@@ -25,7 +25,7 @@ class DefaultSettingsModal extends StatelessWidget {
                 fontSize: 20.0,
               ),
             ),
-            DailyMealCard(isDefault: true),
+            DefaultMealCard(),
           ],
         ),
       ),

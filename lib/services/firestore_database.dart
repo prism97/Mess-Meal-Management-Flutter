@@ -20,7 +20,8 @@ setAllTodoComplete is require to change all todos item to have the complete stat
 changed to true.
  */
 class FirestoreDatabase {
-  FirestoreDatabase({@required this.uid}) : assert(uid != null);
+  FirestoreDatabase({@required this.uid});
+  // : assert(uid != null);
   final String uid;
 
   final _firestoreService = FirestoreService.instance;
@@ -66,27 +67,46 @@ class FirestoreDatabase {
     return newUserManagerSerial;
   }
 
-  //Method to create/update todoModel
+  // retrieve default meal of user
+  Stream<Meal> defaultMealStream() => _firestoreService.documentStream(
+        path: FirestorePath.user(uid),
+        builder: (data, documentId) => Meal.fromMap(
+          Map<String, bool>.from(data['defaultMeal']),
+        ),
+      );
+
+  // update default meal of user
+  Future<void> setDefaultMeal(Meal meal) async {
+    await _firestoreService.setData(
+      path: FirestorePath.user(uid),
+      data: {'defaultMeal': meal.toMap()},
+      merge: true,
+    );
+  }
+
+  // create/update meal
   Future<void> setMeal(Meal meal) async => await _firestoreService.setData(
         path: FirestorePath.meal(uid, meal.date.toIso8601String()),
         data: meal.toMap(),
+        merge: true,
       );
 
-  //Method to delete todoModel entry
+  // delete meal entry
   Future<void> deleteTodo(Meal meal) async {
     await _firestoreService.deleteData(
         path: FirestorePath.meal(uid, meal.date.toIso8601String()));
   }
 
-  //Method to retrieve todoModel object based on the given todoId
-  Stream<Meal> todoStream({@required String todoId}) =>
+  // retrieve meal by date
+  Stream<Meal> mealStream({@required DateTime date}) =>
       _firestoreService.documentStream(
-        path: FirestorePath.meal(uid, todoId),
-        builder: (data, documentId) =>
-            Meal.fromMap(data, date: DateTime.parse(documentId)),
+        path: FirestorePath.meal(uid, date.toIso8601String()),
+        builder: (data, documentId) => Meal.fromMap(
+            Map<String, bool>.from(data),
+            date: DateTime.parse(documentId)),
       );
 
-  //Method to retrieve all meals from the same user based on uid
+  // retrieve all meals from the same user based on uid
   Future<List<Meal>> mealList() => _firestoreService.listDocuments(
         path: FirestorePath.meals(uid),
         builder: (data, documentId) =>

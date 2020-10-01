@@ -1,7 +1,9 @@
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
@@ -114,19 +116,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 );
 
-                                await db.createUser(user);
-                                await auth.sendPasswordResetEmail(_email);
-                                await auth.signOut();
+                                try {
+                                  await db.createUser(user);
+                                  await auth.sendPasswordResetEmail(_email);
+                                  await auth.signOut();
 
-                                // TODO: show success dialog
-
-                                // if (!result) {
-                                //   setState(() {
-                                //     _loading = false;
-                                //   });
-                                //   showErrorSnackBar();
-                                // }
-
+                                  EasyDialog(
+                                    height:
+                                        MediaQuery.of(context).size.height / 2,
+                                    title: Text('Success'),
+                                    description: Text(
+                                        'An e-mail has been sent to your e-mail address. Follow the directions in the e-mail to reset your password & then login with your new password.'),
+                                  ).show(context);
+                                } catch (error) {
+                                  setState(() {
+                                    _loading = false;
+                                  });
+                                  showErrorSnackBar();
+                                }
                               }
                             },
                           ),
@@ -138,5 +145,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  void showErrorSnackBar() {
+    final snackBar = SnackBar(
+      content: Text(
+        'Failed to register and send password reset e-mail! Please try again later.',
+        style: Theme.of(context).textTheme.bodyText1,
+      ),
+      backgroundColor: Theme.of(context).disabledColor,
+      elevation: kElevation,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(kBorderRadius),
+          topRight: Radius.circular(kBorderRadius),
+        ),
+      ),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }
