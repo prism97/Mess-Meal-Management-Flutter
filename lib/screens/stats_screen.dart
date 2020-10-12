@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
@@ -23,7 +22,7 @@ class _StatsScreenState extends State<StatsScreen> {
   DatabaseService db;
 
   Future<void> fetchUserData() async {
-    final String _uid = await AuthService().getCurrentUserId();
+    final String _uid = '1';
     db = DatabaseService(uid: _uid);
     final result = await db.mealAmountCalc();
     if (result != null) {

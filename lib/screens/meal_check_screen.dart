@@ -34,9 +34,6 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
     _dailyMealCard = DailyMealCard(
       date: DateTime.now(),
     );
-    // DailyMealCard(
-    //   date: DateTime.now(),
-    // );
   }
 
   @override

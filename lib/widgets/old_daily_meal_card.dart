@@ -4,7 +4,6 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
-import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:provider/provider.dart';
 
@@ -51,7 +50,7 @@ class _DailyMealCardState extends State<OldDailyMealCard> {
   }
 
   Future<void> fetchMeal() async {
-    final String _uid = await AuthService().getCurrentUserId();
+    final String _uid = '1';
     db = DatabaseService(uid: _uid);
     if (!widget.isDefault) {
       final resultData = await db.getMealData(widget.date);

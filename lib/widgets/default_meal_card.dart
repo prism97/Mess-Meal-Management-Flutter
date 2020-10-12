@@ -14,25 +14,38 @@ class DefaultMealCard extends StatefulWidget {
 
 class _DefaultMealCardState extends State<DefaultMealCard> {
   bool breakfast, lunch, dinner;
-  bool loading = false;
+  bool loading = true, updating = false;
   Meal defaultMeal;
+  FirestoreDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
+    db.getDefaultMeal().then((value) {
+      defaultMeal = value;
+      breakfast = defaultMeal.breakfast;
+      lunch = defaultMeal.lunch;
+      dinner = defaultMeal.dinner;
+      setState(() {
+        loading = false;
+      });
+    });
+  }
 
   // TODO: handle what to do after default meal update
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<FirestoreDatabase>(context, listen: false);
-
-    return StreamBuilder<Meal>(
-      stream: db.defaultMealStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          defaultMeal = snapshot.data;
-          breakfast = defaultMeal.breakfast;
-          lunch = defaultMeal.lunch;
-          dinner = defaultMeal.dinner;
-
-          return Column(
+    return loading
+        ? Padding(
+            padding: const EdgeInsets.only(top: 50.0),
+            child: SpinKitCircle(
+              color: primaryColorDark,
+              size: 50.0,
+            ),
+          )
+        : Column(
             children: [
               Card(
                 margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -49,14 +62,9 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                         title: 'Breakfast',
                         value: breakfast,
                         onChanged: (bool value) {
-                          breakfast = value;
-                          db.setDefaultMeal(
-                            Meal(
-                              breakfast: breakfast,
-                              lunch: lunch,
-                              dinner: dinner,
-                            ),
-                          );
+                          setState(() {
+                            breakfast = value;
+                          });
                         },
                       ),
                       Divider(
@@ -68,14 +76,9 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                         title: 'Lunch',
                         value: lunch,
                         onChanged: (bool value) {
-                          lunch = value;
-                          db.setDefaultMeal(
-                            Meal(
-                              breakfast: breakfast,
-                              lunch: lunch,
-                              dinner: dinner,
-                            ),
-                          );
+                          setState(() {
+                            lunch = value;
+                          });
                         },
                       ),
                       Divider(
@@ -87,32 +90,54 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                         title: 'Dinner',
                         value: dinner,
                         onChanged: (bool value) {
-                          dinner = value;
-                          db.setDefaultMeal(
-                            Meal(
-                              breakfast: breakfast,
-                              lunch: lunch,
-                              dinner: dinner,
-                            ),
-                          );
+                          setState(() {
+                            dinner = value;
+                          });
                         },
                       ),
                     ],
                   ),
                 ),
-              )
+              ),
+              updating
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: SpinKitThreeBounce(
+                        color: Colors.white,
+                        size: 25.0,
+                      ),
+                    )
+                  : RaisedButton(
+                      child: Text('Save'),
+                      onPressed: () async {
+                        Meal newMeal = Meal(
+                          breakfast: breakfast,
+                          lunch: lunch,
+                          dinner: dinner,
+                          date: DateTime.now(),
+                        );
+                        setState(() {
+                          updating = true;
+                        });
+                        try {
+                          await db.updateDefaultMeal(
+                            defaultMeal,
+                            newMeal,
+                          );
+                          defaultMeal = newMeal;
+                          breakfast = defaultMeal.breakfast;
+                          lunch = defaultMeal.lunch;
+                          dinner = defaultMeal.dinner;
+                        } catch (error) {
+                          print(error);
+                        } finally {
+                          setState(() {
+                            updating = false;
+                          });
+                        }
+                      },
+                    )
             ],
           );
-        } else {
-          return Padding(
-            padding: const EdgeInsets.only(top: 50.0),
-            child: SpinKitCircle(
-              color: primaryColorDark,
-              size: 50.0,
-            ),
-          );
-        }
-      },
-    );
   }
 }

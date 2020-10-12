@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/login_screen.dart';
-import 'package:mess_meal/services/auth.dart';
 import 'package:mess_meal/widgets/create_user_card.dart';
 import 'package:mess_meal/widgets/current_manager_card.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
+import 'package:provider/provider.dart';
 
 class AdminScreen extends StatelessWidget {
   static const String id = 'admin_screen';
-  final _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
+    final _auth = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: CustomAppBar(title: 'Admin'),
@@ -65,7 +66,7 @@ class AdminScreen extends StatelessWidget {
                   break;
                 case 3:
                   {
-                    await _auth.logOut();
+                    await _auth.signOut();
                     Navigator.popAndPushNamed(context, LoginScreen.id);
                     break;
                   }

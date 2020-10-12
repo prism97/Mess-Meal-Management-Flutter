@@ -113,6 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     breakfast: true,
                                     lunch: true,
                                     dinner: true,
+                                    date: DateTime.now(),
                                   ),
                                 );
 

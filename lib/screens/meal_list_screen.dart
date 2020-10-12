@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/services/auth.dart';
+import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
+import 'package:provider/provider.dart';
 
 class MealListScreen extends StatefulWidget {
   static const String id = 'meal_list_screen';
@@ -77,8 +78,9 @@ class _MealListScreenState extends State<MealListScreen> {
                           ? BasicWhiteButton(
                               text: 'Logout',
                               onPressed: () {
-                                final auth = AuthService();
-                                auth.logOut();
+                                final auth = Provider.of<AuthProvider>(context,
+                                    listen: false);
+                                auth.signOut();
                               },
                             )
                           : Container(),

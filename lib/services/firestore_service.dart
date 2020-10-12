@@ -11,10 +11,25 @@ class FirestoreService {
   FirestoreService._();
   static final instance = FirestoreService._();
 
+  Future<bool> documentExists({@required String path}) async {
+    final reference = FirebaseFirestore.instance.doc(path);
+    final document = await reference.get();
+    return document.exists;
+  }
+
   Future<Map<String, dynamic>> getData({@required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     final document = await reference.get();
     return document.data();
+  }
+
+  Future<String> createDocument({
+    @required String collectionPath,
+    @required Map<String, dynamic> data,
+  }) async {
+    final reference = FirebaseFirestore.instance.collection(collectionPath);
+    DocumentReference doc = await reference.add(data);
+    return doc.id;
   }
 
   Future<void> setData({

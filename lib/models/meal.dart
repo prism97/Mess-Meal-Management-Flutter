@@ -18,10 +18,24 @@ class Meal {
     }
 
     return Meal(
-        date: date,
-        breakfast: data['breakfast'],
-        lunch: data['lunch'],
-        dinner: data['dinner']);
+      date: date,
+      breakfast: data['breakfast'],
+      lunch: data['lunch'],
+      dinner: data['dinner'],
+    );
+  }
+
+  factory Meal.fromMapWithDate(Map<String, dynamic> data) {
+    if (data == null) {
+      return null;
+    }
+
+    return Meal(
+      date: data['date'],
+      breakfast: data['breakfast'],
+      lunch: data['lunch'],
+      dinner: data['dinner'],
+    );
   }
 
   Map<String, bool> toMap() {
@@ -29,6 +43,15 @@ class Meal {
       'breakfast': this.breakfast,
       'lunch': this.lunch,
       'dinner': this.dinner
+    };
+  }
+
+  Map<String, dynamic> toMapWithDate() {
+    return {
+      'breakfast': this.breakfast,
+      'lunch': this.lunch,
+      'dinner': this.dinner,
+      'date': this.date.toIso8601String(),
     };
   }
 }

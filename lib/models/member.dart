@@ -39,7 +39,7 @@ class Member {
       'name': this.name,
       'managerSerial': this.managerSerial,
       'isConvener': this.isConvener,
-      'defaultMeal': this.defaultMeal.toMap(),
+      'defaultMeal': this.defaultMeal.toMapWithDate(),
     };
   }
 
