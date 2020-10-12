@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 class Meal {
-  DateTime date; // for a particular day (not needed for default meal)
+  DateTime date;
   bool breakfast;
   bool lunch;
   bool dinner;
@@ -31,7 +31,7 @@ class Meal {
     }
 
     return Meal(
-      date: data['date'],
+      date: DateTime.parse(data['date']),
       breakfast: data['breakfast'],
       lunch: data['lunch'],
       dinner: data['dinner'],

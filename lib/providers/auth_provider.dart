@@ -55,7 +55,9 @@ class AuthProvider extends ChangeNotifier {
       name: user['name'],
       managerSerial: user['managerSerial'],
       isConvener: user['isConvener'],
-      defaultMeal: Meal.fromMap(Map<String, bool>.from(user['defaultMeal'])),
+      defaultMeal: Meal.fromMapWithDate(
+        Map<String, dynamic>.from(user['defaultMeal']),
+      ),
     );
   }
 

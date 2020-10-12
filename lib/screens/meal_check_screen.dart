@@ -31,8 +31,9 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
     super.initState();
 
     _calendarController = CalendarController();
+    DateTime now = DateTime.now();
     _dailyMealCard = DailyMealCard(
-      date: DateTime.now(),
+      date: DateTime(now.year, now.month, now.day),
     );
   }
 

@@ -12,15 +12,22 @@ class CustomCalendar extends StatelessWidget {
   final CalendarController calendarController;
   final Function showMealCard;
 
+  DateTime _getToday() {
+    DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, 0, 0, 0);
+  }
+
+  // TODO: calendar time starts with 12, we start with 0
+
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
-      initialSelectedDay: DateTime.now(),
+      initialSelectedDay: _getToday(),
       startDay: DateTime.now().subtract(
-        Duration(days: 15),
+        Duration(days: 30),
       ),
       endDay: DateTime.now().add(
-        Duration(days: 15),
+        Duration(days: 30),
       ),
       calendarController: calendarController,
       availableCalendarFormats: {

@@ -29,7 +29,7 @@ class Member {
       name: data['name'],
       managerSerial: data['managerSerial'],
       isConvener: data['isConvener'],
-      defaultMeal: Meal.fromMap(data['defaultMeal']),
+      defaultMeal: Meal.fromMapWithDate(data['defaultMeal']),
     );
   }
 

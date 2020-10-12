@@ -12,8 +12,11 @@ class MealAmount {
       @required this.lunch,
       @required this.dinner});
 
-  factory MealAmount.fromMap(Map<String, double> data,
-      {DateTime date, int dayOfWeek}) {
+  factory MealAmount.fromDefault() {
+    return MealAmount(breakfast: 0.5, lunch: 1.0, dinner: 1.0);
+  }
+
+  factory MealAmount.fromMap(Map<String, double> data, {DateTime date}) {
     if (data == null) {
       return null;
     }

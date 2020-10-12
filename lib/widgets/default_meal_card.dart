@@ -60,6 +60,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                     children: [
                       MealTile(
                         title: 'Breakfast',
+                        mealAmount: 0.5,
                         value: breakfast,
                         onChanged: (bool value) {
                           setState(() {
@@ -74,6 +75,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                       ),
                       MealTile(
                         title: 'Lunch',
+                        mealAmount: 1.0,
                         value: lunch,
                         onChanged: (bool value) {
                           setState(() {
@@ -88,6 +90,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                       ),
                       MealTile(
                         title: 'Dinner',
+                        mealAmount: 1.0,
                         value: dinner,
                         onChanged: (bool value) {
                           setState(() {

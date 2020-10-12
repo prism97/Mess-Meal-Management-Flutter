@@ -105,16 +105,20 @@ class FirestoreDatabase {
   // retrieve default meal of user
   Stream<Meal> defaultMealStream() => _firestoreService.documentStream(
         path: FirestorePath.user(uid),
-        builder: (data, documentId) => Meal.fromMap(
-          Map<String, bool>.from(data['defaultMeal']),
+        builder: (data, documentId) => Meal.fromMapWithDate(
+          Map<String, dynamic>.from(data['defaultMeal']),
         ),
       );
 
-  Future<Meal> getDefaultMeal() async => Meal.fromMapWithDate(
-        await _firestoreService.getData(
-          path: FirestorePath.user(uid),
-        ),
-      );
+  Future<Meal> getDefaultMeal() async {
+    Member currentUser = Member.fromMap(
+      await _firestoreService.getData(
+        path: FirestorePath.user(uid),
+      ),
+      uid,
+    );
+    return currentUser.defaultMeal;
+  }
 
   // update default meal of user
   Future<void> _setDefaultMeal(Meal meal) async {
@@ -191,8 +195,9 @@ class FirestoreDatabase {
       _firestoreService.documentStream(
         path: FirestorePath.meal(uid, date.toIso8601String()),
         builder: (data, documentId) => Meal.fromMap(
-            Map<String, bool>.from(data),
-            date: DateTime.parse(documentId)),
+          Map<String, bool>.from(data),
+          date: DateTime.parse(documentId),
+        ),
       );
 
   // retrieve meal of any user by date
@@ -204,13 +209,32 @@ class FirestoreDatabase {
         ),
       );
 
-  // retrieve meal amount by date
-  Future<MealAmount> getMealAmount({@required DateTime date}) async =>
-      MealAmount.fromMap(await _firestoreService.getData(
+  // create/update meal amount
+  Future<void> setMealAmount(
+          {@required DateTime date, @required MealAmount mealAmount}) =>
+      _firestoreService.setData(
         path: FirestorePath.mealAmount(
           date.toIso8601String(),
         ),
-      ));
+        data: mealAmount.toMap(),
+        merge: true,
+      );
+
+  // retrieve meal amount by date
+  Stream<MealAmount> mealAmountStream({@required DateTime date}) =>
+      _firestoreService.documentStream(
+        path: FirestorePath.mealAmount(date.toIso8601String()),
+        builder: (data, documentId) =>
+            MealAmount.fromMap(Map<String, double>.from(data)),
+      );
+
+  Future<MealAmount> getMealAmount({@required DateTime date}) async =>
+      MealAmount.fromMap(
+          Map<String, double>.from(await _firestoreService.getData(
+        path: FirestorePath.mealAmount(
+          date.toIso8601String(),
+        ),
+      )));
 
   // retrieve all meals from the same user based on uid
   Future<List<Meal>> mealList() => _firestoreService.listDocuments(
@@ -246,8 +270,6 @@ class FirestoreDatabase {
     DateTime tempDate;
 
     Map<DateTime, MealAmount> mealAmounts = Map();
-    MealAmount defaultMealAmount =
-        MealAmount(breakfast: 0.5, lunch: 1, dinner: 1);
     tempDate = startDate;
 
     // fetch meal amounts for the duration
@@ -261,7 +283,7 @@ class FirestoreDatabase {
       if (exists) {
         mealAmounts[tempDate] = await getMealAmount(date: tempDate);
       } else {
-        mealAmounts[tempDate] = defaultMealAmount;
+        mealAmounts[tempDate] = MealAmount.fromDefault();
       }
       tempDate = tempDate.add(Duration(days: 1));
     }
