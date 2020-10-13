@@ -70,7 +70,6 @@ class _DailyMealCardState extends State<DailyMealCard> {
                 return StreamBuilder<MealAmount>(
                     stream: db.mealAmountStream(date: widget.date),
                     builder: (context, snapshot) {
-                      print(widget.date.toIso8601String());
                       if (snapshot.hasData) {
                         mealAmount = snapshot.data;
                       } else {

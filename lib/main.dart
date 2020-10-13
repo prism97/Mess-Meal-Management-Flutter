@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mess_meal/constants/custom_theme.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/admin_screen.dart';
+import 'package:mess_meal/screens/funds_screen.dart';
 import 'package:mess_meal/screens/landing_screen.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
                 MealCheckScreen.id: (context) => MealCheckScreen(),
                 MealListScreen.id: (context) => MealListScreen(),
                 ManagerScreen.id: (context) => ManagerScreen(),
+                FundsScreen.id: (context) => FundsScreen(),
                 AdminScreen.id: (context) => AdminScreen(),
                 StatsScreen.id: (context) => StatsScreen(),
               },

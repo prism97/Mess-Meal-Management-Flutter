@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
+import 'package:mess_meal/screens/funds_screen.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
@@ -65,8 +66,7 @@ class NavDrawer extends StatelessWidget {
                     title: 'Check Meal',
                     icon: FontAwesomeIcons.calendarCheck,
                     onTap: () {
-                      Navigator.pushReplacementNamed(
-                          context, MealCheckScreen.id);
+                      Navigator.pushNamed(context, MealCheckScreen.id);
                     },
                     selected: currentRoute == MealCheckScreen.id,
                   ),
@@ -75,8 +75,7 @@ class NavDrawer extends StatelessWidget {
                           title: 'Today\'s Meal',
                           icon: FontAwesomeIcons.clipboardList,
                           onTap: () {
-                            Navigator.pushReplacementNamed(
-                                context, MealListScreen.id);
+                            Navigator.pushNamed(context, MealListScreen.id);
                           },
                           selected: currentRoute == MealListScreen.id,
                         )
@@ -85,15 +84,24 @@ class NavDrawer extends StatelessWidget {
                     title: 'Manager',
                     icon: FontAwesomeIcons.userTie,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, ManagerScreen.id);
+                      Navigator.pushNamed(context, ManagerScreen.id);
                     },
                     selected: currentRoute == ManagerScreen.id,
                   ),
+                  snapshot.hasData && snapshot.data.isConvener
+                      ? NavitemTile(
+                          title: 'Funds',
+                          icon: FontAwesomeIcons.dollarSign,
+                          onTap: () {
+                            Navigator.pushNamed(context, FundsScreen.id);
+                          },
+                        )
+                      : Container(),
                   NavitemTile(
                     title: 'Stats',
                     icon: FontAwesomeIcons.chartBar,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, StatsScreen.id);
+                      Navigator.pushNamed(context, StatsScreen.id);
                     },
                     selected: currentRoute == StatsScreen.id,
                   ),

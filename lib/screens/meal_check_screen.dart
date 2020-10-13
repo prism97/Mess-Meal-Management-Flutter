@@ -16,13 +16,19 @@ class MealCheckScreen extends StatefulWidget {
 
 class _MealCheckScreenState extends State<MealCheckScreen> {
   CalendarController _calendarController;
-  DailyMealCard _dailyMealCard;
+  Widget _dailyMealCard;
 
-  void showMealCard(DateTime date) {
+  void showMealCard(bool available, [DateTime date]) {
     setState(() {
-      _dailyMealCard = DailyMealCard(
-        date: date,
-      );
+      if (available) {
+        _dailyMealCard = DailyMealCard(
+          date: date,
+        );
+      } else {
+        _dailyMealCard = Center(
+          child: Text('Data not available'),
+        );
+      }
     });
   }
 

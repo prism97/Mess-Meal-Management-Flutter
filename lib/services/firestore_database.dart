@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mess_meal/models/fund.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/meal_amount.dart';
 import 'package:mess_meal/models/member.dart';
@@ -37,7 +38,10 @@ class FirestoreDatabase {
     // increment user count by 1
     await _firestoreService.setData(
       path: FirestorePath.counts(),
-      data: {'users': FieldValue.increment(1)},
+      data: {
+        'users': FieldValue.increment(1),
+      },
+      merge: true,
     );
 
     if (user.isManager()) {
@@ -48,6 +52,11 @@ class FirestoreDatabase {
   Future<int> _getUserCount() async {
     final data = await _firestoreService.getData(path: FirestorePath.counts());
     return data['users'];
+  }
+
+  Future<int> getTotalFunds() async {
+    final data = await _firestoreService.getData(path: FirestorePath.counts());
+    return data['totalFunds'];
   }
 
   Future<DateTime> _getCurrentManagerStartDate() async {
@@ -386,4 +395,23 @@ class FirestoreDatabase {
       merge: true,
     );
   }
+
+  Future<void> addFund(Fund fund) async {
+    await _firestoreService.createDocument(
+      collectionPath: FirestorePath.funds(),
+      data: fund.toMap(),
+    );
+    await _firestoreService.setData(
+      path: FirestorePath.counts(),
+      data: {
+        'totalFunds': FieldValue.increment(fund.amount),
+      },
+      merge: true,
+    );
+  }
+
+  Future<List<Fund>> getFundList() => _firestoreService.listDocuments(
+        path: FirestorePath.funds(),
+        builder: (data, documentId) => Fund.fromMap(data),
+      );
 }

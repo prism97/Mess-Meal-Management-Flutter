@@ -14,10 +14,8 @@ class CustomCalendar extends StatelessWidget {
 
   DateTime _getToday() {
     DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, 0, 0, 0);
+    return DateTime(now.year, now.month, now.day);
   }
-
-  // TODO: calendar time starts with 12, we start with 0
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +65,10 @@ class CustomCalendar extends StatelessWidget {
         weekendStyle: Theme.of(context).textTheme.subtitle2,
       ),
       onDaySelected: (date, events) {
-        showMealCard(date);
+        showMealCard(true, DateTime(date.year, date.month, date.day));
+      },
+      onUnavailableDaySelected: () {
+        showMealCard(false);
       },
     );
   }
