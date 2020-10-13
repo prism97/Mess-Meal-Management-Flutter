@@ -59,6 +59,17 @@ class FirestoreDatabase {
     return data['totalFunds'];
   }
 
+  Stream<int> totalFundStream() => _firestoreService.documentStream(
+        path: FirestorePath.counts(),
+        builder: (data, documentId) => data['totalFunds'],
+      );
+
+  Stream<Map<String, dynamic>> currentManagerStream() =>
+      _firestoreService.documentStream(
+        path: FirestorePath.currentManager(),
+        builder: (data, documentId) => data,
+      );
+
   Future<DateTime> _getCurrentManagerStartDate() async {
     final data =
         await _firestoreService.getData(path: FirestorePath.currentManager());
@@ -413,5 +424,6 @@ class FirestoreDatabase {
   Future<List<Fund>> getFundList() => _firestoreService.listDocuments(
         path: FirestorePath.funds(),
         builder: (data, documentId) => Fund.fromMap(data),
+        sort: (a, b) => b.date.difference(a.date).inSeconds,
       );
 }

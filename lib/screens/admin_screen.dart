@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/widgets/create_user_card.dart';
-import 'package:mess_meal/widgets/current_manager_card.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -79,9 +78,6 @@ class AdminScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            CurrentManagerCard(
-              admin: true,
-            ),
             CreateUserCard(),
           ],
         ),

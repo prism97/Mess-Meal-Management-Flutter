@@ -50,7 +50,7 @@ class AuthProvider extends ChangeNotifier {
     _status = AuthStatus.Authenticated;
     final user = userDocument.data();
     return Member(
-      uid: user[userDocument.id],
+      uid: userDocument.id,
       email: user['email'],
       name: user['name'],
       managerSerial: user['managerSerial'],

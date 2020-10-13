@@ -27,7 +27,6 @@ class _DailyMealCardState extends State<DailyMealCard> {
   FirestoreDatabase db;
   bool isManager = false;
 
-  // TODO: add time limit for meal update
   bool _checkTimeConstraint() {
     final lastUpdateTime = DateTime(
       widget.date.year,
