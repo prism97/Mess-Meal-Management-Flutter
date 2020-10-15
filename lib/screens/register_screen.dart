@@ -28,8 +28,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<FirestoreDatabase>(context);
-    final auth = Provider.of<AuthProvider>(context);
+    final db = Provider.of<FirestoreDatabase>(context, listen: false);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
     final _email = auth.email;
 
     return Scaffold(

@@ -27,7 +27,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Member>(
-      stream: Provider.of<AuthProvider>(context).user,
+      stream: Provider.of<AuthProvider>(context, listen: false).user,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data.isManager()) {
           return Card(

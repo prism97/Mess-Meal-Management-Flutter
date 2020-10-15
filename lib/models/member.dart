@@ -7,6 +7,7 @@ class Member {
   final String name;
   final int managerSerial;
   bool isConvener;
+  bool isMessboy;
   Meal defaultMeal;
 
   Member({
@@ -15,6 +16,7 @@ class Member {
     @required this.name,
     @required this.managerSerial,
     this.isConvener = false,
+    this.isMessboy = false,
     @required this.defaultMeal,
   });
 

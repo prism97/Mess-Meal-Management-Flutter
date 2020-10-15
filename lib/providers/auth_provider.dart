@@ -14,7 +14,8 @@ class AuthProvider extends ChangeNotifier {
   //Default status
   AuthStatus _status = AuthStatus.Uninitialized;
 
-  Stream<AuthStatus> get status => Stream.value(_status);
+  Stream<AuthStatus> get status =>
+      _auth.authStateChanges().map((event) => _status);
 
   String get uid => _uid;
 
@@ -35,6 +36,18 @@ class AuthProvider extends ChangeNotifier {
   Future<Member> _userFromFirebase(User firebaseUser) async {
     if (firebaseUser == null) {
       return null;
+    }
+
+    if (firebaseUser.email.compareTo("messboy@gmail.com") == 0) {
+      _status = AuthStatus.AuthenticatedAsMessboy;
+      return Member(
+        uid: firebaseUser.uid,
+        email: "messboy@gmail.com",
+        name: "messboy",
+        isMessboy: true,
+        managerSerial: null,
+        defaultMeal: null,
+      );
     }
 
     final userDocument = await FirebaseFirestore.instance

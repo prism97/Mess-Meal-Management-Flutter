@@ -24,7 +24,8 @@ class FundsScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             StreamBuilder<int>(
-              stream: Provider.of<FirestoreDatabase>(context).totalFundStream(),
+              stream: Provider.of<FirestoreDatabase>(context, listen: false)
+                  .totalFundStream(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return Card(

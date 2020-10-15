@@ -182,14 +182,15 @@ class FirestoreDatabase {
     updateEndDate =
         DateTime(updateEndDate.year, updateEndDate.month, updateEndDate.day);
 
-    bool exists;
+    DocumentSnapshot document;
 
     while (true) {
       if (updateStartDate.isAtSameMomentAs(updateEndDate)) break;
-      exists = await _firestoreService.documentExists(
+      document = await _firestoreService.getDocument(
         path: FirestorePath.meal(uid, updateStartDate.toIso8601String()),
       );
-      if (!exists) {
+
+      if (!document.exists) {
         setMeal(
           Meal(
             breakfast: oldMeal.breakfast,
@@ -226,17 +227,6 @@ class FirestoreDatabase {
         builder: (data, documentId) => Meal.fromMap(
           Map<String, bool>.from(data),
           date: DateTime.parse(documentId),
-        ),
-      );
-
-  // retrieve meal of any user by date
-  Future<Meal> _getMealOfUser(
-          {@required DateTime date, @required String uid}) async =>
-      Meal.fromMap(
-        Map<String, bool>.from(
-          await _firestoreService.getData(
-            path: FirestorePath.meal(uid, date.toIso8601String()),
-          ),
         ),
       );
 
@@ -297,22 +287,24 @@ class FirestoreDatabase {
     );
 
     Meal defaultMeal;
-    bool exists;
     DateTime tempDate;
 
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
+    DocumentSnapshot document;
     // fetch meal amounts for the duration
     while (true) {
       if (tempDate.isAtSameMomentAs(endDate)) break;
-      exists = await _firestoreService.documentExists(
+
+      document = await _firestoreService.getDocument(
         path: FirestorePath.mealAmount(
           tempDate.toIso8601String(),
         ),
       );
-      if (exists) {
-        mealAmounts[tempDate] = await getMealAmount(date: tempDate);
+      if (document.exists) {
+        mealAmounts[tempDate] =
+            MealAmount.fromMap(Map<String, double>.from(document.data()));
       } else {
         mealAmounts[tempDate] = MealAmount.fromDefault();
       }
@@ -361,11 +353,12 @@ class FirestoreDatabase {
 
       while (true) {
         if (tempDate.isAtSameMomentAs(endDate)) break;
-        exists = await _firestoreService.documentExists(
+        document = await _firestoreService.getDocument(
           path: FirestorePath.meal(user.uid, tempDate.toIso8601String()),
         );
-        if (exists) {
-          meal = await _getMealOfUser(date: tempDate, uid: user.uid);
+
+        if (document.exists) {
+          meal = Meal.fromMap(Map<String, bool>.from(document.data()));
         } else {
           _setMealOfUser(
             Meal(
@@ -455,16 +448,17 @@ class FirestoreDatabase {
       'dinner': List<Member>(),
     };
 
-    bool exists;
     Meal meal, defaultMeal;
+    DocumentSnapshot document;
     Member user;
     for (user in users) {
       defaultMeal = user.defaultMeal;
-      exists = await _firestoreService.documentExists(
+      document = await _firestoreService.getDocument(
         path: FirestorePath.meal(user.uid, _date.toIso8601String()),
       );
-      if (exists) {
-        meal = await _getMealOfUser(date: _date, uid: user.uid);
+
+      if (document.exists) {
+        meal = Meal.fromMap(Map<String, bool>.from(document.data()));
       } else {
         _setMealOfUser(
           Meal(
@@ -484,4 +478,6 @@ class FirestoreDatabase {
 
     return mealSubscribers;
   }
+
+  //TODO: fetch user mealRecords from managers collection
 }

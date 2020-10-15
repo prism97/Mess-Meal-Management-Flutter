@@ -6,7 +6,13 @@ The UI depends on the Status
 - Unauthenticated - User is not authenticated, Login Screen will be shown
  */
 
-enum AuthStatus { Uninitialized, Unregistered, Authenticated, Unauthenticated }
+enum AuthStatus {
+  Uninitialized,
+  Unregistered,
+  Authenticated,
+  AuthenticatedAsMessboy,
+  Unauthenticated,
+}
 
 enum UserRole { Admin, Manager, Messboy, Member }
 

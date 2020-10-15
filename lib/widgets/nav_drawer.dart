@@ -4,7 +4,6 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/funds_screen.dart';
-import 'package:mess_meal/screens/login_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
@@ -18,8 +17,10 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+
     return StreamBuilder<Member>(
-      stream: Provider.of<AuthProvider>(context).user,
+      stream: auth.user,
       builder: (context, snapshot) {
         return SizedBox(
           width: MediaQuery.of(context).size.width / 1.5,
@@ -115,12 +116,8 @@ class NavDrawer extends StatelessWidget {
                       child: NavitemTile(
                         icon: FontAwesomeIcons.signOutAlt,
                         title: 'Log Out',
-                        onTap: () async {
-                          await Provider.of<AuthProvider>(context,
-                                  listen: false)
-                              .signOut();
-
-                          Navigator.popAndPushNamed(context, LoginScreen.id);
+                        onTap: () {
+                          auth.signOut();
                         },
                       ),
                     ),

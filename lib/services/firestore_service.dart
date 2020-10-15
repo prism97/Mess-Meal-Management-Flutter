@@ -17,6 +17,11 @@ class FirestoreService {
     return document.exists;
   }
 
+  Future<DocumentSnapshot> getDocument({@required String path}) async {
+    final reference = FirebaseFirestore.instance.doc(path);
+    return reference.get();
+  }
+
   Future<Map<String, dynamic>> getData({@required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     final document = await reference.get();
