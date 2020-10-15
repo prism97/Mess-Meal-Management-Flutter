@@ -107,22 +107,64 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                           .copyWith(color: Colors.white),
                                     ),
                                     onPressed: () async {
-                                      // TODO: show dialog first (force update)
-                                      if (_workPeriod >= 15) {
-                                        setState(() {
-                                          _loading = true;
-                                        });
-                                        await db.updateManager();
-                                        setState(() {
-                                          _loading = false;
-                                        });
-                                      } else {
-                                        EasyDialog(
-                                          description: Text(
-                                            'Minimum work period of a manager is 15 days',
+                                      // if (_workPeriod >= 14) {
+                                      EasyDialog(
+                                        height: 160,
+                                        closeButton: false,
+                                        descriptionPadding: EdgeInsets.only(
+                                            bottom: kBorderRadius),
+                                        description: Text(
+                                            'Are you sure you want to update manager? The current manager has worked for $_workPeriod days.'),
+                                        contentList: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              FlatButton(
+                                                color: primaryColorDark,
+                                                textColor: Colors.white,
+                                                padding: EdgeInsets.all(
+                                                    kBorderRadius),
+                                                child: Text('Yes, update'),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _loading = true;
+                                                  });
+                                                  db
+                                                      .updateManager()
+                                                      .whenComplete(
+                                                        () => setState(() {
+                                                          _loading = false;
+                                                        }),
+                                                      );
+
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              SizedBox(
+                                                width: kBorderRadius,
+                                              ),
+                                              FlatButton(
+                                                color: Colors.white,
+                                                textColor: primaryColorDark,
+                                                padding: EdgeInsets.all(
+                                                    kBorderRadius),
+                                                child: Text('No, cancel'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
                                           ),
-                                        ).show(context);
-                                      }
+                                        ],
+                                      ).show(context);
+                                      // } else {
+                                      //   EasyDialog(
+                                      //     description: Text(
+                                      //       'Minimum work period of a manager is 14 days',
+                                      //     ),
+                                      //   ).show(context);
+                                      // }
                                     },
                                   );
                           } else {

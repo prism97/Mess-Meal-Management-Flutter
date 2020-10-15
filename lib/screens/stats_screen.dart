@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
+import 'package:provider/provider.dart';
 
 class StatsScreen extends StatefulWidget {
   static const String id = 'stats_screen';
@@ -14,17 +15,19 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   bool _loading = true;
-  int breakfast = 0;
-  int lunch = 0;
-  int dinner = 0;
-  double totalMealAmount = 0.0;
+  List<Map<String, dynamic>> records;
+  FirestoreDatabase db;
 
-  Future<void> fetchUserData() async {}
+  Future<void> fetchMealRecords() async {
+    records = await db.getMealRecords();
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchUserData().whenComplete(() {
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
+    fetchMealRecords().whenComplete(() {
+      print(records);
       setState(() {
         _loading = false;
       });
@@ -45,40 +48,69 @@ class _StatsScreenState extends State<StatsScreen> {
               )
             : Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    Card(
-                      elevation: kElevation,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(kBorderRadius),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: records.length,
+                  itemBuilder: (context, index) {
+                    Map<String, dynamic> record = records[index];
+                    return Card(
+                      child: InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Manager : ${record['managerName']}',
+                                style: Theme.of(context).textTheme.bodyText1,
+                              ),
+                              Text(
+                                '${record['startDate'].toString().substring(0, 10)} to ${record['endDate'].toString().substring(0, 10)}',
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                              Divider(),
+                              ListTile(
+                                title: Text('Breakfast'),
+                                trailing: Text(
+                                  record['breakfastCount'].toString(),
+                                ),
+                              ),
+                              ListTile(
+                                title: Text('Lunch'),
+                                trailing: Text(
+                                  record['lunchCount'].toString(),
+                                ),
+                              ),
+                              ListTile(
+                                title: Text('Dinner'),
+                                trailing: Text(
+                                  record['dinnerCount'].toString(),
+                                ),
+                              ),
+                              ListTile(
+                                title: Text('Meal Cost'),
+                                trailing: Text(
+                                  record['mealCost'].toString(),
+                                ),
+                              ),
+                              ListTile(
+                                title: Text('Fixed Cost'),
+                                trailing: Text(
+                                  record['fixedCost'].toString(),
+                                ),
+                              ),
+                              ListTile(
+                                title: Text('Total Cost'),
+                                trailing: Text(
+                                  record['totalCost'].toString(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: Column(
-                        children: <Widget>[
-                          Text('Last 30 days'),
-                          ListTile(
-                            title: Text('Breakfasts taken'),
-                            trailing: Text(breakfast.toString()),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('Lunches taken'),
-                            trailing: Text(lunch.toString()),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('Dinners taken'),
-                            trailing: Text(dinner.toString()),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('Total meal amount'),
-                            trailing: Text(totalMealAmount.toString()),
-                          ),
-                          Divider(),
-                        ],
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
       ),

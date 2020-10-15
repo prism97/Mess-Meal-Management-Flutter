@@ -22,14 +22,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loading = false;
+  FirestoreDatabase db;
+  AuthProvider auth;
 
 // text field states
   String _name = '';
 
   @override
+  void initState() {
+    super.initState();
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
+    auth = Provider.of<AuthProvider>(context, listen: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final db = Provider.of<FirestoreDatabase>(context, listen: false);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
     final _email = auth.email;
 
     return Scaffold(

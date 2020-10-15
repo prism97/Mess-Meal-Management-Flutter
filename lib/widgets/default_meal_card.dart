@@ -33,8 +33,6 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
     });
   }
 
-  // TODO: handle what to do after default meal update
-
   @override
   Widget build(BuildContext context) {
     return loading
@@ -106,11 +104,16 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                   ? Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: SpinKitThreeBounce(
-                        color: Colors.white,
+                        color: primaryColorDark,
                         size: 25.0,
                       ),
                     )
                   : RaisedButton(
+                      textColor: Colors.white,
+                      color: accentColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(kBorderRadius),
+                      ),
                       child: Text('Save'),
                       onPressed: () async {
                         Meal newMeal = Meal(
@@ -139,7 +142,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                           });
                         }
                       },
-                    )
+                    ),
             ],
           );
   }

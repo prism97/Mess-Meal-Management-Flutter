@@ -11,12 +11,6 @@ class FirestoreService {
   FirestoreService._();
   static final instance = FirestoreService._();
 
-  Future<bool> documentExists({@required String path}) async {
-    final reference = FirebaseFirestore.instance.doc(path);
-    final document = await reference.get();
-    return document.exists;
-  }
-
   Future<DocumentSnapshot> getDocument({@required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     return reference.get();
@@ -46,20 +40,6 @@ class FirestoreService {
     print('$path: $data');
     await reference.set(data, SetOptions(merge: merge));
   }
-
-  // Future<void> bulkSet({
-  //   @required String path,
-  //   @required List<Map<String, dynamic>> datas,
-  //   bool merge = false,
-  // }) async {
-  //   final reference = Firestore.instance.document(path);
-  //   final batchSet = Firestore.instance.batch();
-
-  //  for()
-  //  batchSet.
-
-  //   print('$path: $datas');
-  // }
 
   Future<void> deleteData({@required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);

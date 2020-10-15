@@ -7,6 +7,7 @@ This class work together with FirestoreService and FirestoreDatabase.
 class FirestorePath {
   static String counts() => 'system/counts';
   static String currentManager() => 'system/currentManager';
+  static String others() => 'system/others';
   static String users() => 'users';
   static String user(String uid) => 'users/$uid';
   static String meal(String uid, String mealId) => 'users/$uid/meals/$mealId';

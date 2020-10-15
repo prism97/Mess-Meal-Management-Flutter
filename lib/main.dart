@@ -65,3 +65,8 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// TODO : add teacher's id
+// TODO : complete egg calc
+// TODO : add guest meal
+// TODO : pdf generation

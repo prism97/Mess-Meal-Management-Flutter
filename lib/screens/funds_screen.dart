@@ -4,6 +4,7 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/add_fund_card.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
+import 'package:mess_meal/widgets/fixed_cost_card.dart';
 import 'package:mess_meal/widgets/fund_list.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ class FundsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            FixedCostCard(),
             StreamBuilder<int>(
               stream: Provider.of<FirestoreDatabase>(context, listen: false)
                   .totalFundStream(),

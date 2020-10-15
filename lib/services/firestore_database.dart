@@ -45,7 +45,20 @@ class FirestoreDatabase {
     );
 
     if (user.isManager()) {
-      _setCurrentManager(user);
+      // create new document in managers collection
+      String managerId = await _firestoreService.createDocument(
+        collectionPath: FirestorePath.managers(),
+        data: {
+          'uid': user.uid,
+          'name': user.name,
+        },
+      );
+      // update current manager document
+      await _setCurrentManager(
+        uid: user.uid,
+        name: user.name,
+        managerId: managerId,
+      );
     }
   }
 
@@ -69,12 +82,6 @@ class FirestoreDatabase {
         path: FirestorePath.currentManager(),
         builder: (data, documentId) => data,
       );
-
-  Future<DateTime> _getCurrentManagerStartDate() async {
-    final data =
-        await _firestoreService.getData(path: FirestorePath.currentManager());
-    return data['startDate'];
-  }
 
   Future<int> updateManagerSerials() async {
     int userCount = await _getUserCount();
@@ -102,7 +109,7 @@ class FirestoreDatabase {
     return 5; // new user will always start at serial 5
   }
 
-  _setCurrentManager(Member user) async {
+  _setCurrentManager({String uid, String name, String managerId}) async {
     DateTime startDate = DateTime.now();
     if (startDate.hour > 7) {
       startDate = startDate.add(Duration(days: 1));
@@ -111,8 +118,9 @@ class FirestoreDatabase {
     await _firestoreService.setData(
       path: FirestorePath.currentManager(),
       data: {
-        'uid': user.uid,
-        'name': user.name,
+        'managerId': managerId,
+        'uid': uid,
+        'name': name,
         'cost': 0,
         'startDate': startDate.toIso8601String(),
       },
@@ -160,48 +168,27 @@ class FirestoreDatabase {
 
   Future<void> updateDefaultMeal(Meal oldMeal, Meal newMeal) async {
     await _setDefaultMeal(newMeal);
-    DateTime updateStartDate, updateEndDate = newMeal.date;
-    DateTime oldMealStartDate = oldMeal.date;
-    DateTime currentManagerStartDate = await _getCurrentManagerStartDate();
-    if (oldMealStartDate.isBefore(currentManagerStartDate)) {
-      updateStartDate = currentManagerStartDate;
-    } else {
-      if (oldMealStartDate.hour < 7) {
-        updateStartDate = oldMealStartDate;
-      } else {
-        updateStartDate = oldMealStartDate.add(Duration(days: 1));
-      }
-    }
 
-    if (updateEndDate.hour < 7) {
-      updateEndDate = newMeal.date.subtract(Duration(days: 1));
-    }
+    /*  if default meal is updated after 7am, 
+        set today's meal with old meal
+        (in case today's meal doesn't exist yet)
+    */
+    DateTime now = DateTime.now();
+    if (now.hour > 6) {
+      DateTime today = DateTime(now.year, now.month, now.day);
 
-    updateStartDate = DateTime(
-        updateStartDate.year, updateStartDate.month, updateStartDate.day);
-    updateEndDate =
-        DateTime(updateEndDate.year, updateEndDate.month, updateEndDate.day);
-
-    DocumentSnapshot document;
-
-    while (true) {
-      if (updateStartDate.isAtSameMomentAs(updateEndDate)) break;
-      document = await _firestoreService.getDocument(
-        path: FirestorePath.meal(uid, updateStartDate.toIso8601String()),
-      );
-
+      DocumentSnapshot document = await _firestoreService.getDocument(
+          path: FirestorePath.meal(uid, today.toIso8601String()));
       if (!document.exists) {
         setMeal(
           Meal(
             breakfast: oldMeal.breakfast,
             lunch: oldMeal.lunch,
             dinner: oldMeal.dinner,
-            date: updateStartDate,
+            date: today,
           ),
         );
       }
-
-      updateStartDate = updateStartDate.add(Duration(days: 1));
     }
   }
 
@@ -264,39 +251,31 @@ class FirestoreDatabase {
             Meal.fromMap(data, date: DateTime.parse(documentId)),
       );
 
+  // retrieve fixed cost
+  Future<double> getFixedCost() async {
+    final data = await _firestoreService.getData(path: FirestorePath.others());
+    return double.parse(data['fixedCost'].toString());
+  }
+
   // update manager
   Future<void> updateManager() async {
     Map<String, dynamic> currentManager = await _getCurrentManager();
-    DateTime startDate = currentManager['startDate'];
+
+    String oldManagerId = currentManager['managerId'];
+    DateTime startDate = DateTime.parse(currentManager['startDate']);
     DateTime endDate = DateTime.now();
     if (endDate.hour < 7) {
       endDate = endDate.subtract(Duration(days: 1));
     }
     endDate = DateTime(endDate.year, endDate.month, endDate.day);
 
-    // create new document in managers collection
-    String managerId = await _firestoreService.createDocument(
-      collectionPath: FirestorePath.managers(),
-      data: {
-        'uid': currentManager['uid'],
-        'name': currentManager['name'],
-        'startDate': startDate,
-        'endDate': endDate,
-        'totalCost': currentManager['cost'],
-      },
-    );
-
-    Meal defaultMeal;
     DateTime tempDate;
-
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
     DocumentSnapshot document;
     // fetch meal amounts for the duration
     while (true) {
-      if (tempDate.isAtSameMomentAs(endDate)) break;
-
       document = await _firestoreService.getDocument(
         path: FirestorePath.mealAmount(
           tempDate.toIso8601String(),
@@ -308,6 +287,7 @@ class FirestoreDatabase {
       } else {
         mealAmounts[tempDate] = MealAmount.fromDefault();
       }
+      if (tempDate.isAtSameMomentAs(endDate)) break;
       tempDate = tempDate.add(Duration(days: 1));
     }
 
@@ -322,10 +302,24 @@ class FirestoreDatabase {
     int breakfastCount, lunchCount, dinnerCount;
 
     Member user;
+    String newManagerId;
     for (user in users) {
-      // update current manager doc in system
+      // this user will be the new manager
       if (user.managerSerial == 2) {
-        await _setCurrentManager(user);
+        // create new document in managers collection
+        newManagerId = await _firestoreService.createDocument(
+          collectionPath: FirestorePath.managers(),
+          data: {
+            'uid': user.uid,
+            'name': user.name,
+          },
+        );
+        // update current manager document
+        await _setCurrentManager(
+          uid: user.uid,
+          name: user.name,
+          managerId: newManagerId,
+        );
       }
 
       // update user's manager serial
@@ -344,7 +338,6 @@ class FirestoreDatabase {
         );
       }
 
-      defaultMeal = user.defaultMeal;
       tempDate = startDate;
       userMealAmount = 0;
       breakfastCount = 0;
@@ -352,64 +345,62 @@ class FirestoreDatabase {
       dinnerCount = 0;
 
       while (true) {
-        if (tempDate.isAtSameMomentAs(endDate)) break;
         document = await _firestoreService.getDocument(
           path: FirestorePath.meal(user.uid, tempDate.toIso8601String()),
         );
 
         if (document.exists) {
           meal = Meal.fromMap(Map<String, bool>.from(document.data()));
-        } else {
-          _setMealOfUser(
-            Meal(
-              breakfast: defaultMeal.breakfast,
-              lunch: defaultMeal.lunch,
-              dinner: defaultMeal.dinner,
-              date: tempDate,
-            ),
-            user.uid,
-          );
-          meal = defaultMeal;
+          mealAmount = mealAmounts[tempDate];
+          if (meal.breakfast) {
+            userMealAmount += mealAmount.breakfast;
+            breakfastCount++;
+          }
+          if (meal.lunch) {
+            userMealAmount += mealAmount.lunch;
+            lunchCount++;
+          }
+          if (meal.dinner) {
+            userMealAmount += mealAmount.dinner;
+            dinnerCount++;
+          }
         }
-
-        mealAmount = mealAmounts[tempDate];
-        if (meal.breakfast) {
-          userMealAmount += mealAmount.breakfast;
-          breakfastCount++;
-        }
-        if (meal.lunch) {
-          userMealAmount += mealAmount.lunch;
-          lunchCount++;
-        }
-        if (meal.dinner) {
-          userMealAmount += mealAmount.dinner;
-          dinnerCount++;
-        }
-
+        if (tempDate.isAtSameMomentAs(endDate)) break;
         tempDate = tempDate.add(Duration(days: 1));
       }
 
       await _firestoreService.setData(
-        path: FirestorePath.mealRecord(managerId, user.uid),
+        path: FirestorePath.mealRecord(oldManagerId, user.uid),
         data: {
           'mealAmount': userMealAmount,
           'breakfastCount': breakfastCount,
           'lunchCount': lunchCount,
           'dinnerCount': dinnerCount,
         },
+        merge: true,
       );
 
       totalMealAmount += userMealAmount;
     }
 
     await _firestoreService.setData(
-      path: FirestorePath.manager(managerId),
+      path: FirestorePath.manager(oldManagerId),
       data: {
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+        'totalCost': currentManager['cost'],
         'totalMealAmount': totalMealAmount,
         'perMealCost': currentManager['cost'] / totalMealAmount,
       },
       merge: true,
     );
+
+    for (user in users) {
+      _firestoreService.setData(
+        path: FirestorePath.mealRecord(newManagerId, user.uid),
+        data: {'eggCount': 0},
+      );
+    }
   }
 
   Future<void> addFund(Fund fund) async {
@@ -460,16 +451,19 @@ class FirestoreDatabase {
       if (document.exists) {
         meal = Meal.fromMap(Map<String, bool>.from(document.data()));
       } else {
-        _setMealOfUser(
-          Meal(
-            breakfast: defaultMeal.breakfast,
-            lunch: defaultMeal.lunch,
-            dinner: defaultMeal.dinner,
-            date: _date,
-          ),
-          user.uid,
-        );
         meal = defaultMeal;
+        // set only after 7 am
+        if (DateTime.now().hour > 6) {
+          _setMealOfUser(
+            Meal(
+              breakfast: defaultMeal.breakfast,
+              lunch: defaultMeal.lunch,
+              dinner: defaultMeal.dinner,
+              date: _date,
+            ),
+            user.uid,
+          );
+        }
       }
       if (meal.breakfast) mealSubscribers['breakfast'].add(user);
       if (meal.lunch) mealSubscribers['lunch'].add(user);
@@ -479,5 +473,50 @@ class FirestoreDatabase {
     return mealSubscribers;
   }
 
-  //TODO: fetch user mealRecords from managers collection
+  Future<List<Map<String, dynamic>>> getMealRecords() async {
+    List<Map<String, dynamic>> managers = [], records = [];
+    int userCount = await _getUserCount();
+    double fixedCost = await getFixedCost();
+    double perUserFixedCost = fixedCost / userCount;
+
+    await _firestoreService.listDocuments(
+      path: FirestorePath.managers(),
+      builder: (data, documentId) {
+        Map<String, dynamic> manager = {
+          'managerId': documentId,
+          'managerName': data['name'],
+          'startDate': data['startDate'],
+          'endDate': data['endDate'],
+          'perMealCost': data['perMealCost'],
+        };
+        managers.add(manager);
+      },
+    );
+    for (var manager in managers) {
+      Map<String, dynamic> mealData = await _firestoreService.getData(
+        path: FirestorePath.mealRecord(manager['managerId'], uid),
+      );
+      if (mealData.containsKey('mealAmount')) {
+        Map<String, dynamic> record = Map.from(manager);
+        record['mealAmount'] = mealData['mealAmount'];
+        record['breakfastCount'] = mealData['breakfastCount'];
+        record['lunchCount'] = mealData['lunchCount'];
+        record['dinnerCount'] = mealData['dinnerCount'];
+        record['mealCost'] = record['perMealCost'] * mealData['mealAmount'];
+        record['fixedCost'] = perUserFixedCost;
+        record['totalCost'] = record['mealCost'] + perUserFixedCost;
+        records.add(record);
+      }
+    }
+    return records;
+  }
+
+  Future<void> updateFixedCost(double newFixedCost) =>
+      _firestoreService.setData(
+        path: FirestorePath.others(),
+        data: {
+          'fixedCost': newFixedCost,
+        },
+        merge: true,
+      );
 }

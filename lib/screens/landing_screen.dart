@@ -14,7 +14,7 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<AuthStatus>(
-      stream: Provider.of<AuthProvider>(context, listen: false).status,
+      stream: Provider.of<AuthProvider>(context).status,
       builder: (context, snapshot) {
         var status = snapshot.data;
 
