@@ -66,7 +66,8 @@ class NavDrawer extends StatelessWidget {
                     title: 'Check Meal',
                     icon: FontAwesomeIcons.calendarCheck,
                     onTap: () {
-                      Navigator.pushNamed(context, MealCheckScreen.id);
+                      Navigator.pushReplacementNamed(
+                          context, MealCheckScreen.id);
                     },
                     selected: currentRoute == MealCheckScreen.id,
                   ),
@@ -75,7 +76,8 @@ class NavDrawer extends StatelessWidget {
                           title: 'Today\'s Meal',
                           icon: FontAwesomeIcons.clipboardList,
                           onTap: () {
-                            Navigator.pushNamed(context, MealListScreen.id);
+                            Navigator.pushReplacementNamed(
+                                context, MealListScreen.id);
                           },
                           selected: currentRoute == MealListScreen.id,
                         )
@@ -84,7 +86,7 @@ class NavDrawer extends StatelessWidget {
                     title: 'Manager',
                     icon: FontAwesomeIcons.userTie,
                     onTap: () {
-                      Navigator.pushNamed(context, ManagerScreen.id);
+                      Navigator.pushReplacementNamed(context, ManagerScreen.id);
                     },
                     selected: currentRoute == ManagerScreen.id,
                   ),
@@ -93,7 +95,8 @@ class NavDrawer extends StatelessWidget {
                           title: 'Funds',
                           icon: FontAwesomeIcons.dollarSign,
                           onTap: () {
-                            Navigator.pushNamed(context, FundsScreen.id);
+                            Navigator.pushReplacementNamed(
+                                context, FundsScreen.id);
                           },
                         )
                       : Container(),
@@ -101,7 +104,7 @@ class NavDrawer extends StatelessWidget {
                     title: 'Stats',
                     icon: FontAwesomeIcons.chartBar,
                     onTap: () {
-                      Navigator.pushNamed(context, StatsScreen.id);
+                      Navigator.pushReplacementNamed(context, StatsScreen.id);
                     },
                     selected: currentRoute == StatsScreen.id,
                   ),

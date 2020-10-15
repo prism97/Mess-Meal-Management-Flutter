@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/services/database.dart';
+import 'package:mess_meal/models/member.dart';
+import 'package:mess_meal/providers/auth_provider.dart';
+import 'package:mess_meal/services/firestore_database.dart';
+import 'package:provider/provider.dart';
 
 class ManagerCostCard extends StatefulWidget {
   @override
@@ -10,32 +13,24 @@ class ManagerCostCard extends StatefulWidget {
 }
 
 class _ManagerCostCardState extends State<ManagerCostCard> {
-  bool _manager = false;
   bool _costUpdating = false;
-  int _cost = 0;
   int _addedCost = 0;
   final _formKey = GlobalKey<FormState>();
-
-  Future<void> checkManager() async {
-    if (DatabaseService.isManager) {
-      _manager = true;
-      final result = await DatabaseService.getManagerData();
-      _cost = int.parse(result['cost']);
-    }
-  }
+  FirestoreDatabase db;
 
   @override
   void initState() {
     super.initState();
-    checkManager().whenComplete(() {
-      setState(() {});
-    });
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _manager
-        ? Card(
+    return StreamBuilder<Member>(
+      stream: Provider.of<AuthProvider>(context).user,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data.isManager()) {
+          return Card(
             color: primaryColorLight,
             elevation: kElevation,
             margin: EdgeInsets.all(kBorderRadius),
@@ -56,17 +51,6 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                   Divider(
                     color: Colors.white,
                   ),
-                  ListTile(
-                    title: Text(
-                      'Cost until now',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: Text(
-                      _cost.toString(),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  Divider(),
                   Form(
                     key: _formKey,
                     child: Row(
@@ -79,6 +63,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                               color: Colors.white,
                             ),
                             decoration: InputDecoration(
+                              isDense: true,
                               hintText: 'new cost',
                             ),
                             validator: (val) => int.parse(val) > 0
@@ -96,40 +81,40 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                         ),
                         Expanded(
                           flex: 1,
-                          child: RaisedButton(
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius),
-                            ),
-                            child: _costUpdating
-                                ? SpinKitFadingCircle(
-                                    color: primaryColorDark,
-                                    size: 40.0,
-                                  )
-                                : Text(
+                          child: _costUpdating
+                              ? SpinKitFadingCircle(
+                                  color: Colors.white,
+                                  size: 40.0,
+                                )
+                              : RaisedButton(
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(kBorderRadius),
+                                  ),
+                                  child: Text(
                                     'Add',
                                     style: Theme.of(context)
                                         .textTheme
                                         .button
                                         .copyWith(color: accentColor),
                                   ),
-                            onPressed: () async {
-                              final formState = _formKey.currentState;
-                              formState.save();
-                              if (formState.validate()) {
-                                setState(() {
-                                  _cost += _addedCost;
-                                  _costUpdating = true;
-                                });
-                                await DatabaseService.updateManagerCost(_cost);
-                                setState(() {
-                                  _costUpdating = false;
-                                  formState.reset();
-                                });
-                              }
-                            },
-                          ),
+                                  onPressed: () async {
+                                    final formState = _formKey.currentState;
+                                    formState.save();
+                                    if (formState.validate()) {
+                                      setState(() {
+                                        _costUpdating = true;
+                                      });
+                                      await db
+                                          .updateCurrentManagerCost(_addedCost);
+                                      setState(() {
+                                        _costUpdating = false;
+                                        formState.reset();
+                                      });
+                                    }
+                                  },
+                                ),
                         ),
                       ],
                     ),
@@ -137,7 +122,11 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                 ],
               ),
             ),
-          )
-        : Container();
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
   }
 }

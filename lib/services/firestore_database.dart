@@ -82,24 +82,24 @@ class FirestoreDatabase {
       return userCount + 1;
     }
 
-    int newUserManagerSerial;
     final users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
       builder: (data, documentId) => Member.fromMap(data, documentId),
-      queryBuilder: (query) => query.where('manager_serial', isGreaterThan: 4),
+      queryBuilder: (query) => query.where('managerSerial', isGreaterThan: 4),
     );
 
-    users.forEach((user) {
-      _firestoreService.setData(
+    Member user;
+    for (user in users) {
+      await _firestoreService.setData(
         path: FirestorePath.user(user.uid),
         data: {
           'managerSerial': FieldValue.increment(1)
         }, //  user.managerSerial + 1
         merge: true,
       );
-    });
+    }
 
-    return newUserManagerSerial;
+    return 5; // new user will always start at serial 5
   }
 
   _setCurrentManager(Member user) async {
@@ -113,14 +113,23 @@ class FirestoreDatabase {
       data: {
         'uid': user.uid,
         'name': user.name,
-        'cost': 0.0,
+        'cost': 0,
         'startDate': startDate.toIso8601String(),
       },
     );
   }
 
-  Future<Map<String, dynamic>> _getCurrentManager() async =>
+  Future<Map<String, dynamic>> _getCurrentManager() =>
       _firestoreService.getData(path: FirestorePath.currentManager());
+
+  Future<void> updateCurrentManagerCost(int addedCost) =>
+      _firestoreService.setData(
+        path: FirestorePath.currentManager(),
+        data: {
+          'cost': FieldValue.increment(addedCost),
+        },
+        merge: true,
+      );
 
   // retrieve default meal of user
   Stream<Meal> defaultMealStream() => _firestoreService.documentStream(
@@ -224,8 +233,10 @@ class FirestoreDatabase {
   Future<Meal> _getMealOfUser(
           {@required DateTime date, @required String uid}) async =>
       Meal.fromMap(
-        await _firestoreService.getData(
-          path: FirestorePath.meal(uid, date.toIso8601String()),
+        Map<String, bool>.from(
+          await _firestoreService.getData(
+            path: FirestorePath.meal(uid, date.toIso8601String()),
+          ),
         ),
       );
 
@@ -318,7 +329,8 @@ class FirestoreDatabase {
     double totalMealAmount = 0, userMealAmount;
     int breakfastCount, lunchCount, dinnerCount;
 
-    users.forEach((user) async {
+    Member user;
+    for (user in users) {
       // update current manager doc in system
       if (user.managerSerial == 2) {
         await _setCurrentManager(user);
@@ -395,7 +407,7 @@ class FirestoreDatabase {
       );
 
       totalMealAmount += userMealAmount;
-    });
+    }
 
     await _firestoreService.setData(
       path: FirestorePath.manager(managerId),
@@ -426,4 +438,50 @@ class FirestoreDatabase {
         builder: (data, documentId) => Fund.fromMap(data),
         sort: (a, b) => b.date.difference(a.date).inSeconds,
       );
+
+  // list of users who subscribed for today's breakfast, lunch and dinner
+  Future<Map<String, List<Member>>> getMealSubscribers() async {
+    final today = DateTime.now();
+    final _date = DateTime(today.year, today.month, today.day);
+
+    List<Member> users = await _firestoreService.listDocuments(
+      path: FirestorePath.users(),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
+    );
+
+    Map<String, List<Member>> mealSubscribers = {
+      'breakfast': List<Member>(),
+      'lunch': List<Member>(),
+      'dinner': List<Member>(),
+    };
+
+    bool exists;
+    Meal meal, defaultMeal;
+    Member user;
+    for (user in users) {
+      defaultMeal = user.defaultMeal;
+      exists = await _firestoreService.documentExists(
+        path: FirestorePath.meal(user.uid, _date.toIso8601String()),
+      );
+      if (exists) {
+        meal = await _getMealOfUser(date: _date, uid: user.uid);
+      } else {
+        _setMealOfUser(
+          Meal(
+            breakfast: defaultMeal.breakfast,
+            lunch: defaultMeal.lunch,
+            dinner: defaultMeal.dinner,
+            date: _date,
+          ),
+          user.uid,
+        );
+        meal = defaultMeal;
+      }
+      if (meal.breakfast) mealSubscribers['breakfast'].add(user);
+      if (meal.lunch) mealSubscribers['lunch'].add(user);
+      if (meal.dinner) mealSubscribers['dinner'].add(user);
+    }
+
+    return mealSubscribers;
+  }
 }

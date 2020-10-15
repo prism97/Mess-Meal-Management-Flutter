@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
-import 'package:mess_meal/services/database.dart';
+import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
@@ -20,13 +21,14 @@ class MealListScreen extends StatefulWidget {
 }
 
 class _MealListScreenState extends State<MealListScreen> {
-  List<String> _breakfast;
-  List<String> _lunch;
-  List<String> _dinner;
+  List<Member> _breakfast;
+  List<Member> _lunch;
+  List<Member> _dinner;
   bool _loading = true;
 
+  FirestoreDatabase db;
   Future<void> fetchMealData() async {
-    final meals = await DatabaseService.mealTakersGrouped();
+    final meals = await db.getMealSubscribers();
 
     _breakfast = meals['breakfast'];
     _lunch = meals['lunch'];
@@ -37,6 +39,7 @@ class _MealListScreenState extends State<MealListScreen> {
   @override
   void initState() {
     super.initState();
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
     fetchMealData().whenComplete(() {
       setState(() {
         _loading = false;
@@ -92,7 +95,7 @@ class _MealListScreenState extends State<MealListScreen> {
 }
 
 class MealListCard extends StatelessWidget {
-  final List<String> users;
+  final List<Member> users;
   final String mealName;
 
   const MealListCard({@required this.users, @required this.mealName});
@@ -136,7 +139,7 @@ class MealListCard extends StatelessWidget {
                           horizontal: 16.0,
                         ),
                         child: Text(
-                          user,
+                          user.name,
                         ),
                       ),
                       Divider(),

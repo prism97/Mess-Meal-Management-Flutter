@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
-import 'package:mess_meal/services/database.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 
@@ -19,19 +18,8 @@ class _StatsScreenState extends State<StatsScreen> {
   int lunch = 0;
   int dinner = 0;
   double totalMealAmount = 0.0;
-  DatabaseService db;
 
-  Future<void> fetchUserData() async {
-    final String _uid = '1';
-    db = DatabaseService(uid: _uid);
-    final result = await db.mealAmountCalc();
-    if (result != null) {
-      breakfast = result['breakfast'];
-      lunch = result['lunch'];
-      dinner = result['dinner'];
-      totalMealAmount = result['total_meal_amount'];
-    }
-  }
+  Future<void> fetchUserData() async {}
 
   @override
   void initState() {
