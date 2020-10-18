@@ -122,6 +122,7 @@ class FirestoreDatabase {
         'uid': uid,
         'name': name,
         'cost': 0,
+        'totalEggCount': 0,
         'startDate': startDate.toIso8601String(),
       },
     );
@@ -383,6 +384,7 @@ class FirestoreDatabase {
       totalMealAmount += userMealAmount;
     }
 
+    double eggUnitPrice = await getEggUnitPrice();
     await _firestoreService.setData(
       path: FirestorePath.manager(oldManagerId),
       data: {
@@ -390,7 +392,9 @@ class FirestoreDatabase {
         'endDate': endDate.toIso8601String(),
         'totalCost': currentManager['cost'],
         'totalMealAmount': totalMealAmount,
-        'perMealCost': currentManager['cost'] / totalMealAmount,
+        'perMealCost': (currentManager['cost'] -
+                currentManager['totalEggCount'] * eggUnitPrice) /
+            totalMealAmount,
       },
       merge: true,
     );
@@ -477,6 +481,7 @@ class FirestoreDatabase {
     List<Map<String, dynamic>> managers = [], records = [];
     int userCount = await _getUserCount();
     double fixedCost = await getFixedCost();
+    double eggUnitPrice = await getEggUnitPrice();
     double perUserFixedCost = fixedCost / userCount;
 
     await _firestoreService.listDocuments(
@@ -502,9 +507,12 @@ class FirestoreDatabase {
         record['breakfastCount'] = mealData['breakfastCount'];
         record['lunchCount'] = mealData['lunchCount'];
         record['dinnerCount'] = mealData['dinnerCount'];
+        record['eggCount'] = mealData['eggCount'];
         record['mealCost'] = record['perMealCost'] * mealData['mealAmount'];
         record['fixedCost'] = perUserFixedCost;
-        record['totalCost'] = record['mealCost'] + perUserFixedCost;
+        record['totalCost'] = record['mealCost'] +
+            mealData['eggCount'] * eggUnitPrice +
+            perUserFixedCost;
         records.add(record);
       }
     }
@@ -519,4 +527,44 @@ class FirestoreDatabase {
         },
         merge: true,
       );
+
+  // retrieve unit price of eggs
+  Future<double> getEggUnitPrice() async {
+    final data = await _firestoreService.getData(path: FirestorePath.others());
+    return double.parse(data['eggUnitPrice'].toString());
+  }
+
+  Stream<double> eggUnitPriceStream() => _firestoreService.documentStream(
+        path: FirestorePath.others(),
+        builder: (data, documentId) =>
+            double.parse(data['eggUnitPrice'].toString()),
+      );
+
+  Future<void> updateEggUnitPrice(double newPrice) => _firestoreService.setData(
+        path: FirestorePath.others(),
+        data: {
+          'eggUnitPrice': newPrice,
+        },
+        merge: true,
+      );
+
+  Future<void> updateEggCountOfUser(String userId) async {
+    Map<String, dynamic> currentManager = await _getCurrentManager();
+    String managerId = currentManager['managerId'];
+
+    await _firestoreService.setData(
+      path: FirestorePath.mealRecord(managerId, userId),
+      data: {
+        'eggCount': FieldValue.increment(1),
+      },
+      merge: true,
+    );
+    return _firestoreService.setData(
+      path: FirestorePath.currentManager(),
+      data: {
+        'totalEggCount': FieldValue.increment(1),
+      },
+      merge: true,
+    );
+  }
 }

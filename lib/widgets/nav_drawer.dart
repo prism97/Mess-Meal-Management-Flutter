@@ -117,6 +117,7 @@ class NavDrawer extends StatelessWidget {
                         icon: FontAwesomeIcons.signOutAlt,
                         title: 'Log Out',
                         onTap: () {
+                          Navigator.of(context).pop();
                           auth.signOut();
                         },
                       ),

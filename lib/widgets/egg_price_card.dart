@@ -7,14 +7,14 @@ import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:provider/provider.dart';
 
-class ManagerCostCard extends StatefulWidget {
+class EggPriceCard extends StatefulWidget {
   @override
-  _ManagerCostCardState createState() => _ManagerCostCardState();
+  _EggPriceCardState createState() => _EggPriceCardState();
 }
 
-class _ManagerCostCardState extends State<ManagerCostCard> {
-  bool _costUpdating = false;
-  int _addedCost = 0;
+class _EggPriceCardState extends State<EggPriceCard> {
+  bool _priceUpdating = false;
+  double _newPrice = 0;
   final _formKey = GlobalKey<FormState>();
   FirestoreDatabase db;
 
@@ -24,7 +24,6 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
     db = Provider.of<FirestoreDatabase>(context, listen: false);
   }
 
-// TODO : change cost int to double
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Member>(
@@ -32,7 +31,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data.isManager()) {
           return Card(
-            color: primaryColorLight,
+            color: accentColor,
             elevation: kElevation,
             margin: EdgeInsets.all(kBorderRadius),
             shape: RoundedRectangleBorder(
@@ -45,9 +44,26 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    'Cost',
-                    style: Theme.of(context).textTheme.headline6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Egg Unit Price',
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                      StreamBuilder<double>(
+                        stream: db.eggUnitPriceStream(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              snapshot.data.toString(),
+                              style: TextStyle(color: Colors.white),
+                            );
+                          }
+                          return Container();
+                        },
+                      ),
+                    ],
                   ),
                   Divider(
                     color: Colors.white,
@@ -65,14 +81,14 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                             ),
                             decoration: InputDecoration(
                               isDense: true,
-                              hintText: 'new cost',
+                              hintText: 'new price',
                             ),
-                            validator: (val) => int.parse(val) > 0
+                            validator: (val) => double.parse(val) > 0
                                 ? null
-                                : 'Cost must be positive',
+                                : 'Price must be positive',
                             onChanged: (val) {
                               setState(() {
-                                _addedCost = int.parse(val);
+                                _newPrice = double.parse(val);
                               });
                             },
                           ),
@@ -82,7 +98,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                         ),
                         Expanded(
                           flex: 1,
-                          child: _costUpdating
+                          child: _priceUpdating
                               ? SpinKitFadingCircle(
                                   color: Colors.white,
                                   size: 40.0,
@@ -94,7 +110,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                                         BorderRadius.circular(kBorderRadius),
                                   ),
                                   child: Text(
-                                    'Add',
+                                    'Update',
                                     style: Theme.of(context)
                                         .textTheme
                                         .button
@@ -105,12 +121,11 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                                     formState.save();
                                     if (formState.validate()) {
                                       setState(() {
-                                        _costUpdating = true;
+                                        _priceUpdating = true;
                                       });
-                                      await db
-                                          .updateCurrentManagerCost(_addedCost);
+                                      await db.updateEggUnitPrice(_newPrice);
                                       setState(() {
-                                        _costUpdating = false;
+                                        _priceUpdating = false;
                                         formState.reset();
                                       });
                                     }

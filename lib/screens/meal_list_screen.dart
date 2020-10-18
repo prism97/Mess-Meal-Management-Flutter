@@ -21,6 +21,7 @@ class MealListScreen extends StatefulWidget {
 }
 
 class _MealListScreenState extends State<MealListScreen> {
+  static final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Member> _breakfast;
   List<Member> _lunch;
   List<Member> _dinner;
@@ -50,6 +51,7 @@ class _MealListScreenState extends State<MealListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: widget.isMessboy
           ? null
           : NavDrawer(
@@ -68,14 +70,17 @@ class _MealListScreenState extends State<MealListScreen> {
                       MealListCard(
                         mealName: 'Breakfast',
                         users: _breakfast,
+                        isMessboy: widget.isMessboy,
                       ),
                       MealListCard(
                         users: _lunch,
                         mealName: 'Lunch',
+                        isMessboy: widget.isMessboy,
                       ),
                       MealListCard(
                         users: _dinner,
                         mealName: 'Dinner',
+                        isMessboy: widget.isMessboy,
                       ),
                       widget.isMessboy
                           ? BasicWhiteButton(
@@ -94,11 +99,28 @@ class _MealListScreenState extends State<MealListScreen> {
   }
 }
 
-class MealListCard extends StatelessWidget {
+class MealListCard extends StatefulWidget {
   final List<Member> users;
   final String mealName;
+  final isMessboy;
 
-  const MealListCard({@required this.users, @required this.mealName});
+  const MealListCard(
+      {@required this.users,
+      @required this.mealName,
+      @required this.isMessboy});
+
+  @override
+  _MealListCardState createState() => _MealListCardState();
+}
+
+class _MealListCardState extends State<MealListCard> {
+  FirestoreDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    db = Provider.of<FirestoreDatabase>(context, listen: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,14 +133,14 @@ class MealListCard extends StatelessWidget {
         children: <Widget>[
           ListTile(
             title: Text(
-              mealName,
+              widget.mealName,
               style: Theme.of(context).textTheme.bodyText1,
             ),
             trailing: CircleAvatar(
               backgroundColor: primaryColorLight,
               foregroundColor: Colors.white,
               child: Text(
-                users.length.toString(),
+                widget.users.length.toString(),
               ),
             ),
           ),
@@ -128,19 +150,40 @@ class MealListCard extends StatelessWidget {
               'subscribers',
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            children: users
+            children: widget.users
                 .map(
                   (user) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
-                          horizontal: 16.0,
-                        ),
-                        child: Text(
+                      ListTile(
+                        title: Text(
                           user.name,
                         ),
+                        trailing: widget.isMessboy
+                            ? RaisedButton(
+                                color: primaryColorDark,
+                                textColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius),
+                                ),
+                                child: Text('Add egg'),
+                                onPressed: () {
+                                  String message;
+                                  db
+                                      .updateEggCountOfUser(user.uid)
+                                      .then((value) => message =
+                                          "Added one egg for ${user.name}")
+                                      .catchError((e) => message =
+                                          "Couldn't update egg count for ${user.name}")
+                                      .whenComplete(
+                                          () => showEggSnackBar(message));
+                                },
+                              )
+                            : Container(
+                                height: 1.0,
+                                width: 1.0,
+                              ),
                       ),
                       Divider(),
                     ],
@@ -151,5 +194,23 @@ class MealListCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void showEggSnackBar(String message) {
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: Theme.of(context).textTheme.bodyText1,
+      ),
+      backgroundColor: Theme.of(context).disabledColor,
+      elevation: kElevation,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(kBorderRadius),
+          topRight: Radius.circular(kBorderRadius),
+        ),
+      ),
+    );
+    _MealListScreenState._scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }
