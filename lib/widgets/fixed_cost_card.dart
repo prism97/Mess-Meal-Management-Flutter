@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/models/member.dart';
+import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:provider/provider.dart';
 
@@ -67,76 +69,92 @@ class _FixedCostCardState extends State<FixedCostCard> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  Divider(
-                    color: Colors.white,
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(
+                  StreamBuilder<Member>(
+                    stream:
+                        Provider.of<AuthProvider>(context, listen: false).user,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data.isConvener) {
+                        return Column(
+                          children: [
+                            Divider(
                               color: Colors.white,
                             ),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText: 'new cost',
+                            Form(
+                              key: _formKey,
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextFormField(
+                                      keyboardType: TextInputType.number,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        hintText: 'new cost',
+                                      ),
+                                      validator: (val) => double.parse(val) > 0
+                                          ? null
+                                          : 'Cost must be positive',
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _newFixedCost = double.parse(val);
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8.0,
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: _costUpdating
+                                        ? SpinKitFadingCircle(
+                                            color: Colors.white,
+                                            size: 40.0,
+                                          )
+                                        : RaisedButton(
+                                            color: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      kBorderRadius),
+                                            ),
+                                            child: Text(
+                                              'Update',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .button
+                                                  .copyWith(color: accentColor),
+                                            ),
+                                            onPressed: () async {
+                                              final formState =
+                                                  _formKey.currentState;
+                                              formState.save();
+                                              if (formState.validate()) {
+                                                setState(() {
+                                                  _costUpdating = true;
+                                                });
+                                                await db.updateFixedCost(
+                                                    _newFixedCost);
+                                                setState(() {
+                                                  _costUpdating = false;
+                                                  _fixedCost = _newFixedCost;
+                                                  formState.reset();
+                                                });
+                                              }
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            validator: (val) => double.parse(val) > 0
-                                ? null
-                                : 'Cost must be positive',
-                            onChanged: (val) {
-                              setState(() {
-                                _newFixedCost = double.parse(val);
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 8.0,
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: _costUpdating
-                              ? SpinKitFadingCircle(
-                                  color: Colors.white,
-                                  size: 40.0,
-                                )
-                              : RaisedButton(
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(kBorderRadius),
-                                  ),
-                                  child: Text(
-                                    'Update',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .button
-                                        .copyWith(color: accentColor),
-                                  ),
-                                  onPressed: () async {
-                                    final formState = _formKey.currentState;
-                                    formState.save();
-                                    if (formState.validate()) {
-                                      setState(() {
-                                        _costUpdating = true;
-                                      });
-                                      await db.updateFixedCost(_newFixedCost);
-                                      setState(() {
-                                        _costUpdating = false;
-                                        _fixedCost = _newFixedCost;
-                                        formState.reset();
-                                      });
-                                    }
-                                  },
-                                ),
-                        ),
-                      ],
-                    ),
+                          ],
+                        );
+                      }
+                      return Container();
+                    },
                   ),
                 ],
               ),

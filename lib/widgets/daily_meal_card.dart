@@ -7,6 +7,7 @@ import 'package:mess_meal/models/meal_amount.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
+import 'package:mess_meal/widgets/guest_meal_dialog.dart';
 import 'package:mess_meal/widgets/meal_amount_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -155,6 +156,26 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                 ],
                               ),
                             ),
+                          ),
+                          RaisedButton(
+                            child: Text(
+                              'Update guest meal',
+                            ),
+                            color: Theme.of(context).accentColor,
+                            textColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(kBorderRadius),
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => GuestMealDialog(
+                                  date: widget.date,
+                                  mealAmount: mealAmount,
+                                ),
+                              );
+                            },
                           ),
                           StreamBuilder<Member>(
                             stream: Provider.of<AuthProvider>(context,

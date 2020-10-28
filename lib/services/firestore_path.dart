@@ -11,6 +11,8 @@ class FirestorePath {
   static String users() => 'users';
   static String user(String uid) => 'users/$uid';
   static String meal(String uid, String mealId) => 'users/$uid/meals/$mealId';
+  static String guestMeal(String uid, String mealId) =>
+      'users/$uid/guestMeals/$mealId';
   static String meals(String uid) => 'users/$uid/meals';
   static String mealAmount(String date) => 'mealAmounts/$date';
   static String managers() => 'managers';

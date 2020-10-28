@@ -88,6 +88,12 @@ class _StatsScreenState extends State<StatsScreen> {
                                 ),
                               ),
                               ListTile(
+                                title: Text('Guest Meal'),
+                                trailing: Text(
+                                  record['guestMealCount'].toString(),
+                                ),
+                              ),
+                              ListTile(
                                 title: Text('Meal Cost'),
                                 trailing: Text(
                                   record['mealCost'].toString(),

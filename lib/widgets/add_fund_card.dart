@@ -31,7 +31,7 @@ class _AddFundCardState extends State<AddFundCard> {
     return StreamBuilder<Member>(
       stream: Provider.of<AuthProvider>(context, listen: false).user,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data.isConvener) {
           return Card(
             color: primaryColorLight,
             elevation: kElevation,
@@ -131,9 +131,8 @@ class _AddFundCardState extends State<AddFundCard> {
               ),
             ),
           );
-        } else {
-          return Container();
         }
+        return Container();
       },
     );
   }

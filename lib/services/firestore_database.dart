@@ -194,15 +194,28 @@ class FirestoreDatabase {
   }
 
   // create/update meal
-  Future<void> setMeal(Meal meal) async => await _firestoreService.setData(
+  Future<void> setMeal(Meal meal) => _firestoreService.setData(
         path: FirestorePath.meal(uid, meal.date.toIso8601String()),
         data: meal.toMap(),
         merge: true,
       );
 
+  // create/update guest meal
+  Future<void> setGuestMeal(Meal meal) => _firestoreService.setData(
+        path: FirestorePath.guestMeal(uid, meal.date.toIso8601String()),
+        data: meal.toMap(),
+        merge: true,
+      );
+
+  // retrieve guest meal document
+  Future<DocumentSnapshot> getGuestMeal(DateTime date) =>
+      _firestoreService.getDocument(
+        path: FirestorePath.guestMeal(uid, date.toIso8601String()),
+      );
+
   // create/update meal of any user
-  Future<void> _setMealOfUser(Meal meal, String userUid) async =>
-      await _firestoreService.setData(
+  Future<void> _setMealOfUser(Meal meal, String userUid) =>
+      _firestoreService.setData(
         path: FirestorePath.meal(userUid, meal.date.toIso8601String()),
         data: meal.toMap(),
         merge: true,
@@ -244,13 +257,6 @@ class FirestoreDatabase {
           date.toIso8601String(),
         ),
       )));
-
-  // retrieve all meals from the same user based on uid
-  Future<List<Meal>> mealList() => _firestoreService.listDocuments(
-        path: FirestorePath.meals(uid),
-        builder: (data, documentId) =>
-            Meal.fromMap(data, date: DateTime.parse(documentId)),
-      );
 
   // retrieve fixed cost
   Future<double> getFixedCost() async {
@@ -298,9 +304,9 @@ class FirestoreDatabase {
     );
 
     MealAmount mealAmount;
-    Meal meal;
+    Meal meal, guestMeal;
     double totalMealAmount = 0, userMealAmount;
-    int breakfastCount, lunchCount, dinnerCount;
+    int breakfastCount, lunchCount, dinnerCount, guestMealCount;
 
     Member user;
     String newManagerId;
@@ -344,15 +350,17 @@ class FirestoreDatabase {
       breakfastCount = 0;
       lunchCount = 0;
       dinnerCount = 0;
+      guestMealCount = 0;
 
       while (true) {
+        mealAmount = mealAmounts[tempDate];
         document = await _firestoreService.getDocument(
           path: FirestorePath.meal(user.uid, tempDate.toIso8601String()),
         );
 
         if (document.exists) {
           meal = Meal.fromMap(Map<String, bool>.from(document.data()));
-          mealAmount = mealAmounts[tempDate];
+
           if (meal.breakfast) {
             userMealAmount += mealAmount.breakfast;
             breakfastCount++;
@@ -366,6 +374,26 @@ class FirestoreDatabase {
             dinnerCount++;
           }
         }
+        // retrieve guest meal for this date & user
+        document = await _firestoreService.getDocument(
+          path: FirestorePath.guestMeal(user.uid, tempDate.toIso8601String()),
+        );
+        if (document.exists) {
+          guestMeal = Meal.fromMap(Map<String, bool>.from(document.data()));
+          if (guestMeal.breakfast) {
+            userMealAmount += mealAmount.breakfast * 1.5;
+            guestMealCount++;
+          }
+          if (guestMeal.lunch) {
+            userMealAmount += mealAmount.lunch * 1.5;
+            guestMealCount++;
+          }
+          if (guestMeal.dinner) {
+            userMealAmount += mealAmount.dinner * 1.5;
+            guestMealCount++;
+          }
+        }
+
         if (tempDate.isAtSameMomentAs(endDate)) break;
         tempDate = tempDate.add(Duration(days: 1));
       }
@@ -377,6 +405,7 @@ class FirestoreDatabase {
           'breakfastCount': breakfastCount,
           'lunchCount': lunchCount,
           'dinnerCount': dinnerCount,
+          'guestMealCount': guestMealCount,
         },
         merge: true,
       );
@@ -511,7 +540,7 @@ class FirestoreDatabase {
         record['mealCost'] = record['perMealCost'] * mealData['mealAmount'];
         record['fixedCost'] = perUserFixedCost;
         record['totalCost'] = record['mealCost'] +
-            mealData['eggCount'] * eggUnitPrice +
+            (mealData['eggCount'] ?? 0) * eggUnitPrice +
             perUserFixedCost;
         records.add(record);
       }

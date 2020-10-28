@@ -91,16 +91,13 @@ class NavDrawer extends StatelessWidget {
                     },
                     selected: currentRoute == ManagerScreen.id,
                   ),
-                  snapshot.hasData && snapshot.data.isConvener
-                      ? NavitemTile(
-                          title: 'Funds',
-                          icon: FontAwesomeIcons.dollarSign,
-                          onTap: () {
-                            Navigator.pushReplacementNamed(
-                                context, FundsScreen.id);
-                          },
-                        )
-                      : Container(),
+                  NavitemTile(
+                    title: 'Funds',
+                    icon: FontAwesomeIcons.dollarSign,
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, FundsScreen.id);
+                    },
+                  ),
                   NavitemTile(
                     title: 'Stats',
                     icon: FontAwesomeIcons.chartBar,
