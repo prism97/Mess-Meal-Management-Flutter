@@ -159,7 +159,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
                           ),
                           RaisedButton(
                             child: Text(
-                              'Update guest meal',
+                              'Guest Meal',
                             ),
                             color: Theme.of(context).accentColor,
                             textColor: Colors.white,
@@ -173,6 +173,11 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                 builder: (context) => GuestMealDialog(
                                   date: widget.date,
                                   mealAmount: mealAmount,
+                                  userMeal: Meal(
+                                    breakfast: breakfast,
+                                    lunch: lunch,
+                                    dinner: dinner,
+                                  ),
                                 ),
                               );
                             },

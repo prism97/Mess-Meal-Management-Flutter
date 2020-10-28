@@ -3,6 +3,7 @@ import 'package:mess_meal/widgets/current_manager_card.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/egg_price_card.dart';
 import 'package:mess_meal/widgets/manager_cost_card.dart';
+import 'package:mess_meal/widgets/manager_list_card.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 
 class ManagerScreen extends StatelessWidget {
@@ -23,6 +24,7 @@ class ManagerScreen extends StatelessWidget {
             ManagerCostCard(),
             EggPriceCard(),
             CurrentManagerCard(),
+            ManagerListCard(),
           ],
         ),
       ),

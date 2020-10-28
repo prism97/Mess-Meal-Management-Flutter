@@ -596,4 +596,11 @@ class FirestoreDatabase {
       merge: true,
     );
   }
+
+  // retrieve user list (names only) sorted by manager serial
+  Future<List<Member>> getManagerList() => _firestoreService.listDocuments(
+        path: FirestorePath.users(),
+        builder: (data, documentId) => Member.fromMap(data, documentId),
+        queryBuilder: (query) => query.orderBy('managerSerial').limit(5),
+      );
 }

@@ -45,7 +45,6 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     'Current Manager',

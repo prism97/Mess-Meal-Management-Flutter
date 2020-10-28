@@ -11,8 +11,12 @@ import 'package:provider/provider.dart';
 class GuestMealDialog extends StatefulWidget {
   final DateTime date;
   final MealAmount mealAmount;
+  final Meal userMeal;
 
-  const GuestMealDialog({@required this.date, @required this.mealAmount});
+  const GuestMealDialog(
+      {@required this.date,
+      @required this.mealAmount,
+      @required this.userMeal});
 
   @override
   _GuestMealDialogState createState() => _GuestMealDialogState();
@@ -22,6 +26,17 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
   bool _loading = true;
   bool _breakfast, _lunch, _dinner;
   FirestoreDatabase db;
+
+  bool _checkTimeConstraint() {
+    final lastUpdateTime = DateTime(
+      widget.date.year,
+      widget.date.month,
+      widget.date.day,
+      7,
+    );
+    if (DateTime.now().isAfter(lastUpdateTime)) return false;
+    return true;
+  }
 
   @override
   void initState() {
@@ -77,11 +92,15 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                             title: 'Breakfast',
                             mealAmount: widget.mealAmount.breakfast * 1.5,
                             value: _breakfast,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _breakfast = value;
-                              });
-                            },
+                            onChanged: _checkTimeConstraint()
+                                ? (bool value) {
+                                    if (value && widget.userMeal.breakfast) {
+                                      setState(() {
+                                        _breakfast = value;
+                                      });
+                                    }
+                                  }
+                                : null,
                           ),
                           SizedBox(
                             height: 10.0,
@@ -90,11 +109,15 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                             title: 'Lunch',
                             mealAmount: widget.mealAmount.lunch * 1.5,
                             value: _lunch,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _lunch = value;
-                              });
-                            },
+                            onChanged: _checkTimeConstraint()
+                                ? (bool value) {
+                                    if (value && widget.userMeal.lunch) {
+                                      setState(() {
+                                        _lunch = value;
+                                      });
+                                    }
+                                  }
+                                : null,
                           ),
                           SizedBox(
                             height: 10.0,
@@ -103,35 +126,41 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                             title: 'Dinner',
                             mealAmount: widget.mealAmount.dinner * 1.5,
                             value: _dinner,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _dinner = value;
-                              });
-                            },
+                            onChanged: _checkTimeConstraint()
+                                ? (bool value) {
+                                    if (value && widget.userMeal.dinner) {
+                                      setState(() {
+                                        _dinner = value;
+                                      });
+                                    }
+                                  }
+                                : null,
                           ),
                           SizedBox(
                             height: 5.0,
                           ),
-                          RaisedButton(
-                            color: Theme.of(context).accentColor,
-                            textColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius),
-                            ),
-                            child: Text('Save'),
-                            onPressed: () async {
-                              await db.setGuestMeal(
-                                Meal(
-                                  breakfast: _breakfast,
-                                  lunch: _lunch,
-                                  dinner: _dinner,
-                                  date: widget.date,
-                                ),
-                              );
-                              Navigator.pop(context);
-                            },
-                          ),
+                          _checkTimeConstraint()
+                              ? RaisedButton(
+                                  color: Theme.of(context).accentColor,
+                                  textColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(kBorderRadius),
+                                  ),
+                                  child: Text('Save'),
+                                  onPressed: () async {
+                                    await db.setGuestMeal(
+                                      Meal(
+                                        breakfast: _breakfast,
+                                        lunch: _lunch,
+                                        dinner: _dinner,
+                                        date: widget.date,
+                                      ),
+                                    );
+                                    Navigator.pop(context);
+                                  },
+                                )
+                              : Container(),
                         ],
                       ),
                     ),
