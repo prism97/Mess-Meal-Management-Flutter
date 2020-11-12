@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mess_meal/models/fund.dart';
+import 'package:mess_meal/models/manager_cost.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/meal_amount.dart';
 import 'package:mess_meal/models/member.dart';
@@ -131,13 +132,27 @@ class FirestoreDatabase {
   Future<Map<String, dynamic>> _getCurrentManager() =>
       _firestoreService.getData(path: FirestorePath.currentManager());
 
-  Future<void> updateCurrentManagerCost(int addedCost) =>
-      _firestoreService.setData(
-        path: FirestorePath.currentManager(),
-        data: {
-          'cost': FieldValue.increment(addedCost),
-        },
-        merge: true,
+  Future<void> updateCurrentManagerCost(ManagerCost cost) async {
+    await _firestoreService.setData(
+      path: FirestorePath.currentManager(),
+      data: {
+        'cost': FieldValue.increment(cost.amount),
+      },
+      merge: true,
+    );
+    Map<String, dynamic> currentManager = await _getCurrentManager();
+    String managerId = currentManager['managerId'];
+    return _firestoreService.createDocument(
+      collectionPath: FirestorePath.managerCost(managerId),
+      data: cost.toMap(),
+    );
+  }
+
+  Future<List<ManagerCost>> getManagerCostList(String managerId) =>
+      _firestoreService.listDocuments(
+        path: FirestorePath.managerCost(managerId),
+        builder: (data, documentId) => ManagerCost.fromMap(data),
+        sort: (a, b) => b.date.difference(a.date).inSeconds,
       );
 
   // retrieve default meal of user

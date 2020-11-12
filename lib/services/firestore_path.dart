@@ -17,6 +17,7 @@ class FirestorePath {
   static String mealAmount(String date) => 'mealAmounts/$date';
   static String managers() => 'managers';
   static String manager(String managerId) => 'managers/$managerId';
+  static String managerCost(String managerId) => 'managers/$managerId/costs';
   static String mealRecord(String managerId, String userId) =>
       'managers/$managerId/mealRecords/$userId';
   static String funds() => 'funds';

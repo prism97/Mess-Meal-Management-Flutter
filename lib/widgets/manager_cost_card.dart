@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/models/manager_cost.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
@@ -14,7 +15,8 @@ class ManagerCostCard extends StatefulWidget {
 
 class _ManagerCostCardState extends State<ManagerCostCard> {
   bool _costUpdating = false;
-  int _addedCost = 0;
+  int _amount;
+  String _description;
   final _formKey = GlobalKey<FormState>();
   FirestoreDatabase db;
 
@@ -46,7 +48,7 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Cost',
+                    'Add Cost',
                     style: Theme.of(context).textTheme.headline6,
                   ),
                   Divider(
@@ -54,69 +56,83 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                   ),
                   Form(
                     key: _formKey,
-                    child: Row(
+                    child: Column(
                       children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText: 'new cost',
-                            ),
-                            validator: (val) => int.parse(val) > 0
-                                ? null
-                                : 'Cost must be positive',
-                            onChanged: (val) {
-                              setState(() {
-                                _addedCost = int.parse(val);
-                              });
-                            },
+                        TextFormField(
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(
+                            color: Colors.white,
                           ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            hintText: 'amount',
+                          ),
+                          validator: (val) => int.parse(val) > 0
+                              ? null
+                              : 'Amount must be positive',
+                          onChanged: (val) {
+                            setState(() {
+                              _amount = int.parse(val);
+                            });
+                          },
                         ),
                         SizedBox(
-                          width: 8.0,
+                          height: 8.0,
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: _costUpdating
-                              ? SpinKitFadingCircle(
-                                  color: Colors.white,
-                                  size: 40.0,
-                                )
-                              : RaisedButton(
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(kBorderRadius),
-                                  ),
-                                  child: Text(
-                                    'Add',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .button
-                                        .copyWith(color: accentColor),
-                                  ),
-                                  onPressed: () async {
-                                    final formState = _formKey.currentState;
-                                    formState.save();
-                                    if (formState.validate()) {
-                                      setState(() {
-                                        _costUpdating = true;
-                                      });
-                                      await db
-                                          .updateCurrentManagerCost(_addedCost);
-                                      setState(() {
-                                        _costUpdating = false;
-                                        formState.reset();
-                                      });
-                                    }
-                                  },
+                        TextFormField(
+                          keyboardType: TextInputType.text,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            hintText: 'description',
+                          ),
+                          validator: (val) =>
+                              val.isEmpty ? 'Please add a description' : null,
+                          onChanged: (val) {
+                            setState(() {
+                              _description = val;
+                            });
+                          },
+                        ),
+                        _costUpdating
+                            ? SpinKitFadingCircle(
+                                color: Colors.white,
+                                size: 40.0,
+                              )
+                            : RaisedButton(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius),
                                 ),
-                        ),
+                                child: Text(
+                                  'Add',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .button
+                                      .copyWith(color: accentColor),
+                                ),
+                                onPressed: () async {
+                                  final formState = _formKey.currentState;
+                                  formState.save();
+                                  if (formState.validate()) {
+                                    setState(() {
+                                      _costUpdating = true;
+                                    });
+                                    await db.updateCurrentManagerCost(
+                                      ManagerCost(
+                                        amount: _amount,
+                                        description: _description,
+                                        date: DateTime.now(),
+                                      ),
+                                    );
+                                    setState(() {
+                                      _costUpdating = false;
+                                      formState.reset();
+                                    });
+                                  }
+                                },
+                              ),
                       ],
                     ),
                   ),

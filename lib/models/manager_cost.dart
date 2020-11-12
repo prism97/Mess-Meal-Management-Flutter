@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 
-class Fund {
-  int amount; // can be positive or negative
-  String convenerId;
-  String convenerName;
+class ManagerCost {
+  int amount;
   String description;
   DateTime date;
 
-  Fund({
+  ManagerCost({
     @required this.amount,
-    @required this.convenerId,
-    @required this.convenerName,
     @required this.description,
     @required this.date,
   });
 
-  factory Fund.fromMap(Map<String, dynamic> data) {
-    return Fund(
+  factory ManagerCost.fromMap(Map<String, dynamic> data) {
+    return ManagerCost(
       amount: data['amount'],
-      convenerId: data['convenerId'],
-      convenerName: data['convenerName'],
       description: data['description'],
       date: DateTime.parse(data['date']),
     );
@@ -28,8 +22,6 @@ class Fund {
   Map<String, dynamic> toMap() {
     return {
       'amount': this.amount,
-      'convenerId': this.convenerId,
-      'convenerName': this.convenerName,
       'description': this.description,
       'date': this.date.toIso8601String(),
     };

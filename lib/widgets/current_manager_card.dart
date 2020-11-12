@@ -5,6 +5,7 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
+import 'package:mess_meal/screens/manager_cost_screen.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:provider/provider.dart';
 
@@ -46,9 +47,34 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  Text(
-                    'Current Manager',
-                    style: Theme.of(context).textTheme.bodyText2,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Current Manager',
+                        style: Theme.of(context).textTheme.bodyText2,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ManagerCostScreen(
+                                managerId: snapshot.data['managerId'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "View Costs >>",
+                          style: TextStyle(
+                            color: accentColor,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Column(
                     children: <Widget>[
