@@ -68,6 +68,11 @@ class FirestoreDatabase {
     return data['users'];
   }
 
+  Future<int> _getMessboyCount() async {
+    final data = await _firestoreService.getData(path: FirestorePath.counts());
+    return data['messboys'];
+  }
+
   Future<int> getTotalFunds() async {
     final data = await _firestoreService.getData(path: FirestorePath.counts());
     return data['totalFunds'];
@@ -295,6 +300,11 @@ class FirestoreDatabase {
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
+    int userCount = await _getUserCount();
+    double fixedCost = await getFixedCost();
+    int messboyCount = await _getMessboyCount();
+    double messboyMealAmount = 0;
+
     DocumentSnapshot document;
     // fetch meal amounts for the duration
     while (true) {
@@ -309,6 +319,10 @@ class FirestoreDatabase {
       } else {
         mealAmounts[tempDate] = MealAmount.fromDefault();
       }
+      messboyMealAmount += mealAmounts[tempDate].breakfast * messboyCount;
+      messboyMealAmount += mealAmounts[tempDate].lunch * messboyCount;
+      messboyMealAmount += mealAmounts[tempDate].dinner * messboyCount;
+
       if (tempDate.isAtSameMomentAs(endDate)) break;
       tempDate = tempDate.add(Duration(days: 1));
     }
@@ -429,6 +443,12 @@ class FirestoreDatabase {
     }
 
     double eggUnitPrice = await getEggUnitPrice();
+    double perMealCost = (currentManager['cost'] -
+            currentManager['totalEggCount'] * eggUnitPrice) /
+        (totalMealAmount + messboyMealAmount);
+    double perUserFixedCost =
+        (fixedCost + perMealCost * messboyMealAmount) / userCount;
+
     await _firestoreService.setData(
       path: FirestorePath.manager(oldManagerId),
       data: {
@@ -436,9 +456,8 @@ class FirestoreDatabase {
         'endDate': endDate.toIso8601String(),
         'totalCost': currentManager['cost'],
         'totalMealAmount': totalMealAmount,
-        'perMealCost': (currentManager['cost'] -
-                currentManager['totalEggCount'] * eggUnitPrice) /
-            totalMealAmount,
+        'perMealCost': perMealCost,
+        'perUserFixedCost': perUserFixedCost,
       },
       merge: true,
     );
@@ -521,46 +540,69 @@ class FirestoreDatabase {
     return mealSubscribers;
   }
 
-  Future<List<Map<String, dynamic>>> getMealRecords() async {
-    List<Map<String, dynamic>> managers = [], records = [];
-    int userCount = await _getUserCount();
-    double fixedCost = await getFixedCost();
+  Future<Map<String, dynamic>> getMealRecord(
+      Map<String, dynamic> managerDocument,
+      {String userId}) async {
     double eggUnitPrice = await getEggUnitPrice();
-    double perUserFixedCost = fixedCost / userCount;
+    Map<String, dynamic> record = {};
 
-    await _firestoreService.listDocuments(
-      path: FirestorePath.managers(),
-      builder: (data, documentId) {
-        Map<String, dynamic> manager = {
-          'managerId': documentId,
-          'managerName': data['name'],
-          'startDate': data['startDate'],
-          'endDate': data['endDate'],
-          'perMealCost': data['perMealCost'],
-        };
-        managers.add(manager);
-      },
+    Map<String, dynamic> mealData = await _firestoreService.getData(
+      path:
+          FirestorePath.mealRecord(managerDocument['managerId'], userId ?? uid),
     );
-    for (var manager in managers) {
-      Map<String, dynamic> mealData = await _firestoreService.getData(
-        path: FirestorePath.mealRecord(manager['managerId'], uid),
-      );
-      if (mealData.containsKey('mealAmount')) {
-        Map<String, dynamic> record = Map.from(manager);
-        record['mealAmount'] = mealData['mealAmount'];
-        record['breakfastCount'] = mealData['breakfastCount'];
-        record['lunchCount'] = mealData['lunchCount'];
-        record['dinnerCount'] = mealData['dinnerCount'];
-        record['eggCount'] = mealData['eggCount'];
-        record['mealCost'] = record['perMealCost'] * mealData['mealAmount'];
-        record['fixedCost'] = perUserFixedCost;
-        record['totalCost'] = record['mealCost'] +
-            (mealData['eggCount'] ?? 0) * eggUnitPrice +
-            perUserFixedCost;
-        records.add(record);
-      }
+    if (mealData.containsKey('mealAmount')) {
+      record['mealAmount'] = mealData['mealAmount'];
+      record['breakfastCount'] = mealData['breakfastCount'];
+      record['lunchCount'] = mealData['lunchCount'];
+      record['dinnerCount'] = mealData['dinnerCount'];
+      record['guestMealCount'] = mealData['guestMealCount'];
+      record['eggCount'] = mealData['eggCount'];
+      record['mealCost'] =
+          managerDocument['perMealCost'] * mealData['mealAmount'];
+      record['fixedCost'] = managerDocument['perUserFixedCost'];
+      record['totalCost'] = record['mealCost'] +
+          (mealData['eggCount'] ?? 0) * eggUnitPrice +
+          (managerDocument['perUserFixedCost'] ??
+              0); // TODO : remove ?? 0 later
     }
-    return records;
+
+    return record;
+  }
+
+  Future<List<Map<String, dynamic>>> getManagerRecords() =>
+      _firestoreService.listDocuments(
+        path: FirestorePath.managers(),
+        builder: (data, documentId) {
+          data['managerId'] = documentId;
+          return data;
+        },
+        queryBuilder: (query) => query.where('startDate', isGreaterThan: ''),
+        sort: (a, b) => DateTime.parse(b['startDate'])
+            .difference(DateTime.parse(a['startDate']))
+            .inSeconds,
+      );
+
+  Future<List<Map<String, dynamic>>> calculateCost(
+      List<Map<String, dynamic>> managers) async {
+    List<Map<String, dynamic>> costList = [];
+    List<Member> users = await _firestoreService.listDocuments(
+      path: FirestorePath.users(),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
+    );
+    for (var user in users) {
+      double totalCost = 0;
+      for (var manager in managers) {
+        Map<String, dynamic> record =
+            await getMealRecord(manager, userId: user.uid);
+        totalCost += double.parse(record['totalCost']);
+      }
+      costList.add({
+        "teacherId": user.uid, // TODO: add teacher id
+        "name": user.name,
+        "totalCost": totalCost,
+      });
+    }
+    return costList;
   }
 
   Future<void> updateFixedCost(double newFixedCost) =>
