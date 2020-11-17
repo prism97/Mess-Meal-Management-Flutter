@@ -301,7 +301,9 @@ class FirestoreDatabase {
     tempDate = startDate;
 
     int userCount = await _getUserCount();
-    double fixedCost = await getFixedCost();
+    // system fixed cost is for one month, so divide by number of days
+    double fixedCost =
+        (await getFixedCost()) / endDate.difference(startDate).inDays;
     int messboyCount = await _getMessboyCount();
     double messboyMealAmount = 0;
 
@@ -458,6 +460,7 @@ class FirestoreDatabase {
         'totalMealAmount': totalMealAmount,
         'perMealCost': perMealCost,
         'perUserFixedCost': perUserFixedCost,
+        'eggUnitPrice': eggUnitPrice,
       },
       merge: true,
     );
@@ -543,7 +546,6 @@ class FirestoreDatabase {
   Future<Map<String, dynamic>> getMealRecord(
       Map<String, dynamic> managerDocument,
       {String userId}) async {
-    double eggUnitPrice = await getEggUnitPrice();
     Map<String, dynamic> record = {};
 
     Map<String, dynamic> mealData = await _firestoreService.getData(
@@ -561,7 +563,7 @@ class FirestoreDatabase {
           managerDocument['perMealCost'] * mealData['mealAmount'];
       record['fixedCost'] = managerDocument['perUserFixedCost'];
       record['totalCost'] = record['mealCost'] +
-          (mealData['eggCount'] ?? 0) * eggUnitPrice +
+          (mealData['eggCount'] ?? 0) * managerDocument['eggUnitPrice'] +
           (managerDocument['perUserFixedCost'] ??
               0); // TODO : remove ?? 0 later
     }
@@ -597,7 +599,7 @@ class FirestoreDatabase {
         totalCost += double.parse(record['totalCost']);
       }
       costList.add({
-        "teacherId": user.uid, // TODO: add teacher id
+        "teacherId": user.teacherId,
         "name": user.name,
         "totalCost": totalCost,
       });

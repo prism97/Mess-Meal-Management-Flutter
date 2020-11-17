@@ -5,6 +5,7 @@ class Member {
   final String uid;
   final String email;
   final String name;
+  final String teacherId;
   final int managerSerial;
   bool isConvener;
   bool isMessboy;
@@ -14,6 +15,7 @@ class Member {
     @required this.uid,
     @required this.email,
     @required this.name,
+    @required this.teacherId,
     @required this.managerSerial,
     this.isConvener = false,
     this.isMessboy = false,
@@ -29,6 +31,7 @@ class Member {
       uid: documentId,
       email: data['email'],
       name: data['name'],
+      teacherId: data['teacherId'],
       managerSerial: data['managerSerial'],
       isConvener: data['isConvener'],
       defaultMeal: Meal.fromMapWithDate(data['defaultMeal']),
@@ -39,6 +42,7 @@ class Member {
     return {
       'email': this.email,
       'name': this.name,
+      'teacherId': this.teacherId,
       'managerSerial': this.managerSerial,
       'isConvener': this.isConvener,
       'defaultMeal': this.defaultMeal.toMapWithDate(),

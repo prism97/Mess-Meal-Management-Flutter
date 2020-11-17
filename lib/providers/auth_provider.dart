@@ -44,6 +44,7 @@ class AuthProvider extends ChangeNotifier {
         uid: firebaseUser.uid,
         email: "messboy@gmail.com",
         name: "messboy",
+        teacherId: null,
         isMessboy: true,
         managerSerial: null,
         defaultMeal: null,
@@ -66,6 +67,7 @@ class AuthProvider extends ChangeNotifier {
       uid: userDocument.id,
       email: user['email'],
       name: user['name'],
+      teacherId: user['teacherId'],
       managerSerial: user['managerSerial'],
       isConvener: user['isConvener'],
       defaultMeal: Meal.fromMapWithDate(

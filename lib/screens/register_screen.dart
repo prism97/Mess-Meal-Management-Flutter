@@ -27,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // text field states
   String _name = '';
+  String _teacherId = '';
 
   @override
   void initState() {
@@ -72,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       decoration: InputDecoration(
                         prefixIcon: Icon(
-                          FontAwesomeIcons.solidEnvelope,
+                          FontAwesomeIcons.userCircle,
                           color: Theme.of(context).disabledColor,
                         ),
                         hintText: 'display name',
@@ -83,6 +84,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : null,
                       onChanged: (val) {
                         setState(() => _name = val);
+                      },
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    TextFormField(
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          FontAwesomeIcons.idCard,
+                          color: Theme.of(context).disabledColor,
+                        ),
+                        hintText: 'teacher id',
+                      ),
+                      keyboardType: TextInputType.name,
+                      validator: (val) =>
+                          val == null ? 'Enter your teacher ID' : null,
+                      onChanged: (val) {
+                        setState(() => _teacherId = val);
                       },
                     ),
                     SizedBox(
@@ -115,6 +137,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   uid: db.uid,
                                   email: _email,
                                   name: _name,
+                                  teacherId: _teacherId,
                                   managerSerial: managerSerial,
                                   defaultMeal: Meal(
                                     breakfast: true,

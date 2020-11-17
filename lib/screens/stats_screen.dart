@@ -7,6 +7,7 @@ import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
+import 'package:mess_meal/widgets/pdf_generator.dart';
 import 'package:provider/provider.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -47,9 +48,8 @@ class _StatsScreenState extends State<StatsScreen> {
       floatingActionButton: _canGeneratePDF
           ? FloatingActionButton(
               child: Icon(FontAwesomeIcons.filePdf),
-              onPressed: () {
-                // TODO : calculate and make pdf
-                db.calculateCost(selectedRecords);
+              onPressed: () async {
+                PdfGenerator.generate(await db.calculateCost(selectedRecords));
               },
             )
           : Container(),
