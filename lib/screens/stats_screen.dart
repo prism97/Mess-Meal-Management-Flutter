@@ -49,7 +49,9 @@ class _StatsScreenState extends State<StatsScreen> {
           ? FloatingActionButton(
               child: Icon(FontAwesomeIcons.filePdf),
               onPressed: () async {
-                PdfGenerator.generate(await db.calculateCost(selectedRecords));
+                final pdfData = await PdfGenerator.generate(
+                    await db.calculateCost(selectedRecords));
+                PdfGenerator.saveAsFile(context, pdfData);
               },
             )
           : Container(),
@@ -130,6 +132,12 @@ class _StatsScreenState extends State<StatsScreen> {
                                     builder: (context) => UserRecordScreen(
                                         managerDocument: record)),
                               );
+                            },
+                          ),
+                          BasicWhiteButton(
+                            text: "Recalculate stats",
+                            onPressed: () {
+                              db.recalculateManagerStats(record['managerId']);
                             },
                           ),
                         ],

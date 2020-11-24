@@ -28,13 +28,16 @@ dependencies:
   email_validator: ^1.0.4
   shared_preferences: ^0.5.6+1
   provider: 4.0.4
-  firebase_core: ^0.5.0
-  firebase_auth: ^0.18.0+1
-  cloud_firestore: ^0.14.0+2
+  firebase_core: ^0.5.2
+  firebase_auth: ^0.18.3
+  cloud_firestore: ^0.14.3
+  firebase_messaging: ^7.0.3
   flutter_spinkit: ^4.1.1+1
   intl: ^0.16.1
   easy_dialog: ^1.0.5
   pdf: ^1.11.2
+  open_file: ^3.0.3
+  path_provider: ^1.6.24
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +59,11 @@ flutter:
   # assets:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
+  assets:
+   - assets/OpenSans-Regular.ttf
+   - assets/OpenSans-Bold.ttf
+   - assets/OpenSans-Italic.ttf
+   - assets/OpenSans-BoldItalic.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

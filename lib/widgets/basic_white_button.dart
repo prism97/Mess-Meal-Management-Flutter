@@ -12,7 +12,7 @@ class BasicWhiteButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         vertical: 8.0,
-        horizontal: 80.0,
+        horizontal: 20.0,
       ),
       child: RaisedButton(
         color: Colors.white,

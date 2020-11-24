@@ -12,6 +12,7 @@ import 'package:mess_meal/screens/register_screen.dart';
 import 'package:mess_meal/screens/splash_screen.dart';
 import 'package:mess_meal/screens/stats_screen.dart';
 import 'package:mess_meal/services/firestore_database.dart';
+import 'package:mess_meal/services/push_notifications.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
@@ -22,11 +23,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<NavigatorState> navigatorKey =
+        GlobalKey(debugLabel: "Main Navigator");
+
     return FutureBuilder(
       future: Firebase.initializeApp(),
       builder: (context, snapshot) {
         // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
+          PushNotifications.init(navigatorKey);
           return MultiProvider(
             providers: [
               ChangeNotifierProvider.value(
@@ -38,6 +43,7 @@ class MyApp extends StatelessWidget {
               ),
             ],
             child: MaterialApp(
+              navigatorKey: navigatorKey,
               debugShowCheckedModeBanner: false,
               theme: themeData,
               routes: {
