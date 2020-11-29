@@ -21,7 +21,8 @@ class PdfGenerator {
     return data;
   }
 
-  static Future<Uint8List> generate(List<Map<String, dynamic>> rawData) async {
+  static Future<Uint8List> generate(List<Map<String, dynamic>> rawData,
+      List<Map<String, String>> managers) async {
     var myTheme = pw.ThemeData.withFont(
       base: pw.Font.ttf(await rootBundle.load("assets/OpenSans-Regular.ttf")),
       bold: pw.Font.ttf(await rootBundle.load("assets/OpenSans-Bold.ttf")),
@@ -32,14 +33,38 @@ class PdfGenerator {
 
     final pw.Document doc = pw.Document(theme: myTheme);
 
+    List<pw.Widget> textWidgets = [];
+    for (var entry in managers) {
+      textWidgets.add(
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text("Manager",
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text(entry['manager']),
+            pw.Text("Duration",
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.Text(entry['duration']),
+          ],
+        ),
+      );
+      textWidgets.add(
+        pw.Padding(
+          padding: pw.EdgeInsets.only(bottom: 20.0),
+        ),
+      );
+    }
+
     doc.addPage(
       pw.MultiPage(
         pageFormat:
             PdfPageFormat.letter.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         build: (pw.Context context) => <pw.Widget>[
-          // TODO : add more stuff
-          // TODO : make cost precision 2
+          ...textWidgets,
+          pw.Padding(
+            padding: pw.EdgeInsets.only(bottom: 20.0),
+          ),
           pw.Table.fromTextArray(
             context: context,
             data: transformData(rawData),

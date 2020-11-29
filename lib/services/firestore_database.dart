@@ -609,7 +609,7 @@ class FirestoreDatabase {
       costList.add({
         "teacherId": user.teacherId,
         "name": user.name,
-        "totalCost": totalCost,
+        "totalCost": double.parse((totalCost).toStringAsFixed(2)),
       });
     }
     return costList;

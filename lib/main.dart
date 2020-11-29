@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: navigator key is causing problem in navigation
     final GlobalKey<NavigatorState> navigatorKey =
         GlobalKey(debugLabel: "Main Navigator");
 
