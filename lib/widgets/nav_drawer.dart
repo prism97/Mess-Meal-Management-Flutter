@@ -4,6 +4,7 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/funds_screen.dart';
+import 'package:mess_meal/screens/landing_screen.dart';
 import 'package:mess_meal/screens/manager_screen.dart';
 import 'package:mess_meal/screens/meal_check_screen.dart';
 import 'package:mess_meal/screens/meal_list_screen.dart';
@@ -67,8 +68,9 @@ class NavDrawer extends StatelessWidget {
                     title: 'Check Meal',
                     icon: FontAwesomeIcons.calendarCheck,
                     onTap: () {
-                      Navigator.pushReplacementNamed(
-                          context, MealCheckScreen.id);
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(LandingScreen.id));
+                      Navigator.pushNamed(context, MealCheckScreen.id);
                     },
                     selected: currentRoute == MealCheckScreen.id,
                   ),
@@ -77,8 +79,9 @@ class NavDrawer extends StatelessWidget {
                           title: 'Today\'s Meal',
                           icon: FontAwesomeIcons.clipboardList,
                           onTap: () {
-                            Navigator.pushReplacementNamed(
-                                context, MealListScreen.id);
+                            Navigator.popUntil(
+                                context, ModalRoute.withName(LandingScreen.id));
+                            Navigator.pushNamed(context, MealListScreen.id);
                           },
                           selected: currentRoute == MealListScreen.id,
                         )
@@ -87,7 +90,9 @@ class NavDrawer extends StatelessWidget {
                     title: 'Manager',
                     icon: FontAwesomeIcons.userTie,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, ManagerScreen.id);
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(LandingScreen.id));
+                      Navigator.pushNamed(context, ManagerScreen.id);
                     },
                     selected: currentRoute == ManagerScreen.id,
                   ),
@@ -95,14 +100,18 @@ class NavDrawer extends StatelessWidget {
                     title: 'Funds',
                     icon: FontAwesomeIcons.dollarSign,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, FundsScreen.id);
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(LandingScreen.id));
+                      Navigator.pushNamed(context, FundsScreen.id);
                     },
                   ),
                   NavitemTile(
                     title: 'Stats',
                     icon: FontAwesomeIcons.chartBar,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, StatsScreen.id);
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(LandingScreen.id));
+                      Navigator.pushNamed(context, StatsScreen.id);
                     },
                     selected: currentRoute == StatsScreen.id,
                   ),
@@ -114,7 +123,8 @@ class NavDrawer extends StatelessWidget {
                         icon: FontAwesomeIcons.signOutAlt,
                         title: 'Log Out',
                         onTap: () {
-                          Navigator.of(context).pop();
+                          Navigator.popUntil(
+                              context, ModalRoute.withName(LandingScreen.id));
                           auth.signOut();
                         },
                       ),
