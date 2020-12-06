@@ -132,7 +132,6 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                           .copyWith(color: Colors.white),
                                     ),
                                     onPressed: () async {
-                                      // if (_workPeriod >= 14) {
                                       EasyDialog(
                                         height: 160,
                                         closeButton: false,
@@ -183,13 +182,6 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                           ),
                                         ],
                                       ).show(context);
-                                      // } else {
-                                      //   EasyDialog(
-                                      //     description: Text(
-                                      //       'Minimum work period of a manager is 14 days',
-                                      //     ),
-                                      //   ).show(context);
-                                      // }
                                     },
                                   );
                           } else {

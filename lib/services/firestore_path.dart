@@ -18,6 +18,8 @@ class FirestorePath {
   static String managers() => 'managers';
   static String manager(String managerId) => 'managers/$managerId';
   static String managerCost(String managerId) => 'managers/$managerId/costs';
+  static String mealRecords(String managerId) =>
+      'managers/$managerId/mealRecords';
   static String mealRecord(String managerId, String userId) =>
       'managers/$managerId/mealRecords/$userId';
   static String funds() => 'funds';

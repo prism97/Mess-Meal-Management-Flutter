@@ -81,122 +81,123 @@ class _StatsScreenState extends State<StatsScreen> {
               },
             )
           : Container(),
-      body: _loading
-          ? SpinKitFadingCircle(
-              color: accentColor,
-              size: 50.0,
-            )
-          : StreamBuilder<Member>(
-              stream: Provider.of<AuthProvider>(context, listen: false).user,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  _isConvener = snapshot.data.isConvener;
+      body: StreamBuilder<Member>(
+          stream: Provider.of<AuthProvider>(context, listen: false).user,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              _isConvener = snapshot.data.isConvener;
 
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListView.builder(
-                      physics: ScrollPhysics(),
-                      itemCount: records.length,
-                      itemBuilder: (context, index) {
-                        Map<String, dynamic> record = records[index];
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text(
-                                    'Manager : ${record['name']}',
-                                    style:
-                                        Theme.of(context).textTheme.bodyText1,
-                                  ),
-                                  subtitle: Text(
-                                    '${record['startDate'].toString().substring(0, 10)} to ${record['endDate'].toString().substring(0, 10)}',
-                                    style:
-                                        Theme.of(context).textTheme.bodyText2,
-                                  ),
-                                  trailing: _isConvener
-                                      ? IconButton(
-                                          color: primaryColorLight,
-                                          icon: Icon(record['selected']
-                                              ? FontAwesomeIcons
-                                                  .solidCheckCircle
-                                              : FontAwesomeIcons.checkCircle),
-                                          onPressed: () {
-                                            setState(() {
-                                              record['selected'] =
-                                                  !record['selected'];
-                                            });
+              return _loading
+                  ? SpinKitFadingCircle(
+                      color: accentColor,
+                      size: 50.0,
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListView.builder(
+                        physics: ScrollPhysics(),
+                        itemCount: records.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> record = records[index];
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      'Manager : ${record['name']}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText1,
+                                    ),
+                                    subtitle: Text(
+                                      '${record['startDate'].toString().substring(0, 10)} to ${record['endDate'].toString().substring(0, 10)}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    ),
+                                    trailing: _isConvener
+                                        ? IconButton(
+                                            color: primaryColorLight,
+                                            icon: Icon(record['selected']
+                                                ? FontAwesomeIcons
+                                                    .solidCheckCircle
+                                                : FontAwesomeIcons.checkCircle),
+                                            onPressed: () {
+                                              setState(() {
+                                                record['selected'] =
+                                                    !record['selected'];
+                                              });
 
-                                            if (record['selected']) {
-                                              selectedRecordIndices.add(index);
-                                            } else {
-                                              selectedRecordIndices
-                                                  .remove(index);
-                                            }
-                                            if (selectedRecordIndices.length >
-                                                0) {
-                                              setState(() {
-                                                _canGeneratePDF = true;
-                                              });
-                                            } else {
-                                              setState(() {
-                                                _canGeneratePDF = false;
-                                              });
-                                            }
-                                          },
-                                        )
-                                      : Container(
-                                          height: 0,
-                                          width: 0,
-                                        ),
-                                ),
-                                Divider(),
-                                ListTile(
-                                  title: Text('Total Cost'),
-                                  trailing: Text(
-                                    record['totalCost'].toString(),
+                                              if (record['selected']) {
+                                                selectedRecordIndices
+                                                    .add(index);
+                                              } else {
+                                                selectedRecordIndices
+                                                    .remove(index);
+                                              }
+                                              if (selectedRecordIndices.length >
+                                                  0) {
+                                                setState(() {
+                                                  _canGeneratePDF = true;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  _canGeneratePDF = false;
+                                                });
+                                              }
+                                            },
+                                          )
+                                        : Container(
+                                            height: 0,
+                                            width: 0,
+                                          ),
                                   ),
-                                  dense: true,
-                                ),
-                                ListTile(
-                                  title: Text('Total Meal Amount'),
-                                  trailing: Text(
-                                    record['totalMealAmount'].toString(),
+                                  Divider(),
+                                  ListTile(
+                                    title: Text('Total Cost'),
+                                    trailing: Text(
+                                      record['totalCost'].toString(),
+                                    ),
+                                    dense: true,
                                   ),
-                                  dense: true,
-                                ),
-                                BasicWhiteButton(
-                                  text: "View your data",
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              UserRecordScreen(
-                                                  managerDocument: record)),
-                                    );
-                                  },
-                                ),
-                                _isConvener
-                                    ? BasicWhiteButton(
-                                        text: "Recalculate stats",
-                                        onPressed: () {
-                                          db.recalculateManagerStats(
-                                              record['managerId']);
-                                        },
-                                      )
-                                    : Container(),
-                              ],
+                                  ListTile(
+                                    title: Text('Total Meal Amount'),
+                                    trailing: Text(
+                                      record['totalMealAmount'].toString(),
+                                    ),
+                                    dense: true,
+                                  ),
+                                  BasicWhiteButton(
+                                    text: "View your data",
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserRecordScreen(
+                                                    managerDocument: record)),
+                                      );
+                                    },
+                                  ),
+                                  // _isConvener
+                                  //     ? BasicWhiteButton(
+                                  //         text: "Recalculate stats",
+                                  //         onPressed: () {
+                                  //           db.recalculateManagerStats(
+                                  //               record['managerId']);
+                                  //         },
+                                  //       )
+                                  //     : Container(),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-                return Container();
-              }),
+                          );
+                        },
+                      ),
+                    );
+            }
+            return Container();
+          }),
     );
   }
 }

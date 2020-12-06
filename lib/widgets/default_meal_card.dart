@@ -1,9 +1,12 @@
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/meal.dart';
+import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
+import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/daily_meal_card.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +17,7 @@ class DefaultMealCard extends StatefulWidget {
 
 class _DefaultMealCardState extends State<DefaultMealCard> {
   bool breakfast, lunch, dinner;
-  bool loading = true, updating = false;
+  bool loading = true, updating = false, deleting = false;
   Meal defaultMeal;
   FirestoreDatabase db;
 
@@ -141,6 +144,86 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                             updating = false;
                           });
                         }
+                      },
+                    ),
+              Divider(
+                indent: 10.0,
+                endIndent: 10.0,
+              ),
+              deleting
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: SpinKitThreeBounce(
+                        color: primaryColorDark,
+                        size: 25.0,
+                      ),
+                    )
+                  : BasicWhiteButton(
+                      text: "Delete Account",
+                      onPressed: () {
+                        EasyDialog(
+                          height: 200,
+                          closeButton: false,
+                          descriptionPadding:
+                              EdgeInsets.only(bottom: kBorderRadius),
+                          title: Text("Delete Account"),
+                          description: Text(
+                              "Are you sure you want to delete your account? This will delete all your data from the Mess Meal app."),
+                          contentList: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                FlatButton(
+                                  color: primaryColorDark,
+                                  textColor: Colors.white,
+                                  padding: EdgeInsets.all(kBorderRadius),
+                                  child: Text('Yes, delete'),
+                                  onPressed: () async {
+                                    setState(() {
+                                      deleting = true;
+                                    });
+                                    Navigator.of(context).pop();
+                                    bool deleted = await db.deleteAccount();
+
+                                    String deleteMessage;
+                                    if (deleted) {
+                                      deleteMessage =
+                                          "Account has been deleted successfully.";
+                                    } else {
+                                      deleteMessage =
+                                          "Failed to delete account. Check if you're the current manager or try again later.";
+                                    }
+                                    EasyDialog(
+                                      description: Text(deleteMessage),
+                                    ).show(context);
+                                    setState(() {
+                                      deleting = false;
+                                    });
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                    if (deleted) {
+                                      Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .signOut();
+                                    }
+                                  },
+                                ),
+                                SizedBox(
+                                  width: kBorderRadius,
+                                ),
+                                FlatButton(
+                                  color: Colors.white,
+                                  textColor: primaryColorDark,
+                                  padding: EdgeInsets.all(kBorderRadius),
+                                  child: Text('No, cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ).show(context);
                       },
                     ),
             ],

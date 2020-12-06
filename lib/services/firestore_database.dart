@@ -352,9 +352,8 @@ class FirestoreDatabase {
     double totalMealAmount = 0, userMealAmount;
     int breakfastCount, lunchCount, dinnerCount, guestMealCount;
 
-    Member user;
     String newManagerId;
-    for (user in users) {
+    for (var user in users) {
       // this user will be the new manager
       if (user.managerSerial == 2) {
         // create new document in managers collection
@@ -445,6 +444,8 @@ class FirestoreDatabase {
       await _firestoreService.setData(
         path: FirestorePath.mealRecord(oldManagerId, user.uid),
         data: {
+          'teacherId': user.teacherId,
+          'name': user.name,
           'mealAmount': userMealAmount,
           'breakfastCount': breakfastCount,
           'lunchCount': lunchCount,
@@ -457,7 +458,7 @@ class FirestoreDatabase {
       totalMealAmount += userMealAmount;
     }
 
-    for (user in users) {
+    for (var user in users) {
       _firestoreService.setData(
         path: FirestorePath.mealRecord(newManagerId, user.uid),
         data: {'eggCount': 0},
@@ -572,8 +573,7 @@ class FirestoreDatabase {
       record['fixedCost'] = managerDocument['perUserFixedCost'];
       record['totalCost'] = record['mealCost'] +
           (mealData['eggCount'] ?? 0) * managerDocument['eggUnitPrice'] +
-          (managerDocument['perUserFixedCost'] ??
-              0); // TODO : remove ?? 0 later
+          managerDocument['perUserFixedCost'];
     }
 
     return record;
@@ -595,20 +595,33 @@ class FirestoreDatabase {
   Future<List<Map<String, dynamic>>> calculateCost(
       List<Map<String, dynamic>> managers) async {
     List<Map<String, dynamic>> costList = [];
-    List<Member> users = await _firestoreService.listDocuments(
-      path: FirestorePath.users(),
-      builder: (data, documentId) => Member.fromMap(data, documentId),
-    );
-    for (var user in users) {
+    List<Map<String, dynamic>> uniqueUserList = [];
+    Set<String> uniqueUserIdList = Set();
+    for (var manager in managers) {
+      await _firestoreService.listDocuments(
+        path: FirestorePath.mealRecords(manager['managerId']),
+        builder: (data, documentId) {
+          bool inserted = uniqueUserIdList.add(documentId);
+          if (inserted) {
+            uniqueUserList.add({
+              'uid': documentId,
+              'teacherId': data['teacherId'],
+              'name': data['name'],
+            });
+          }
+        },
+      );
+    }
+    for (var user in uniqueUserList) {
       double totalCost = 0;
       for (var manager in managers) {
         Map<String, dynamic> record =
-            await getMealRecord(manager, userId: user.uid);
-        totalCost += record['totalCost'];
+            await getMealRecord(manager, userId: user['uid']);
+        totalCost += record['totalCost'] ?? 0;
       }
       costList.add({
-        "teacherId": user.teacherId,
-        "name": user.name,
+        "teacherId": user['teacherId'],
+        "name": user['name'],
         "totalCost": double.parse((totalCost).toStringAsFixed(2)),
       });
     }
@@ -671,7 +684,54 @@ class FirestoreDatabase {
         queryBuilder: (query) => query.orderBy('managerSerial').limit(5),
       );
 
-  // extra function
+  Future<bool> deleteAccount() async {
+    final doc =
+        await _firestoreService.getDocument(path: FirestorePath.user(uid));
+    Member user = Member.fromMap(doc.data(), doc.id);
+    int managerSerial = user.managerSerial;
+    // current manager account can't be deleted
+    if (managerSerial == 1) return false;
+
+    try {
+      await doc.reference.delete();
+
+      // decrement user count by 1
+      await _firestoreService.setData(
+        path: FirestorePath.counts(),
+        data: {
+          'users': FieldValue.increment(-1),
+        },
+        merge: true,
+      );
+      // update manager serials
+      final users = await _firestoreService.listDocuments(
+        path: FirestorePath.users(),
+        builder: (data, documentId) => Member.fromMap(data, documentId),
+        queryBuilder: (query) =>
+            query.where('managerSerial', isGreaterThan: managerSerial),
+      );
+
+      for (Member user in users) {
+        await _firestoreService.setData(
+          path: FirestorePath.user(user.uid),
+          data: {
+            'managerSerial': FieldValue.increment(-1)
+          }, //  user.managerSerial - 1
+          merge: true,
+        );
+      }
+      return true;
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
+
+  /*
+  *
+  * extra function, might be needed later
+  *
+  */
   Future<void> recalculateManagerStats(String managerId) async {
     Map<String, dynamic> manager =
         await _firestoreService.getData(path: FirestorePath.manager(managerId));

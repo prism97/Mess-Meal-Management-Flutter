@@ -76,19 +76,22 @@ class _UserRecordScreenState extends State<UserRecordScreen> {
                   ListTile(
                     title: Text('Meal Cost'),
                     trailing: Text(
-                      record['mealCost'].toString(),
+                      double.parse((record['mealCost']).toStringAsFixed(2))
+                          .toString(),
                     ),
                   ),
                   ListTile(
                     title: Text('Fixed Cost'),
                     trailing: Text(
-                      record['fixedCost'].toString(),
+                      double.parse((record['fixedCost']).toStringAsFixed(2))
+                          .toString(),
                     ),
                   ),
                   ListTile(
                     title: Text('Total Cost'),
                     trailing: Text(
-                      record['totalCost'].toString(),
+                      double.parse((record['totalCost']).toStringAsFixed(2))
+                          .toString(),
                     ),
                   ),
                 ],

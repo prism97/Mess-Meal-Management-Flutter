@@ -75,8 +75,11 @@ class _MealCheckScreenState extends State<MealCheckScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
-            builder: (context) => DefaultSettingsModal(),
+            builder: (context) => Wrap(
+              children: [DefaultSettingsModal()],
+            ),
           );
         },
         child: Icon(

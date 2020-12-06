@@ -58,6 +58,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headline6,
               ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                'Please provide the following information to activate your account',
+                textAlign: TextAlign.center,
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle2
+                    .copyWith(color: Colors.purple.shade100),
+              ),
               Form(
                 key: _formKey,
                 child: Column(

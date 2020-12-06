@@ -26,7 +26,6 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
     db = Provider.of<FirestoreDatabase>(context, listen: false);
   }
 
-// TODO : change cost int to double
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Member>(
