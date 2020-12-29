@@ -154,9 +154,9 @@ class _StatsScreenState extends State<StatsScreen> {
                                   ),
                                   Divider(),
                                   ListTile(
-                                    title: Text('Total Cost'),
+                                    title: Text('Per Meal Cost'),
                                     trailing: Text(
-                                      record['totalCost'].toString(),
+                                      record['perMealCost'].toStringAsFixed(2),
                                     ),
                                     dense: true,
                                   ),
@@ -167,15 +167,24 @@ class _StatsScreenState extends State<StatsScreen> {
                                     ),
                                     dense: true,
                                   ),
+                                  ListTile(
+                                    title: Text('Total Cost'),
+                                    trailing: Text(
+                                      record['totalCost'].toString(),
+                                    ),
+                                    dense: true,
+                                  ),
                                   BasicWhiteButton(
                                     text: "View your data",
                                     onPressed: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserRecordScreen(
-                                                    managerDocument: record)),
+                                          builder: (context) =>
+                                              UserRecordScreen(
+                                            managerDocument: record,
+                                          ),
+                                        ),
                                       );
                                     },
                                   ),

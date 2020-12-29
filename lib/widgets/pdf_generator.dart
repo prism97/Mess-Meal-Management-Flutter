@@ -61,6 +61,26 @@ class PdfGenerator {
             PdfPageFormat.letter.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         build: (pw.Context context) => <pw.Widget>[
+          pw.Center(
+            child: pw.Text(
+              "Shahid Smrity Hall Teachers' Block",
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          pw.Center(
+            child: pw.Text(
+              "Mess Charge",
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+          pw.Padding(
+            padding: pw.EdgeInsets.only(bottom: 20.0),
+          ),
           ...textWidgets,
           pw.Padding(
             padding: pw.EdgeInsets.only(bottom: 20.0),

@@ -6,6 +6,7 @@ import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
+import 'package:mess_meal/widgets/forgot_password_button.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -94,6 +95,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (val) {
                         setState(() => _password = val);
                       },
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ForgotPasswordButton(),
                     ),
                     SizedBox(
                       height: 20.0,

@@ -14,21 +14,17 @@ enum AuthStatus {
   Unauthenticated,
 }
 
-enum UserRole { Admin, Manager, Messboy, Member }
-
-extension UserRoleExtension on UserRole {
-  static UserRole fromString(String role) {
-    switch (role) {
-      case "admin":
-        return UserRole.Admin;
-      case "manager":
-        return UserRole.Manager;
-      case "messboy":
-        return UserRole.Messboy;
-      case "member":
-        return UserRole.Member;
-      default:
-        return UserRole.Member;
-    }
-  }
+enum Department {
+  Arch,
+  ChE,
+  CE,
+  CSE,
+  EEE,
+  IPE,
+  ME,
+  MME,
+  NAME,
+  URP,
+  WRE,
+  BME,
 }

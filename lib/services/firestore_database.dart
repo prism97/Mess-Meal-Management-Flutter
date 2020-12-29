@@ -561,7 +561,7 @@ class FirestoreDatabase {
       path:
           FirestorePath.mealRecord(managerDocument['managerId'], userId ?? uid),
     );
-    if (mealData.containsKey('mealAmount')) {
+    if (mealData != null && mealData.containsKey('mealAmount')) {
       record['mealAmount'] = mealData['mealAmount'];
       record['breakfastCount'] = mealData['breakfastCount'];
       record['lunchCount'] = mealData['lunchCount'];

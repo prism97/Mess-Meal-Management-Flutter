@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/enums.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/member.dart';
@@ -28,6 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 // text field states
   String _name = '';
   String _teacherId = '';
+  Department _department;
 
   @override
   void initState() {
@@ -78,46 +80,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(
                       height: 40.0,
                     ),
-                    TextFormField(
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          FontAwesomeIcons.userCircle,
-                          color: Theme.of(context).disabledColor,
-                        ),
-                        hintText: 'display name',
-                      ),
-                      keyboardType: TextInputType.name,
-                      validator: (val) => val == null
-                          ? 'Enter a display name for your account'
-                          : null,
-                      onChanged: (val) {
-                        setState(() => _name = val);
-                      },
-                    ),
+                    _buildNameField(context),
                     SizedBox(
                       height: 20.0,
                     ),
-                    TextFormField(
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          FontAwesomeIcons.idCard,
-                          color: Theme.of(context).disabledColor,
-                        ),
-                        hintText: 'teacher id',
-                      ),
-                      keyboardType: TextInputType.name,
-                      validator: (val) =>
-                          val == null ? 'Enter your teacher ID' : null,
-                      onChanged: (val) {
-                        setState(() => _teacherId = val);
-                      },
+                    _buildTeacherIdField(context),
+                    SizedBox(
+                      height: 20.0,
                     ),
+                    _buildDepartmentField(),
                     SizedBox(
                       height: 20.0,
                     ),
@@ -129,56 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               size: 25.0,
                             ),
                           )
-                        : BasicWhiteButton(
-                            text: 'Save',
-                            onPressed: () async {
-                              FocusScope.of(context).unfocus();
-
-                              final formState = _formKey.currentState;
-                              if (formState.validate()) {
-                                formState.save();
-                                setState(() {
-                                  _loading = true;
-                                });
-                                // create user document & send password reset email
-                                final managerSerial =
-                                    await db.updateManagerSerials();
-
-                                final Member user = Member(
-                                  uid: db.uid,
-                                  email: _email,
-                                  name: _name,
-                                  teacherId: _teacherId,
-                                  managerSerial: managerSerial,
-                                  defaultMeal: Meal(
-                                    breakfast: true,
-                                    lunch: true,
-                                    dinner: true,
-                                    date: DateTime.now(),
-                                  ),
-                                );
-
-                                try {
-                                  await db.createUser(user);
-                                  await auth.sendPasswordResetEmail(_email);
-                                  await auth.signOut();
-
-                                  EasyDialog(
-                                    height:
-                                        MediaQuery.of(context).size.height / 2,
-                                    title: Text('Success'),
-                                    description: Text(
-                                        'An e-mail has been sent to your e-mail address. Follow the directions in the e-mail to reset your password & then login with your new password.'),
-                                  ).show(context);
-                                } catch (error) {
-                                  setState(() {
-                                    _loading = false;
-                                  });
-                                  showErrorSnackBar();
-                                }
-                              }
-                            },
-                          ),
+                        : _buildSaveButton(context, _email),
                   ],
                 ),
               ),
@@ -186,6 +108,132 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  BasicWhiteButton _buildSaveButton(BuildContext context, String _email) {
+    return BasicWhiteButton(
+      text: 'Save',
+      onPressed: () async {
+        FocusScope.of(context).unfocus();
+
+        final formState = _formKey.currentState;
+        if (formState.validate()) {
+          formState.save();
+          setState(() {
+            _loading = true;
+          });
+          // create user document & send password reset email
+          final managerSerial = await db.updateManagerSerials();
+
+          final Member user = Member(
+            uid: db.uid,
+            email: _email,
+            name: _name + ', ' + _department.toString().substring(11),
+            teacherId: _teacherId,
+            managerSerial: managerSerial,
+            defaultMeal: Meal(
+              breakfast: true,
+              lunch: true,
+              dinner: true,
+              date: DateTime.now(),
+            ),
+          );
+
+          try {
+            await db.createUser(user);
+            await auth.sendPasswordResetEmail(_email);
+            await auth.signOut();
+
+            EasyDialog(
+              height: MediaQuery.of(context).size.height / 2,
+              title: Text('Success'),
+              description: Text(
+                  'An e-mail has been sent to your e-mail address. Follow the directions in the e-mail to reset your password & then login with your new password.'),
+            ).show(context);
+          } catch (error) {
+            setState(() {
+              _loading = false;
+            });
+            showErrorSnackBar();
+          }
+        }
+      },
+    );
+  }
+
+  DropdownButtonFormField<Department> _buildDepartmentField() {
+    return DropdownButtonFormField<Department>(
+      items: Department.values
+          .map(
+            (e) => DropdownMenuItem<Department>(
+              value: e,
+              child: Text(
+                e.toString().substring(11),
+              ),
+            ),
+          )
+          .toList(),
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: Icon(
+          FontAwesomeIcons.building,
+          color: Theme.of(context).disabledColor,
+        ),
+        hintText: 'department',
+      ),
+      iconEnabledColor: Theme.of(context).disabledColor,
+      dropdownColor: accentColor.shade400,
+      onChanged: (val) {
+        setState(() {
+          _department = val;
+        });
+      },
+      validator: (val) => val == null ? 'This field is required' : null,
+    );
+  }
+
+  TextFormField _buildTeacherIdField(BuildContext context) {
+    return TextFormField(
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: Icon(
+          FontAwesomeIcons.idCard,
+          color: Theme.of(context).disabledColor,
+        ),
+        hintText: 'teacher id',
+      ),
+      keyboardType: TextInputType.name,
+      validator: (val) =>
+          val == null || val.isEmpty ? 'This field is required' : null,
+      onChanged: (val) {
+        setState(() => _teacherId = val);
+      },
+    );
+  }
+
+  TextFormField _buildNameField(BuildContext context) {
+    return TextFormField(
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: Icon(
+          FontAwesomeIcons.userCircle,
+          color: Theme.of(context).disabledColor,
+        ),
+        hintText: 'display name',
+      ),
+      keyboardType: TextInputType.name,
+      validator: (val) =>
+          val == null || val.isEmpty ? 'This field is required' : null,
+      onChanged: (val) {
+        setState(() => _name = val);
+      },
     );
   }
 

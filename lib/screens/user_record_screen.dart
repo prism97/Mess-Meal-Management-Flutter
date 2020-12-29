@@ -40,63 +40,73 @@ class _UserRecordScreenState extends State<UserRecordScreen> {
               color: accentColor,
               size: 50.0,
             )
-          : Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    title: Text('Breakfast'),
-                    trailing: Text(
-                      record['breakfastCount'].toString(),
+          : record.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Text(
+                      "You don't have any meal record for this period",
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  ListTile(
-                    title: Text('Lunch'),
-                    trailing: Text(
-                      record['lunchCount'].toString(),
-                    ),
+                )
+              : Card(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text('Breakfast'),
+                        trailing: Text(
+                          record['breakfastCount'].toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Lunch'),
+                        trailing: Text(
+                          record['lunchCount'].toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Dinner'),
+                        trailing: Text(
+                          record['dinnerCount'].toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Eggs'),
+                        trailing: Text(
+                          record['eggCount'].toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Guest Meal'),
+                        trailing: Text(
+                          record['guestMealCount'].toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Meal Cost'),
+                        trailing: Text(
+                          double.parse((record['mealCost']).toStringAsFixed(2))
+                              .toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Fixed Cost'),
+                        trailing: Text(
+                          double.parse((record['fixedCost']).toStringAsFixed(2))
+                              .toString(),
+                        ),
+                      ),
+                      ListTile(
+                        title: Text('Total Cost'),
+                        trailing: Text(
+                          double.parse((record['totalCost']).toStringAsFixed(2))
+                              .toString(),
+                        ),
+                      ),
+                    ],
                   ),
-                  ListTile(
-                    title: Text('Dinner'),
-                    trailing: Text(
-                      record['dinnerCount'].toString(),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Eggs'),
-                    trailing: Text(
-                      record['eggCount'].toString(),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Guest Meal'),
-                    trailing: Text(
-                      record['guestMealCount'].toString(),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Meal Cost'),
-                    trailing: Text(
-                      double.parse((record['mealCost']).toStringAsFixed(2))
-                          .toString(),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Fixed Cost'),
-                    trailing: Text(
-                      double.parse((record['fixedCost']).toStringAsFixed(2))
-                          .toString(),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Total Cost'),
-                    trailing: Text(
-                      double.parse((record['totalCost']).toStringAsFixed(2))
-                          .toString(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
     );
   }
 }
