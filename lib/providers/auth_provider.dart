@@ -38,11 +38,11 @@ class AuthProvider extends ChangeNotifier {
       return null;
     }
 
-    if (firebaseUser.email.compareTo("messboy@gmail.com") == 0) {
+    if (firebaseUser.email.compareTo("tbmessboy@gmail.com") == 0) {
       _status = AuthStatus.AuthenticatedAsMessboy;
       return Member(
         uid: firebaseUser.uid,
-        email: "messboy@gmail.com",
+        email: "tbmessboy@gmail.com",
         name: "messboy",
         teacherId: null,
         isMessboy: true,

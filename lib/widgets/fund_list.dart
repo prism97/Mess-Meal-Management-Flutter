@@ -49,12 +49,17 @@ class _FundListState extends State<FundList> {
               : ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(
-                        'Added by ${_funds[index].convenerName} on ${_funds[index].date.toIso8601String().substring(0, 10)}'),
-                    subtitle: Text(_funds[index].description),
-                    isThreeLine: true,
-                    trailing: Text(_funds[index].amount.toString()),
+                  itemBuilder: (context, index) => Column(
+                    children: [
+                      ListTile(
+                        title: Text(
+                            'Added by ${_funds[index].convenerName} on ${_funds[index].date.toIso8601String().substring(0, 10)}'),
+                        subtitle: Text(_funds[index].description),
+                        isThreeLine: true,
+                        trailing: Text(_funds[index].amount.toString()),
+                      ),
+                      Divider(),
+                    ],
                   ),
                   itemCount: _funds.length,
                 ),

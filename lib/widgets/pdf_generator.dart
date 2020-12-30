@@ -12,11 +12,13 @@ class PdfGenerator {
     List<List<dynamic>> data = List();
     data.add(['Teacher ID', 'Name', 'Total Cost']);
     for (var entry in rawData) {
-      List list = List();
-      for (var field in entry.values) {
-        list.add(field);
+      if (entry['name'] != null) {
+        List list = List();
+        for (var field in entry.values) {
+          list.add(field);
+        }
+        data.add(list);
       }
-      data.add(list);
     }
     return data;
   }
@@ -39,12 +41,20 @@ class PdfGenerator {
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text("Manager",
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.Text(entry['manager']),
-            pw.Text("Duration",
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.Text(entry['duration']),
+            pw.Row(
+              children: [
+                pw.Text("Manager\t",
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                pw.Text(entry['manager']),
+              ],
+            ),
+            pw.Row(
+              children: [
+                pw.Text("Duration\t",
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                pw.Text(entry['duration']),
+              ],
+            ),
           ],
         ),
       );

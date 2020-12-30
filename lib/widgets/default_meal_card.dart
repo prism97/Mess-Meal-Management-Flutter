@@ -7,7 +7,7 @@ import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
-import 'package:mess_meal/widgets/daily_meal_card.dart';
+import 'package:mess_meal/widgets/meal_tile.dart';
 import 'package:provider/provider.dart';
 
 class DefaultMealCard extends StatefulWidget {

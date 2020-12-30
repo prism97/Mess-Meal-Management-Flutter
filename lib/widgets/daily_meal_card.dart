@@ -9,6 +9,7 @@ import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/guest_meal_dialog.dart';
 import 'package:mess_meal/widgets/meal_amount_dialog.dart';
+import 'package:mess_meal/widgets/meal_tile.dart';
 import 'package:provider/provider.dart';
 
 class DailyMealCard extends StatefulWidget {
@@ -229,39 +230,6 @@ class _DailyMealCardState extends State<DailyMealCard> {
           );
         }
       },
-    );
-  }
-}
-
-class MealTile extends StatelessWidget {
-  final String title;
-  final double mealAmount;
-  final bool value;
-  final Function onChanged;
-
-  const MealTile({
-    @required this.title,
-    @required this.mealAmount,
-    @required this.value,
-    @required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyText1,
-      ),
-      secondary: Chip(
-        label: Text(mealAmount.toString()),
-      ),
-      value: value,
-      onChanged: onChanged,
-      inactiveThumbColor: accentColor.shade300,
-      inactiveTrackColor: Theme.of(context).disabledColor,
-      activeColor: primaryColorDark,
-      activeTrackColor: accentColor.shade600,
     );
   }
 }

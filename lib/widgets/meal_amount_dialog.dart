@@ -32,19 +32,31 @@ class _MealAmountDialogState extends State<MealAmountDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          kBorderRadius,
+        ),
+      ),
       child: Container(
-        height: MediaQuery.of(context).size.height / 1.8,
+        height: MediaQuery.of(context).size.height / 2,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'Meal Amount for ${widget.date.toIso8601String().substring(0, 10)}',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColorDark,
-                  fontSize: 15.0,
-                ),
+                'Meal Amount',
+                style: Theme.of(context).textTheme.bodyText1,
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                widget.date.toIso8601String().substring(0, 10),
+                style: Theme.of(context).textTheme.bodyText2,
+                textAlign: TextAlign.center,
+              ),
+              Divider(
+                indent: 20,
+                endIndent: 20,
               ),
               SizedBox(
                 height: 10.0,
