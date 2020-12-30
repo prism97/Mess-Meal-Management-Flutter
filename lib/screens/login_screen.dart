@@ -30,7 +30,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Container(
           height: MediaQuery.of(context).size.height,

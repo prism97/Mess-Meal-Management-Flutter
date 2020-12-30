@@ -81,7 +81,13 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                       Divider(),
                       ListTile(
                         title: Text('Name'),
-                        trailing: Text(snapshot.data['name']),
+                        trailing: SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                          child: Text(
+                            snapshot.data['name'],
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
                       ),
                       Divider(),
                       ListTile(
@@ -133,8 +139,9 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                     ),
                                     onPressed: () async {
                                       EasyDialog(
-                                        height: 160,
-                                        closeButton: false,
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                3,
                                         descriptionPadding: EdgeInsets.only(
                                             bottom: kBorderRadius),
                                         description: Text(

@@ -162,8 +162,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                       text: "Delete Account",
                       onPressed: () {
                         EasyDialog(
-                          height: 200,
-                          closeButton: false,
+                          height: MediaQuery.of(context).size.height / 3,
                           descriptionPadding:
                               EdgeInsets.only(bottom: kBorderRadius),
                           title: Text("Delete Account"),
@@ -184,6 +183,7 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                                     });
                                     Navigator.of(context).pop();
                                     bool deleted = await db.deleteAccount();
+                                    Navigator.of(context).pop();
 
                                     String deleteMessage;
                                     if (deleted) {
@@ -194,13 +194,15 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                                           "Failed to delete account. Check if you're the current manager or try again later.";
                                     }
                                     EasyDialog(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              3,
                                       description: Text(deleteMessage),
                                     ).show(context);
                                     setState(() {
                                       deleting = false;
                                     });
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
+
                                     if (deleted) {
                                       Provider.of<AuthProvider>(context,
                                               listen: false)

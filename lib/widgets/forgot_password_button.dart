@@ -20,7 +20,7 @@ class _ForgotPasswordButtonState extends State<ForgotPasswordButton> {
     return TextButton(
       onPressed: () {
         EasyDialog(
-          height: 300,
+          height: MediaQuery.of(context).size.height / 2,
           title: Text('Forgot Password?'),
           description: Text(
               'Enter the email address you used when you joined and we’ll send you instructions to reset your password.'),
@@ -45,10 +45,17 @@ class _ForgotPasswordButtonState extends State<ForgotPasswordButton> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
+        cursorColor: primaryColorLight,
         style: TextStyle(
           color: accentColor,
         ),
         decoration: InputDecoration(
+          focusedBorder:
+              Theme.of(context).inputDecorationTheme.focusedBorder.copyWith(
+                    borderSide: BorderSide(
+                      color: primaryColorLight,
+                    ),
+                  ),
           prefixIcon: Icon(
             FontAwesomeIcons.solidEnvelope,
             color: accentColor,

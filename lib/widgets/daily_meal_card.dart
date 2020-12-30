@@ -258,8 +258,10 @@ class MealTile extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-      inactiveThumbColor: Theme.of(context).primaryColorLight,
+      inactiveThumbColor: accentColor.shade300,
       inactiveTrackColor: Theme.of(context).disabledColor,
+      activeColor: primaryColorDark,
+      activeTrackColor: accentColor.shade600,
     );
   }
 }
