@@ -22,9 +22,9 @@ class MealListScreen extends StatefulWidget {
 
 class _MealListScreenState extends State<MealListScreen> {
   static final _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Member> _breakfast;
-  List<Member> _lunch;
-  List<Member> _dinner;
+  List<Member> _breakfast, _guestBreakfast;
+  List<Member> _lunch, _guestLunch;
+  List<Member> _dinner, _guestDinner;
   bool _loading = true;
 
   FirestoreDatabase db;
@@ -34,6 +34,11 @@ class _MealListScreenState extends State<MealListScreen> {
     _breakfast = meals['breakfast'];
     _lunch = meals['lunch'];
     _dinner = meals['dinner'];
+
+    final guestMeals = await db.getGuestMealSubscribers();
+    _guestBreakfast = guestMeals['breakfast'];
+    _guestLunch = guestMeals['lunch'];
+    _guestDinner = guestMeals['dinner'];
     return;
   }
 
@@ -67,6 +72,14 @@ class _MealListScreenState extends State<MealListScreen> {
               : SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text(
+                          '—— Member Meal ——',
+                          style: Theme.of(context).textTheme.bodyText2,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                       MealListCard(
                         mealName: 'Breakfast',
                         users: _breakfast,
@@ -80,6 +93,29 @@ class _MealListScreenState extends State<MealListScreen> {
                       MealListCard(
                         users: _dinner,
                         mealName: 'Dinner',
+                        isMessboy: widget.isMessboy,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text(
+                          '—— Guest Meal ——',
+                          style: Theme.of(context).textTheme.bodyText2,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      MealListCard(
+                        users: _guestBreakfast,
+                        mealName: 'Guest Breakfast',
+                        isMessboy: widget.isMessboy,
+                      ),
+                      MealListCard(
+                        users: _guestLunch,
+                        mealName: 'Guest Lunch',
+                        isMessboy: widget.isMessboy,
+                      ),
+                      MealListCard(
+                        users: _guestDinner,
+                        mealName: 'Guest Dinner',
                         isMessboy: widget.isMessboy,
                       ),
                       widget.isMessboy

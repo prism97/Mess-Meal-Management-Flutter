@@ -27,4 +27,5 @@ enum Department {
   URP,
   WRE,
   BME,
+  Other
 }

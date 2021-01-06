@@ -133,9 +133,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             teacherId: _teacherId,
             managerSerial: managerSerial,
             defaultMeal: Meal(
-              breakfast: true,
-              lunch: true,
-              dinner: true,
+              breakfast: false,
+              lunch: false,
+              dinner: false,
               date: DateTime.now(),
             ),
           );

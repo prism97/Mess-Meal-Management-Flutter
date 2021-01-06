@@ -506,6 +506,7 @@ class FirestoreDatabase {
   Future<Map<String, List<Member>>> getMealSubscribers() async {
     final today = DateTime.now();
     final _date = DateTime(today.year, today.month, today.day);
+    final _updateTime = DateTime(today.year, today.month, today.day, 7);
 
     List<Member> users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
@@ -530,14 +531,19 @@ class FirestoreDatabase {
       if (document.exists) {
         meal = Meal.fromMap(Map<String, bool>.from(document.data()));
       } else {
-        meal = defaultMeal;
+        if (defaultMeal.date.isBefore(_updateTime)) {
+          meal = defaultMeal;
+        } else {
+          meal = Meal(breakfast: false, lunch: false, dinner: false);
+        }
+
         // set only after 7 am
         if (DateTime.now().hour > 6) {
           _setMealOfUser(
             Meal(
-              breakfast: defaultMeal.breakfast,
-              lunch: defaultMeal.lunch,
-              dinner: defaultMeal.dinner,
+              breakfast: meal.breakfast,
+              lunch: meal.lunch,
+              dinner: meal.dinner,
               date: _date,
             ),
             user.uid,
@@ -550,6 +556,40 @@ class FirestoreDatabase {
     }
 
     return mealSubscribers;
+  }
+
+  // list of users who turned on guest meal for today's breakfast, lunch or dinner
+  Future<Map<String, List<Member>>> getGuestMealSubscribers() async {
+    final today = DateTime.now();
+    final _date = DateTime(today.year, today.month, today.day);
+
+    List<Member> users = await _firestoreService.listDocuments(
+      path: FirestorePath.users(),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
+    );
+
+    Map<String, List<Member>> guestMealSubscribers = {
+      'breakfast': List<Member>(),
+      'lunch': List<Member>(),
+      'dinner': List<Member>(),
+    };
+
+    Meal guestMeal;
+    DocumentSnapshot document;
+    Member user;
+    for (user in users) {
+      document = await _firestoreService.getDocument(
+        path: FirestorePath.guestMeal(user.uid, _date.toIso8601String()),
+      );
+
+      if (document.exists) {
+        guestMeal = Meal.fromMap(Map<String, bool>.from(document.data()));
+        if (guestMeal.breakfast) guestMealSubscribers['breakfast'].add(user);
+        if (guestMeal.lunch) guestMealSubscribers['lunch'].add(user);
+        if (guestMeal.dinner) guestMealSubscribers['dinner'].add(user);
+      }
+    }
+    return guestMealSubscribers;
   }
 
   Future<Map<String, dynamic>> getMealRecord(
