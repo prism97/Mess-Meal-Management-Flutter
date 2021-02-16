@@ -61,8 +61,12 @@ class AuthProvider extends ChangeNotifier {
       return null;
     }
 
-    _status = AuthStatus.Authenticated;
     final user = userDocument.data();
+    if (user.containsKey('isDeleted') && user['isDeleted']) {
+      _status = AuthStatus.Unauthenticated;
+      return null;
+    }
+    _status = AuthStatus.Authenticated;
     return Member(
       uid: userDocument.id,
       email: user['email'],
@@ -70,8 +74,11 @@ class AuthProvider extends ChangeNotifier {
       teacherId: user['teacherId'],
       managerSerial: user['managerSerial'],
       isConvener: user['isConvener'],
+      isDeleted: user['isDeleted'] ?? false,
       defaultMeal: Meal.fromMapWithDate(
-        Map<String, dynamic>.from(user['defaultMeal']),
+        Map<String, dynamic>.from(
+          user['defaultMeal'],
+        ),
       ),
     );
   }

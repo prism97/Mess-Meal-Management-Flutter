@@ -132,6 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             name: _name + ', ' + _department.toString().substring(11),
             teacherId: _teacherId,
             managerSerial: managerSerial,
+            isDeleted: false,
             defaultMeal: Meal(
               breakfast: false,
               lunch: false,

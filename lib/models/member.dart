@@ -9,6 +9,7 @@ class Member {
   final int managerSerial;
   bool isConvener;
   bool isMessboy;
+  bool isDeleted;
   Meal defaultMeal;
 
   Member({
@@ -19,6 +20,7 @@ class Member {
     @required this.managerSerial,
     this.isConvener = false,
     this.isMessboy = false,
+    this.isDeleted = false,
     @required this.defaultMeal,
   });
 
@@ -34,6 +36,7 @@ class Member {
       teacherId: data['teacherId'],
       managerSerial: data['managerSerial'],
       isConvener: data['isConvener'],
+      isDeleted: data['isDeleted'] ?? false,
       defaultMeal: Meal.fromMapWithDate(data['defaultMeal']),
     );
   }
@@ -45,6 +48,7 @@ class Member {
       'teacherId': this.teacherId,
       'managerSerial': this.managerSerial,
       'isConvener': this.isConvener,
+      'isDeleted': this.isDeleted,
       'defaultMeal': this.defaultMeal.toMapWithDate(),
     };
   }

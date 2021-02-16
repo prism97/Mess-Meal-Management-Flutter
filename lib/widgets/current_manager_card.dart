@@ -7,6 +7,7 @@ import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/manager_cost_screen.dart';
 import 'package:mess_meal/services/firestore_database.dart';
+import 'package:mess_meal/widgets/manager_update_dialog.dart';
 import 'package:provider/provider.dart';
 
 class CurrentManagerCard extends StatefulWidget {
@@ -158,18 +159,23 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                                     kBorderRadius),
                                                 child: Text('Yes, update'),
                                                 onPressed: () {
-                                                  setState(() {
-                                                    _loading = true;
-                                                  });
-                                                  db
-                                                      .updateManager()
-                                                      .whenComplete(
-                                                        () => setState(() {
-                                                          _loading = false;
-                                                        }),
-                                                      );
-
+                                                  // setState(() {
+                                                  //   _loading = true;
+                                                  // });
+                                                  // db
+                                                  //     .updateManager()
+                                                  //     .whenComplete(
+                                                  //       () => setState(() {
+                                                  //         _loading = false;
+                                                  //       }),
+                                                  //     );
                                                   Navigator.of(context).pop();
+                                                  showDialog(
+                                                    context: context,
+                                                    barrierDismissible: false,
+                                                    builder: (context) =>
+                                                        ManagerUpdateDialog(),
+                                                  );
                                                 },
                                               ),
                                               SizedBox(

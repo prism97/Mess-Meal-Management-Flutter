@@ -63,12 +63,21 @@ class FirestoreDatabase {
     }
   }
 
-  Future<int> _getUserCount() async {
+  Future<List<Member>> _getActiveUsers() async {
+    List<Member> users = await _firestoreService.listDocuments(
+      path: FirestorePath.users(),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('isDeleted', isNotEqualTo: true),
+    );
+    return users;
+  }
+
+  Future<int> getUserCount() async {
     final data = await _firestoreService.getData(path: FirestorePath.counts());
     return data['users'];
   }
 
-  Future<int> _getMessboyCount() async {
+  Future<int> getMessboyCount() async {
     final data = await _firestoreService.getData(path: FirestorePath.counts());
     return data['messboys'];
   }
@@ -90,7 +99,7 @@ class FirestoreDatabase {
       );
 
   Future<int> updateManagerSerials() async {
-    int userCount = await _getUserCount();
+    int userCount = await getUserCount();
     if (userCount < 5) {
       return userCount + 1;
     }
@@ -134,7 +143,7 @@ class FirestoreDatabase {
     );
   }
 
-  Future<Map<String, dynamic>> _getCurrentManager() =>
+  Future<Map<String, dynamic>> getCurrentManager() =>
       _firestoreService.getData(path: FirestorePath.currentManager());
 
   Future<void> updateCurrentManagerCost(ManagerCost cost) async {
@@ -145,7 +154,7 @@ class FirestoreDatabase {
       },
       merge: true,
     );
-    Map<String, dynamic> currentManager = await _getCurrentManager();
+    Map<String, dynamic> currentManager = await getCurrentManager();
     String managerId = currentManager['managerId'];
     return _firestoreService.createDocument(
       collectionPath: FirestorePath.managerCost(managerId),
@@ -284,40 +293,61 @@ class FirestoreDatabase {
     return double.parse(data['fixedCost'].toString());
   }
 
-  // update manager
-  Future<void> updateManager() async {
-    Map<String, dynamic> currentManager = await _getCurrentManager();
-
-    String oldManagerId = currentManager['managerId'];
-    DateTime startDate = DateTime.parse(currentManager['startDate']);
-    DateTime endDate = DateTime.now();
-    if (endDate.hour < 7) {
-      endDate = endDate.subtract(Duration(days: 1));
-    }
-    endDate = DateTime(endDate.year, endDate.month, endDate.day);
-    double eggUnitPrice = await getEggUnitPrice();
-
-    await _firestoreService.setData(
-      path: FirestorePath.manager(oldManagerId),
+  Future<void> saveOldManagerData(
+      Map<String, dynamic> oldManager, double eggUnitPrice) {
+    return _firestoreService.setData(
+      path: FirestorePath.manager(oldManager['managerId']),
       data: {
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String(),
-        'totalCost': currentManager['cost'],
+        'startDate': oldManager['startDate'].toIso8601String(),
+        'endDate': oldManager['endDate'].toIso8601String(),
+        'totalCost': oldManager['cost'],
         'eggUnitPrice': eggUnitPrice,
-        'totalEggCount': currentManager['totalEggCount'],
+        'totalEggCount': oldManager['totalEggCount'],
       },
       merge: true,
     );
+  }
 
+  // update manager
+  Future<void> updateManager(
+      Map<String, dynamic> oldManager, Map<String, dynamic> counts) async {
+    // Map<String, dynamic> currentManager = await getCurrentManager();
+
+    // String oldManagerId = currentManager['managerId'];
+    // DateTime startDate = DateTime.parse(currentManager['startDate']);
+    // DateTime endDate = DateTime.now();
+    // if (endDate.hour < 7) {
+    //   endDate = endDate.subtract(Duration(days: 1));
+    // }
+    // endDate = DateTime(endDate.year, endDate.month, endDate.day);
+    // double eggUnitPrice = await getEggUnitPrice();
+
+    // await _firestoreService.setData(
+    //   path: FirestorePath.manager(oldManagerId),
+    //   data: {
+    //     'startDate': startDate.toIso8601String(),
+    //     'endDate': endDate.toIso8601String(),
+    //     'totalCost': currentManager['cost'],
+    //     'eggUnitPrice': eggUnitPrice,
+    //     'totalEggCount': currentManager['totalEggCount'],
+    //   },
+    //   merge: true,
+    // );
+
+    DateTime startDate = oldManager['startDate'];
+    DateTime endDate = oldManager['endDate'];
     DateTime tempDate;
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
-    int userCount = await _getUserCount();
-    // system fixed cost is for one month, so divide by number of days
-    double fixedCost =
-        (await getFixedCost()) / endDate.difference(startDate).inDays;
-    int messboyCount = await _getMessboyCount();
+    // int userCount = await getUserCount();
+    // // system fixed cost is for one month, so divide by number of days
+    // double fixedCost =
+    //     (await getFixedCost()) / endDate.difference(startDate).inDays;
+    // int messboyCount = await getMessboyCount();
+    int userCount = counts['userCount'];
+    int messboyCount = counts['messboyCount'];
+    double fixedCost = counts['fixedCost'];
     double messboyMealAmount = 0;
 
     DocumentSnapshot document;
@@ -341,6 +371,8 @@ class FirestoreDatabase {
       if (tempDate.isAtSameMomentAs(endDate)) break;
       tempDate = tempDate.add(Duration(days: 1));
     }
+
+    print('Meal amounts fetched');
 
     List<Member> users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
@@ -374,13 +406,12 @@ class FirestoreDatabase {
 
       // update user's manager serial
       if (user.isManager()) {
-        int userCount = await _getUserCount();
         await _firestoreService.setData(
           path: FirestorePath.user(user.uid),
           data: {'managerSerial': userCount},
           merge: true,
         );
-      } else {
+      } else if (!user.isDeleted) {
         await _firestoreService.setData(
           path: FirestorePath.user(user.uid),
           data: {'managerSerial': FieldValue.increment(-1)},
@@ -442,7 +473,7 @@ class FirestoreDatabase {
       }
 
       await _firestoreService.setData(
-        path: FirestorePath.mealRecord(oldManagerId, user.uid),
+        path: FirestorePath.mealRecord(oldManager['managerId'], user.uid),
         data: {
           'teacherId': user.teacherId,
           'name': user.name,
@@ -458,21 +489,16 @@ class FirestoreDatabase {
       totalMealAmount += userMealAmount;
     }
 
-    for (var user in users) {
-      _firestoreService.setData(
-        path: FirestorePath.mealRecord(newManagerId, user.uid),
-        data: {'eggCount': 0},
-      );
-    }
+    print('user calc complete');
 
-    double perMealCost = (currentManager['cost'] -
-            currentManager['totalEggCount'] * eggUnitPrice) /
+    double perMealCost = (oldManager['cost'] -
+            oldManager['totalEggCount'] * counts['eggUnitPrice']) /
         (totalMealAmount + messboyMealAmount);
     double perUserFixedCost =
         (fixedCost + perMealCost * messboyMealAmount) / userCount;
 
     await _firestoreService.setData(
-      path: FirestorePath.manager(oldManagerId),
+      path: FirestorePath.manager(oldManager['managerId']),
       data: {
         'totalMealAmount': totalMealAmount,
         'perMealCost': perMealCost,
@@ -480,6 +506,17 @@ class FirestoreDatabase {
       },
       merge: true,
     );
+  }
+
+  Future<void> cleanupUserData() async {
+    List<Member> deletedUsers = await _firestoreService.listDocuments(
+      path: FirestorePath.users(),
+      builder: (data, documentId) => Member.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('isDeleted', isEqualTo: true),
+    );
+    for (var user in deletedUsers) {
+      await _firestoreService.deleteData(path: FirestorePath.user(user.uid));
+    }
   }
 
   Future<void> addFund(Fund fund) async {
@@ -698,7 +735,7 @@ class FirestoreDatabase {
       );
 
   Future<void> updateEggCountOfUser(String userId) async {
-    Map<String, dynamic> currentManager = await _getCurrentManager();
+    Map<String, dynamic> currentManager = await getCurrentManager();
     String managerId = currentManager['managerId'];
 
     await _firestoreService.setData(
@@ -729,11 +766,24 @@ class FirestoreDatabase {
         await _firestoreService.getDocument(path: FirestorePath.user(uid));
     Member user = Member.fromMap(doc.data(), doc.id);
     int managerSerial = user.managerSerial;
+
     // current manager account can't be deleted
     if (managerSerial == 1) return false;
 
     try {
-      await doc.reference.delete();
+      await doc.reference.set(
+        {
+          'isDeleted': true,
+          'managerSerial': -1,
+          'defaultMeal': Meal(
+            breakfast: false,
+            lunch: false,
+            dinner: false,
+            date: DateTime.now(),
+          ),
+        },
+        SetOptions(merge: true),
+      );
 
       // decrement user count by 1
       await _firestoreService.setData(
@@ -783,11 +833,11 @@ class FirestoreDatabase {
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
-    int userCount = await _getUserCount();
+    int userCount = await getUserCount();
     // system fixed cost is for one month, so divide by number of days
     double fixedCost =
         (await getFixedCost()) / endDate.difference(startDate).inDays;
-    int messboyCount = await _getMessboyCount();
+    int messboyCount = await getMessboyCount();
     double messboyMealAmount = 0;
 
     DocumentSnapshot document;
