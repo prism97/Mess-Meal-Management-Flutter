@@ -12,6 +12,7 @@ enum AuthStatus {
   Authenticated,
   AuthenticatedAsMessboy,
   Unauthenticated,
+  AccountDeleted,
 }
 
 enum Department {

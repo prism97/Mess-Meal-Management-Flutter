@@ -63,7 +63,7 @@ class AuthProvider extends ChangeNotifier {
 
     final user = userDocument.data();
     if (user.containsKey('isDeleted') && user['isDeleted']) {
-      _status = AuthStatus.Unauthenticated;
+      _status = AuthStatus.AccountDeleted;
       return null;
     }
     _status = AuthStatus.Authenticated;

@@ -11,7 +11,7 @@ class PdfGenerator {
   static List<List<dynamic>> transformData(List<Map<String, dynamic>> rawData) {
     List<List<dynamic>> data = List();
     int totalCost = 0, serial = 1;
-    data.add(['SL No.', 'Teacher ID', 'Name', 'Cost']);
+    data.add(['SL No.', 'Teacher ID', 'Name', 'Cost(tk)']);
     for (var entry in rawData) {
       if (entry['name'] != null) {
         List list = List();
@@ -27,8 +27,8 @@ class PdfGenerator {
     List totalEntry = List();
     totalEntry.add(" ");
     totalEntry.add(" ");
-    totalEntry.add(" ");
-    totalEntry.add("Total : $totalCost");
+    totalEntry.add("Total");
+    totalEntry.add("$totalCost");
     data.add(totalEntry);
     return data;
   }
@@ -108,7 +108,25 @@ class PdfGenerator {
           pw.Table.fromTextArray(
             context: context,
             data: transformData(rawData),
-          )
+            headerAlignments: {
+              0: pw.Alignment.center,
+              1: pw.Alignment.center,
+              2: pw.Alignment.center,
+              3: pw.Alignment.center,
+            },
+            cellAlignments: {
+              0: pw.Alignment.center,
+              1: pw.Alignment.center,
+              2: pw.Alignment.centerLeft,
+              3: pw.Alignment.center,
+            },
+            columnWidths: {
+              0: pw.FlexColumnWidth(1),
+              1: pw.FlexColumnWidth(3),
+              2: pw.FlexColumnWidth(4),
+              3: pw.FlexColumnWidth(2),
+            },
+          ),
         ],
       ),
     );

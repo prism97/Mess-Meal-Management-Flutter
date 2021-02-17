@@ -64,10 +64,15 @@ class FirestoreDatabase {
   }
 
   Future<List<Member>> _getActiveUsers() async {
-    List<Member> users = await _firestoreService.listDocuments(
+    List<Member> users = List();
+    await _firestoreService.listDocuments(
       path: FirestorePath.users(),
-      builder: (data, documentId) => Member.fromMap(data, documentId),
-      queryBuilder: (query) => query.where('isDeleted', isNotEqualTo: true),
+      builder: (data, documentId) {
+        Member user = Member.fromMap(data, documentId);
+        if (!user.isDeleted) {
+          users.add(user);
+        }
+      },
     );
     return users;
   }
@@ -780,14 +785,11 @@ class FirestoreDatabase {
   }
 
   // retrieve user list (names only) sorted by manager serial
-  Future<List<Member>> getManagerList() => _firestoreService.listDocuments(
-        path: FirestorePath.users(),
-        builder: (data, documentId) => Member.fromMap(data, documentId),
-        queryBuilder: (query) => query
-            .where('isDeleted', isNotEqualTo: true)
-            .orderBy('managerSerial')
-            .limit(5),
-      );
+  Future<List<Member>> getManagerList() async {
+    List<Member> activeUsers = await _getActiveUsers();
+    activeUsers.sort((a, b) => a.managerSerial.compareTo(b.managerSerial));
+    return activeUsers.sublist(0, 5);
+  }
 
   Future<bool> deleteAccount() async {
     final doc =
@@ -808,7 +810,7 @@ class FirestoreDatabase {
             lunch: false,
             dinner: false,
             date: DateTime.now(),
-          ),
+          ).toMapWithDate(),
         },
         SetOptions(merge: true),
       );

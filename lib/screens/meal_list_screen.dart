@@ -7,6 +7,7 @@ import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
+import 'package:mess_meal/widgets/manager_list_card.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -118,6 +119,7 @@ class _MealListScreenState extends State<MealListScreen> {
                         mealName: 'Guest Dinner',
                         isMessboy: widget.isMessboy,
                       ),
+                      widget.isMessboy ? ManagerListCard() : Container(),
                       widget.isMessboy
                           ? BasicWhiteButton(
                               text: 'Logout',

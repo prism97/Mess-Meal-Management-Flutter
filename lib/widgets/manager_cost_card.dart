@@ -66,9 +66,9 @@ class _ManagerCostCardState extends State<ManagerCostCard> {
                             isDense: true,
                             hintText: 'amount',
                           ),
-                          validator: (val) => int.parse(val) > 0
+                          validator: (val) => int.tryParse(val) != null
                               ? null
-                              : 'Amount must be positive',
+                              : 'Please enter valid amount',
                           onChanged: (val) {
                             setState(() {
                               _amount = int.parse(val);
