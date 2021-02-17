@@ -10,16 +10,26 @@ import 'package:path_provider/path_provider.dart';
 class PdfGenerator {
   static List<List<dynamic>> transformData(List<Map<String, dynamic>> rawData) {
     List<List<dynamic>> data = List();
-    data.add(['Teacher ID', 'Name', 'Total Cost']);
+    int totalCost = 0, serial = 1;
+    data.add(['SL No.', 'Teacher ID', 'Name', 'Cost']);
     for (var entry in rawData) {
       if (entry['name'] != null) {
         List list = List();
+        list.add(serial);
+        serial++;
         for (var field in entry.values) {
           list.add(field);
         }
+        totalCost += entry['cost'];
         data.add(list);
       }
     }
+    List totalEntry = List();
+    totalEntry.add(" ");
+    totalEntry.add(" ");
+    totalEntry.add(" ");
+    totalEntry.add("Total : $totalCost");
+    data.add(totalEntry);
     return data;
   }
 
@@ -109,7 +119,8 @@ class PdfGenerator {
       BuildContext context, Uint8List pdfData) async {
     final appDocDir = await getExternalStorageDirectory();
     final appDocPath = appDocDir.path;
-    final file = File(appDocPath + '/' + 'document.pdf');
+    final file = File(
+        appDocPath + '/' + 'Document-${DateTime.now().toIso8601String()}.pdf');
     print('Save as file ${file.path} ...');
     await file.writeAsBytes(pdfData);
     await OpenFile.open(file.path);

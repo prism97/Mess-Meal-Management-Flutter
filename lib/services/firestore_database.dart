@@ -517,6 +517,15 @@ class FirestoreDatabase {
     for (var user in deletedUsers) {
       await _firestoreService.deleteData(path: FirestorePath.user(user.uid));
     }
+    // decrement user count
+    int count = 0 - deletedUsers.length;
+    await _firestoreService.setData(
+      path: FirestorePath.counts(),
+      data: {
+        'users': FieldValue.increment(count),
+      },
+      merge: true,
+    );
   }
 
   Future<void> addFund(Fund fund) async {
@@ -689,6 +698,22 @@ class FirestoreDatabase {
         },
       );
     }
+    uniqueUserList.sort((a, b) {
+      String deptA, deptB;
+      var splits = a['name'].toString().split(",");
+      if (splits.length == 2) {
+        deptA = splits[1].trim();
+      } else {
+        deptA = splits[0].trim();
+      }
+      splits = b['name'].toString().split(",");
+      if (splits.length == 2) {
+        deptB = splits[1].trim();
+      } else {
+        deptB = splits[0].trim();
+      }
+      return deptA.compareTo(deptB);
+    });
     for (var user in uniqueUserList) {
       double totalCost = 0;
       for (var manager in managers) {
@@ -699,7 +724,7 @@ class FirestoreDatabase {
       costList.add({
         "teacherId": user['teacherId'],
         "name": user['name'],
-        "totalCost": double.parse((totalCost).toStringAsFixed(2)),
+        "cost": totalCost.round(),
       });
     }
     return costList;
@@ -758,7 +783,10 @@ class FirestoreDatabase {
   Future<List<Member>> getManagerList() => _firestoreService.listDocuments(
         path: FirestorePath.users(),
         builder: (data, documentId) => Member.fromMap(data, documentId),
-        queryBuilder: (query) => query.orderBy('managerSerial').limit(5),
+        queryBuilder: (query) => query
+            .where('isDeleted', isNotEqualTo: true)
+            .orderBy('managerSerial')
+            .limit(5),
       );
 
   Future<bool> deleteAccount() async {
@@ -785,14 +813,6 @@ class FirestoreDatabase {
         SetOptions(merge: true),
       );
 
-      // decrement user count by 1
-      await _firestoreService.setData(
-        path: FirestorePath.counts(),
-        data: {
-          'users': FieldValue.increment(-1),
-        },
-        merge: true,
-      );
       // update manager serials
       final users = await _firestoreService.listDocuments(
         path: FirestorePath.users(),

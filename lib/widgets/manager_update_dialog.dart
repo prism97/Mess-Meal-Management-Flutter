@@ -40,9 +40,9 @@ class _ManagerUpdateDialogState extends State<ManagerUpdateDialog> {
   Future<void> _fetchSystemCounts() async {
     userCount = await db.getUserCount();
     messboyCount = await db.getMessboyCount();
-    // system fixed cost is for one month, so divide by number of days
+    // system fixed cost is for one month, so divide by 30 & multiply by number of days
     fixedCost =
-        (await db.getFixedCost()) / endDate.difference(startDate).inDays;
+        (await db.getFixedCost() / 30) * endDate.difference(startDate).inDays;
   }
 
   @override
