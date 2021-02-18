@@ -7,6 +7,7 @@ import 'package:mess_meal/models/meal_amount.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/meal_tile.dart';
 import 'package:provider/provider.dart';
+import 'package:decimal/decimal.dart';
 
 class GuestMealDialog extends StatefulWidget {
   final DateTime date;
@@ -41,7 +42,7 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
   @override
   void initState() {
     super.initState();
-
+    print(widget.mealAmount.breakfast);
     db = Provider.of<FirestoreDatabase>(context, listen: false);
     db.getGuestMeal(widget.date).then((doc) {
       if (doc.exists) {
@@ -102,7 +103,11 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                         children: [
                           MealTile(
                             title: 'Breakfast',
-                            mealAmount: widget.mealAmount.breakfast * 1.5,
+                            mealAmount: (Decimal.parse(widget
+                                        .mealAmount.breakfast
+                                        .toString()) *
+                                    Decimal.parse('1.5'))
+                                .toDouble(),
                             value: _breakfast,
                             onChanged: _checkTimeConstraint()
                                 ? (bool value) {
@@ -120,7 +125,10 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                           ),
                           MealTile(
                             title: 'Lunch',
-                            mealAmount: widget.mealAmount.lunch * 1.5,
+                            mealAmount: (Decimal.parse(
+                                        widget.mealAmount.lunch.toString()) *
+                                    Decimal.parse('1.5'))
+                                .toDouble(),
                             value: _lunch,
                             onChanged: _checkTimeConstraint()
                                 ? (bool value) {
@@ -138,7 +146,10 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                           ),
                           MealTile(
                             title: 'Dinner',
-                            mealAmount: widget.mealAmount.dinner * 1.5,
+                            mealAmount: (Decimal.parse(
+                                        widget.mealAmount.dinner.toString()) *
+                                    Decimal.parse('1.5'))
+                                .toDouble(),
                             value: _dinner,
                             onChanged: _checkTimeConstraint()
                                 ? (bool value) {

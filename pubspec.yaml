@@ -37,6 +37,7 @@ dependencies:
   pdf: ^1.11.2
   open_file: ^3.0.3
   path_provider: ^1.6.24
+  decimal: ^0.3.5
 
 dev_dependencies:
   flutter_test:
