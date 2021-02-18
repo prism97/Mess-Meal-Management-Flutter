@@ -66,6 +66,10 @@ class _MealListCardState extends State<MealListCard> {
                       ListTile(
                         title: Text(
                           user.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 14),
                         ),
                         trailing: widget.isMessboy
                             ? RaisedButton(
@@ -75,7 +79,13 @@ class _MealListCardState extends State<MealListCard> {
                                   borderRadius:
                                       BorderRadius.circular(kBorderRadius),
                                 ),
-                                child: Text('Add egg'),
+                                child: Text(
+                                  'Add egg',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      .copyWith(color: Colors.white),
+                                ),
                                 onPressed: () {
                                   String message;
                                   db

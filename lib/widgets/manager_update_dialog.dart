@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:provider/provider.dart';
 
@@ -41,8 +42,8 @@ class _ManagerUpdateDialogState extends State<ManagerUpdateDialog> {
     userCount = await db.getUserCount();
     messboyCount = await db.getMessboyCount();
     // system fixed cost is for one month, so divide by 30 & multiply by number of days
-    fixedCost =
-        (await db.getFixedCost() / 30) * endDate.difference(startDate).inDays;
+    fixedCost = (await db.getFixedCost() / 30) *
+        (endDate.difference(startDate).inDays + 1);
   }
 
   @override
@@ -59,9 +60,13 @@ class _ManagerUpdateDialogState extends State<ManagerUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Card(
-        margin: EdgeInsets.symmetric(
-            vertical: MediaQuery.of(context).size.height / 3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          kBorderRadius,
+        ),
+      ),
+      child: Container(
+        height: MediaQuery.of(context).size.height / 3,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

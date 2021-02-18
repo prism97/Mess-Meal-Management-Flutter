@@ -23,11 +23,15 @@ class GuestMealListCard extends StatefulWidget {
 
 class _GuestMealListCardState extends State<GuestMealListCard> {
   FirestoreDatabase db;
+  int count = 0;
 
   @override
   void initState() {
     super.initState();
     db = Provider.of<FirestoreDatabase>(context, listen: false);
+    for (var entry in widget.entries) {
+      count += entry['count'];
+    }
   }
 
   @override
@@ -48,7 +52,7 @@ class _GuestMealListCardState extends State<GuestMealListCard> {
               backgroundColor: primaryColorLight,
               foregroundColor: Colors.white,
               child: Text(
-                widget.entries.length.toString(),
+                count.toString(),
               ),
             ),
           ),
@@ -67,6 +71,10 @@ class _GuestMealListCardState extends State<GuestMealListCard> {
                   ListTile(
                     title: Text(
                       '${user.name} - $count',
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle2
+                          .copyWith(fontSize: 14),
                     ),
                     trailing: widget.isMessboy
                         ? RaisedButton(
@@ -76,7 +84,13 @@ class _GuestMealListCardState extends State<GuestMealListCard> {
                               borderRadius:
                                   BorderRadius.circular(kBorderRadius),
                             ),
-                            child: Text('Add egg'),
+                            child: Text(
+                              'Add egg',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption
+                                  .copyWith(color: Colors.white),
+                            ),
                             onPressed: () {
                               String message;
                               db

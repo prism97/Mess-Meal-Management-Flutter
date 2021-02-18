@@ -652,12 +652,12 @@ class FirestoreDatabase {
       record['lunchCount'] = mealData['lunchCount'];
       record['dinnerCount'] = mealData['dinnerCount'];
       record['guestMealCount'] = mealData['guestMealCount'];
-      record['eggCount'] = mealData['eggCount'];
+      record['eggCount'] = mealData['eggCount'] ?? 0;
       record['mealCost'] =
           managerDocument['perMealCost'] * mealData['mealAmount'];
       record['fixedCost'] = managerDocument['perUserFixedCost'];
       record['totalCost'] = record['mealCost'] +
-          (mealData['eggCount'] ?? 0) * managerDocument['eggUnitPrice'] +
+          record['eggCount'] * managerDocument['eggUnitPrice'] +
           managerDocument['perUserFixedCost'];
     }
 
