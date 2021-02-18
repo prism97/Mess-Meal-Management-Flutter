@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:decimal/decimal.dart';
 import 'package:mess_meal/models/fund.dart';
+import 'package:mess_meal/models/guest_meal.dart';
 import 'package:mess_meal/models/manager_cost.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/meal_amount.dart';
@@ -235,7 +237,7 @@ class FirestoreDatabase {
       );
 
   // create/update guest meal
-  Future<void> setGuestMeal(Meal meal) => _firestoreService.setData(
+  Future<void> setGuestMeal(GuestMeal meal) => _firestoreService.setData(
         path: FirestorePath.guestMeal(uid, meal.date.toIso8601String()),
         data: meal.toMap(),
         merge: true,
@@ -316,40 +318,12 @@ class FirestoreDatabase {
   // update manager
   Future<void> updateManager(
       Map<String, dynamic> oldManager, Map<String, dynamic> counts) async {
-    // Map<String, dynamic> currentManager = await getCurrentManager();
-
-    // String oldManagerId = currentManager['managerId'];
-    // DateTime startDate = DateTime.parse(currentManager['startDate']);
-    // DateTime endDate = DateTime.now();
-    // if (endDate.hour < 7) {
-    //   endDate = endDate.subtract(Duration(days: 1));
-    // }
-    // endDate = DateTime(endDate.year, endDate.month, endDate.day);
-    // double eggUnitPrice = await getEggUnitPrice();
-
-    // await _firestoreService.setData(
-    //   path: FirestorePath.manager(oldManagerId),
-    //   data: {
-    //     'startDate': startDate.toIso8601String(),
-    //     'endDate': endDate.toIso8601String(),
-    //     'totalCost': currentManager['cost'],
-    //     'eggUnitPrice': eggUnitPrice,
-    //     'totalEggCount': currentManager['totalEggCount'],
-    //   },
-    //   merge: true,
-    // );
-
     DateTime startDate = oldManager['startDate'];
     DateTime endDate = oldManager['endDate'];
     DateTime tempDate;
     Map<DateTime, MealAmount> mealAmounts = Map();
     tempDate = startDate;
 
-    // int userCount = await getUserCount();
-    // // system fixed cost is for one month, so divide by number of days
-    // double fixedCost =
-    //     (await getFixedCost()) / endDate.difference(startDate).inDays;
-    // int messboyCount = await getMessboyCount();
     int userCount = counts['userCount'];
     int messboyCount = counts['messboyCount'];
     double fixedCost = counts['fixedCost'];
@@ -385,7 +359,8 @@ class FirestoreDatabase {
     );
 
     MealAmount mealAmount;
-    Meal meal, guestMeal;
+    Meal meal;
+    GuestMeal guestMeal;
     double totalMealAmount = 0, userMealAmount;
     int breakfastCount, lunchCount, dinnerCount, guestMealCount;
 
@@ -458,19 +433,25 @@ class FirestoreDatabase {
           path: FirestorePath.guestMeal(user.uid, tempDate.toIso8601String()),
         );
         if (document.exists) {
-          guestMeal = Meal.fromMap(Map<String, bool>.from(document.data()));
-          if (guestMeal.breakfast) {
-            userMealAmount += mealAmount.breakfast * 1.5;
-            guestMealCount++;
-          }
-          if (guestMeal.lunch) {
-            userMealAmount += mealAmount.lunch * 1.5;
-            guestMealCount++;
-          }
-          if (guestMeal.dinner) {
-            userMealAmount += mealAmount.dinner * 1.5;
-            guestMealCount++;
-          }
+          guestMeal = GuestMeal.fromMap(Map<String, int>.from(document.data()));
+
+          userMealAmount += (Decimal.parse(guestMeal.breakfast.toString()) *
+                  Decimal.parse(mealAmount.breakfast.toString()) *
+                  Decimal.parse('1.5'))
+              .toDouble();
+          guestMealCount += guestMeal.breakfast;
+
+          userMealAmount += (Decimal.parse(guestMeal.lunch.toString()) *
+                  Decimal.parse(mealAmount.lunch.toString()) *
+                  Decimal.parse('1.5'))
+              .toDouble();
+          guestMealCount += guestMeal.lunch;
+
+          userMealAmount += (Decimal.parse(guestMeal.dinner.toString()) *
+                  Decimal.parse(mealAmount.dinner.toString()) *
+                  Decimal.parse('1.5'))
+              .toDouble();
+          guestMealCount += guestMeal.dinner;
         }
 
         if (tempDate.isAtSameMomentAs(endDate)) break;
@@ -610,7 +591,8 @@ class FirestoreDatabase {
   }
 
   // list of users who turned on guest meal for today's breakfast, lunch or dinner
-  Future<Map<String, List<Member>>> getGuestMealSubscribers() async {
+  Future<Map<String, List<Map<String, dynamic>>>>
+      getGuestMealSubscribers() async {
     final today = DateTime.now();
     final _date = DateTime(today.year, today.month, today.day);
 
@@ -619,13 +601,13 @@ class FirestoreDatabase {
       builder: (data, documentId) => Member.fromMap(data, documentId),
     );
 
-    Map<String, List<Member>> guestMealSubscribers = {
-      'breakfast': List<Member>(),
-      'lunch': List<Member>(),
-      'dinner': List<Member>(),
+    Map<String, List<Map<String, dynamic>>> guestMealSubscribers = {
+      'breakfast': List<Map<String, dynamic>>(),
+      'lunch': List<Map<String, dynamic>>(),
+      'dinner': List<Map<String, dynamic>>(),
     };
 
-    Meal guestMeal;
+    GuestMeal guestMeal;
     DocumentSnapshot document;
     Member user;
     for (user in users) {
@@ -634,10 +616,22 @@ class FirestoreDatabase {
       );
 
       if (document.exists) {
-        guestMeal = Meal.fromMap(Map<String, bool>.from(document.data()));
-        if (guestMeal.breakfast) guestMealSubscribers['breakfast'].add(user);
-        if (guestMeal.lunch) guestMealSubscribers['lunch'].add(user);
-        if (guestMeal.dinner) guestMealSubscribers['dinner'].add(user);
+        guestMeal = GuestMeal.fromMap(Map<String, int>.from(document.data()));
+        if (guestMeal.breakfast > 0)
+          guestMealSubscribers['breakfast'].add({
+            'user': user,
+            'count': guestMeal.breakfast,
+          });
+        if (guestMeal.lunch > 0)
+          guestMealSubscribers['lunch'].add({
+            'user': user,
+            'count': guestMeal.lunch,
+          });
+        if (guestMeal.dinner > 0)
+          guestMealSubscribers['dinner'].add({
+            'user': user,
+            'count': guestMeal.dinner,
+          });
       }
     }
     return guestMealSubscribers;
@@ -837,148 +831,5 @@ class FirestoreDatabase {
       print(error);
       return false;
     }
-  }
-
-  /*
-  *
-  * extra function, might be needed later
-  *
-  */
-  Future<void> recalculateManagerStats(String managerId) async {
-    Map<String, dynamic> manager =
-        await _firestoreService.getData(path: FirestorePath.manager(managerId));
-
-    DateTime startDate = DateTime.parse(manager['startDate']);
-    DateTime endDate = DateTime.parse(manager['endDate']);
-
-    DateTime tempDate;
-    Map<DateTime, MealAmount> mealAmounts = Map();
-    tempDate = startDate;
-
-    int userCount = await getUserCount();
-    // system fixed cost is for one month, so divide by number of days
-    double fixedCost =
-        (await getFixedCost()) / endDate.difference(startDate).inDays;
-    int messboyCount = await getMessboyCount();
-    double messboyMealAmount = 0;
-
-    DocumentSnapshot document;
-    // fetch meal amounts for the duration
-    while (true) {
-      document = await _firestoreService.getDocument(
-        path: FirestorePath.mealAmount(
-          tempDate.toIso8601String(),
-        ),
-      );
-      if (document.exists) {
-        mealAmounts[tempDate] =
-            MealAmount.fromMap(Map<String, double>.from(document.data()));
-      } else {
-        mealAmounts[tempDate] = MealAmount.fromDefault();
-      }
-      messboyMealAmount += mealAmounts[tempDate].breakfast * messboyCount;
-      messboyMealAmount += mealAmounts[tempDate].lunch * messboyCount;
-      messboyMealAmount += mealAmounts[tempDate].dinner * messboyCount;
-
-      if (tempDate.isAtSameMomentAs(endDate)) break;
-      tempDate = tempDate.add(Duration(days: 1));
-    }
-
-    List<Member> users = await _firestoreService.listDocuments(
-      path: FirestorePath.users(),
-      builder: (data, documentId) => Member.fromMap(data, documentId),
-    );
-
-    MealAmount mealAmount;
-    Meal meal, guestMeal;
-    double totalMealAmount = 0, userMealAmount;
-    int breakfastCount, lunchCount, dinnerCount, guestMealCount;
-
-    Member user;
-
-    for (user in users) {
-      tempDate = startDate;
-      userMealAmount = 0;
-      breakfastCount = 0;
-      lunchCount = 0;
-      dinnerCount = 0;
-      guestMealCount = 0;
-
-      while (true) {
-        mealAmount = mealAmounts[tempDate];
-        document = await _firestoreService.getDocument(
-          path: FirestorePath.meal(user.uid, tempDate.toIso8601String()),
-        );
-
-        if (document.exists) {
-          meal = Meal.fromMap(Map<String, bool>.from(document.data()));
-
-          if (meal.breakfast) {
-            userMealAmount += mealAmount.breakfast;
-            breakfastCount++;
-          }
-          if (meal.lunch) {
-            userMealAmount += mealAmount.lunch;
-            lunchCount++;
-          }
-          if (meal.dinner) {
-            userMealAmount += mealAmount.dinner;
-            dinnerCount++;
-          }
-        }
-        // retrieve guest meal for this date & user
-        document = await _firestoreService.getDocument(
-          path: FirestorePath.guestMeal(user.uid, tempDate.toIso8601String()),
-        );
-        if (document.exists) {
-          guestMeal = Meal.fromMap(Map<String, bool>.from(document.data()));
-          if (guestMeal.breakfast) {
-            userMealAmount += mealAmount.breakfast * 1.5;
-            guestMealCount++;
-          }
-          if (guestMeal.lunch) {
-            userMealAmount += mealAmount.lunch * 1.5;
-            guestMealCount++;
-          }
-          if (guestMeal.dinner) {
-            userMealAmount += mealAmount.dinner * 1.5;
-            guestMealCount++;
-          }
-        }
-
-        if (tempDate.isAtSameMomentAs(endDate)) break;
-        tempDate = tempDate.add(Duration(days: 1));
-      }
-
-      await _firestoreService.setData(
-        path: FirestorePath.mealRecord(managerId, user.uid),
-        data: {
-          'mealAmount': userMealAmount,
-          'breakfastCount': breakfastCount,
-          'lunchCount': lunchCount,
-          'dinnerCount': dinnerCount,
-          'guestMealCount': guestMealCount,
-        },
-        merge: true,
-      );
-
-      totalMealAmount += userMealAmount;
-    }
-
-    double perMealCost = (manager['totalCost'] -
-            manager['totalEggCount'] * manager['eggUnitPrice']) /
-        (totalMealAmount + messboyMealAmount);
-    double perUserFixedCost =
-        (fixedCost + perMealCost * messboyMealAmount) / userCount;
-
-    await _firestoreService.setData(
-      path: FirestorePath.manager(managerId),
-      data: {
-        'totalMealAmount': totalMealAmount,
-        'perMealCost': perMealCost,
-        'perUserFixedCost': perUserFixedCost,
-      },
-      merge: true,
-    );
   }
 }

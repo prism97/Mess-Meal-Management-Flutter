@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
-import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/services/firestore_database.dart';
 import 'package:mess_meal/widgets/basic_white_button.dart';
 import 'package:mess_meal/widgets/custom_app_bar.dart';
+import 'package:mess_meal/widgets/guest_meal_list_card.dart';
 import 'package:mess_meal/widgets/manager_list_card.dart';
+import 'package:mess_meal/widgets/meal_list_card.dart';
 import 'package:mess_meal/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
 
 class MealListScreen extends StatefulWidget {
   static const String id = 'meal_list_screen';
   final isMessboy;
+  static final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   const MealListScreen({this.isMessboy = false});
 
@@ -22,10 +24,8 @@ class MealListScreen extends StatefulWidget {
 }
 
 class _MealListScreenState extends State<MealListScreen> {
-  static final _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Member> _breakfast, _guestBreakfast;
-  List<Member> _lunch, _guestLunch;
-  List<Member> _dinner, _guestDinner;
+  List<Member> _breakfast, _lunch, _dinner;
+  List<Map<String, dynamic>> _guestBreakfast, _guestLunch, _guestDinner;
   bool _loading = true;
 
   FirestoreDatabase db;
@@ -57,7 +57,7 @@ class _MealListScreenState extends State<MealListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
+      key: MealListScreen._scaffoldKey,
       drawer: widget.isMessboy
           ? null
           : NavDrawer(
@@ -85,16 +85,19 @@ class _MealListScreenState extends State<MealListScreen> {
                         mealName: 'Breakfast',
                         users: _breakfast,
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       MealListCard(
                         users: _lunch,
                         mealName: 'Lunch',
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       MealListCard(
                         users: _dinner,
                         mealName: 'Dinner',
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
@@ -104,20 +107,23 @@ class _MealListScreenState extends State<MealListScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      MealListCard(
-                        users: _guestBreakfast,
+                      GuestMealListCard(
+                        entries: _guestBreakfast,
                         mealName: 'Guest Breakfast',
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
-                      MealListCard(
-                        users: _guestLunch,
+                      GuestMealListCard(
+                        entries: _guestLunch,
                         mealName: 'Guest Lunch',
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
-                      MealListCard(
-                        users: _guestDinner,
+                      GuestMealListCard(
+                        entries: _guestDinner,
                         mealName: 'Guest Dinner',
                         isMessboy: widget.isMessboy,
+                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       widget.isMessboy ? ManagerListCard() : Container(),
                       widget.isMessboy
@@ -134,121 +140,5 @@ class _MealListScreenState extends State<MealListScreen> {
                   ),
                 ),
     );
-  }
-}
-
-class MealListCard extends StatefulWidget {
-  final List<Member> users;
-  final String mealName;
-  final isMessboy;
-
-  const MealListCard(
-      {@required this.users,
-      @required this.mealName,
-      @required this.isMessboy});
-
-  @override
-  _MealListCardState createState() => _MealListCardState();
-}
-
-class _MealListCardState extends State<MealListCard> {
-  FirestoreDatabase db;
-
-  @override
-  void initState() {
-    super.initState();
-    db = Provider.of<FirestoreDatabase>(context, listen: false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10.0),
-      elevation: kElevation,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(kBorderRadius)),
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              widget.mealName,
-              style: Theme.of(context).textTheme.bodyText1,
-            ),
-            trailing: CircleAvatar(
-              backgroundColor: primaryColorLight,
-              foregroundColor: Colors.white,
-              child: Text(
-                widget.users.length.toString(),
-              ),
-            ),
-          ),
-          Divider(),
-          ExpansionTile(
-            title: Text(
-              'subscribers',
-              style: Theme.of(context).textTheme.bodyText1,
-            ),
-            children: widget.users
-                .map(
-                  (user) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          user.name,
-                        ),
-                        trailing: widget.isMessboy
-                            ? RaisedButton(
-                                color: primaryColorDark,
-                                textColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(kBorderRadius),
-                                ),
-                                child: Text('Add egg'),
-                                onPressed: () {
-                                  String message;
-                                  db
-                                      .updateEggCountOfUser(user.uid)
-                                      .then((value) => message =
-                                          "Added one egg for ${user.name}")
-                                      .catchError((e) => message =
-                                          "Couldn't update egg count for ${user.name}")
-                                      .whenComplete(
-                                          () => showEggSnackBar(message));
-                                },
-                              )
-                            : Container(
-                                height: 1.0,
-                                width: 1.0,
-                              ),
-                      ),
-                      Divider(),
-                    ],
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void showEggSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: Theme.of(context).textTheme.bodyText1,
-      ),
-      backgroundColor: Theme.of(context).disabledColor,
-      elevation: kElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(kBorderRadius),
-          topRight: Radius.circular(kBorderRadius),
-        ),
-      ),
-    );
-    _MealListScreenState._scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }

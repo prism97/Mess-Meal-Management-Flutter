@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
+import 'package:mess_meal/models/guest_meal.dart';
 import 'package:mess_meal/models/meal.dart';
 import 'package:mess_meal/models/meal_amount.dart';
 import 'package:mess_meal/services/firestore_database.dart';
-import 'package:mess_meal/widgets/meal_tile.dart';
+import 'package:mess_meal/widgets/guest_meal_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:decimal/decimal.dart';
 
@@ -25,7 +26,7 @@ class GuestMealDialog extends StatefulWidget {
 
 class _GuestMealDialogState extends State<GuestMealDialog> {
   bool _loading = true;
-  bool _breakfast, _lunch, _dinner;
+  int _breakfast, _lunch, _dinner;
   FirestoreDatabase db;
 
   bool _checkTimeConstraint() {
@@ -46,14 +47,15 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
     db = Provider.of<FirestoreDatabase>(context, listen: false);
     db.getGuestMeal(widget.date).then((doc) {
       if (doc.exists) {
-        Meal guestMeal = Meal.fromMap(Map<String, bool>.from(doc.data()));
+        GuestMeal guestMeal =
+            GuestMeal.fromMap(Map<String, int>.from(doc.data()));
         _breakfast = guestMeal.breakfast;
         _lunch = guestMeal.lunch;
         _dinner = guestMeal.dinner;
       } else {
-        _breakfast = false;
-        _lunch = false;
-        _dinner = false;
+        _breakfast = 0;
+        _lunch = 0;
+        _dinner = 0;
       }
       setState(() {
         _loading = false;
@@ -101,21 +103,32 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                   : Form(
                       child: Column(
                         children: [
-                          MealTile(
+                          GuestMealTile(
                             title: 'Breakfast',
                             mealAmount: (Decimal.parse(widget
                                         .mealAmount.breakfast
                                         .toString()) *
                                     Decimal.parse('1.5'))
                                 .toDouble(),
-                            value: _breakfast,
-                            onChanged: _checkTimeConstraint()
-                                ? (bool value) {
-                                    if (!widget.userMeal.breakfast && value) {
+                            count: _breakfast,
+                            onDecrement:
+                                _checkTimeConstraint() && _breakfast != 0
+                                    ? () {
+                                        if (!widget.userMeal.breakfast) {
+                                          return;
+                                        }
+                                        setState(() {
+                                          _breakfast--;
+                                        });
+                                      }
+                                    : null,
+                            onIncrement: _checkTimeConstraint()
+                                ? () {
+                                    if (!widget.userMeal.breakfast) {
                                       return;
                                     }
                                     setState(() {
-                                      _breakfast = value;
+                                      _breakfast++;
                                     });
                                   }
                                 : null,
@@ -123,20 +136,30 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                           SizedBox(
                             height: 10.0,
                           ),
-                          MealTile(
+                          GuestMealTile(
                             title: 'Lunch',
                             mealAmount: (Decimal.parse(
                                         widget.mealAmount.lunch.toString()) *
                                     Decimal.parse('1.5'))
                                 .toDouble(),
-                            value: _lunch,
-                            onChanged: _checkTimeConstraint()
-                                ? (bool value) {
-                                    if (!widget.userMeal.lunch && value) {
+                            count: _lunch,
+                            onDecrement: _checkTimeConstraint() && _lunch != 0
+                                ? () {
+                                    if (!widget.userMeal.lunch) {
                                       return;
                                     }
                                     setState(() {
-                                      _lunch = value;
+                                      _lunch--;
+                                    });
+                                  }
+                                : null,
+                            onIncrement: _checkTimeConstraint()
+                                ? () {
+                                    if (!widget.userMeal.lunch) {
+                                      return;
+                                    }
+                                    setState(() {
+                                      _lunch++;
                                     });
                                   }
                                 : null,
@@ -144,20 +167,30 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                           SizedBox(
                             height: 10.0,
                           ),
-                          MealTile(
+                          GuestMealTile(
                             title: 'Dinner',
                             mealAmount: (Decimal.parse(
                                         widget.mealAmount.dinner.toString()) *
                                     Decimal.parse('1.5'))
                                 .toDouble(),
-                            value: _dinner,
-                            onChanged: _checkTimeConstraint()
-                                ? (bool value) {
-                                    if (!widget.userMeal.dinner && value) {
+                            count: _dinner,
+                            onDecrement: _checkTimeConstraint() && _dinner != 0
+                                ? () {
+                                    if (!widget.userMeal.dinner) {
                                       return;
                                     }
                                     setState(() {
-                                      _dinner = value;
+                                      _dinner--;
+                                    });
+                                  }
+                                : null,
+                            onIncrement: _checkTimeConstraint()
+                                ? () {
+                                    if (!widget.userMeal.dinner) {
+                                      return;
+                                    }
+                                    setState(() {
+                                      _dinner++;
                                     });
                                   }
                                 : null,
@@ -176,7 +209,7 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                                   child: Text('Save'),
                                   onPressed: () async {
                                     await db.setGuestMeal(
-                                      Meal(
+                                      GuestMeal(
                                         breakfast: _breakfast,
                                         lunch: _lunch,
                                         dinner: _dinner,
