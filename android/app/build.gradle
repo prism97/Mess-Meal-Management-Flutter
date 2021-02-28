@@ -66,14 +66,14 @@ android {
         development {
             dimension "flavor-type"
             applicationId "com.prism.mess_meal"
-            versionCode 2
-            versionName "1.1"
+            versionCode 1
+            versionName "2.0"
         }
         production {
             dimension "flavor-type"
             applicationId "com.prism.mess_meal_production"
-            versionCode 2
-            versionName "1.1"
+            versionCode 1
+            versionName "2.0"
         }
     }
 }
