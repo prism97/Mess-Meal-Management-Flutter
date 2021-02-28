@@ -487,7 +487,9 @@ class FirestoreDatabase {
       path: FirestorePath.manager(oldManager['managerId']),
       data: {
         'totalMealAmount': totalMealAmount,
+        'messboyMealAmount': messboyMealAmount,
         'perMealCost': perMealCost,
+        'systemFixedCost': fixedCost,
         'perUserFixedCost': perUserFixedCost,
       },
       merge: true,
