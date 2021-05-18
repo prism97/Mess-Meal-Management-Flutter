@@ -133,7 +133,7 @@ class FirestoreDatabase {
 
   _setCurrentManager({String uid, String name, String managerId}) async {
     DateTime startDate = DateTime.now();
-    if (startDate.hour > 7) {
+    if (startDate.hour > 4) {
       startDate = startDate.add(Duration(days: 1));
     }
     startDate = DateTime(startDate.year, startDate.month, startDate.day);
@@ -206,12 +206,12 @@ class FirestoreDatabase {
   Future<void> updateDefaultMeal(Meal oldMeal, Meal newMeal) async {
     await _setDefaultMeal(newMeal);
 
-    /*  if default meal is updated after 7am, 
+    /*  if default meal is updated after 5am, 
         set today's meal with old meal
         (in case today's meal doesn't exist yet)
     */
     DateTime now = DateTime.now();
-    if (now.hour > 6) {
+    if (now.hour > 4) {
       DateTime today = DateTime(now.year, now.month, now.day);
 
       DocumentSnapshot document = await _firestoreService.getDocument(
@@ -540,7 +540,7 @@ class FirestoreDatabase {
   Future<Map<String, List<Member>>> getMealSubscribers() async {
     final today = DateTime.now();
     final _date = DateTime(today.year, today.month, today.day);
-    final _updateTime = DateTime(today.year, today.month, today.day, 7);
+    final _updateTime = DateTime(today.year, today.month, today.day, 5);
 
     List<Member> users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
@@ -571,8 +571,8 @@ class FirestoreDatabase {
           meal = Meal(breakfast: false, lunch: false, dinner: false);
         }
 
-        // set only after 7 am
-        if (DateTime.now().hour > 6) {
+        // set only after 5 am
+        if (DateTime.now().hour > 4) {
           _setMealOfUser(
             Meal(
               breakfast: meal.breakfast,

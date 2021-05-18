@@ -29,7 +29,7 @@ class _ManagerUpdateDialogState extends State<ManagerUpdateDialog> {
     oldManagerId = oldManager['managerId'];
     startDate = DateTime.parse(oldManager['startDate']);
     endDate = DateTime.now();
-    if (endDate.hour < 7) {
+    if (endDate.hour < 5) {
       endDate = endDate.subtract(Duration(days: 1));
     }
     endDate = DateTime(endDate.year, endDate.month, endDate.day);

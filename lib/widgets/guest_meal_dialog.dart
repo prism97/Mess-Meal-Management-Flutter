@@ -34,7 +34,7 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
       widget.date.year,
       widget.date.month,
       widget.date.day,
-      7,
+      5,
     );
     if (DateTime.now().isAfter(lastUpdateTime)) return false;
     return true;
