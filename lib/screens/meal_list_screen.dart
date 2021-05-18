@@ -125,7 +125,12 @@ class _MealListScreenState extends State<MealListScreen> {
                         isMessboy: widget.isMessboy,
                         scaffoldKey: MealListScreen._scaffoldKey,
                       ),
-                      widget.isMessboy ? ManagerListCard() : Container(),
+                      widget.isMessboy
+                          ? ManagerListCard(
+                              start: 0,
+                              end: 3,
+                            )
+                          : Container(),
                       widget.isMessboy
                           ? BasicWhiteButton(
                               text: 'Logout',

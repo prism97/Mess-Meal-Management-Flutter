@@ -24,7 +24,10 @@ class ManagerScreen extends StatelessWidget {
             ManagerCostCard(),
             EggPriceCard(),
             CurrentManagerCard(),
-            ManagerListCard(),
+            ManagerListCard(
+              start: 1,
+              end: 6,
+            ),
           ],
         ),
       ),

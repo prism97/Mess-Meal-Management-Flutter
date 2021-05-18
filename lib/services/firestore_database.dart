@@ -781,10 +781,10 @@ class FirestoreDatabase {
   }
 
   // retrieve user list (names only) sorted by manager serial
-  Future<List<Member>> getManagerList() async {
+  Future<List<Member>> getManagerList(int start, int end) async {
     List<Member> activeUsers = await _getActiveUsers();
     activeUsers.sort((a, b) => a.managerSerial.compareTo(b.managerSerial));
-    return activeUsers.sublist(0, 5);
+    return activeUsers.sublist(start, end);
   }
 
   Future<bool> deleteAccount() async {
