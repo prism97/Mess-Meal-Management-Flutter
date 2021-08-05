@@ -199,12 +199,23 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                             height: 5.0,
                           ),
                           _checkTimeConstraint()
-                              ? RaisedButton(
-                                  color: Theme.of(context).accentColor,
-                                  textColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(kBorderRadius),
+                              ? ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Theme.of(context).accentColor,
+                                    ),
+                                    foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Colors.white,
+                                    ),
+                                    shape: MaterialStateProperty.all<
+                                        OutlinedBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            kBorderRadius),
+                                      ),
+                                    ),
                                   ),
                                   child: Text('Save'),
                                   onPressed: () async {

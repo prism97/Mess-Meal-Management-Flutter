@@ -9,13 +9,12 @@ class MealListCard extends StatefulWidget {
   final List<Member> users;
   final String mealName;
   final isMessboy;
-  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const MealListCard(
-      {@required this.users,
-      @required this.mealName,
-      @required this.isMessboy,
-      @required this.scaffoldKey});
+  const MealListCard({
+    @required this.users,
+    @required this.mealName,
+    @required this.isMessboy,
+  });
 
   @override
   _MealListCardState createState() => _MealListCardState();
@@ -72,12 +71,23 @@ class _MealListCardState extends State<MealListCard> {
                               .copyWith(fontSize: 14),
                         ),
                         trailing: widget.isMessboy
-                            ? RaisedButton(
-                                color: primaryColorDark,
-                                textColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(kBorderRadius),
+                            ? ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    primaryColorDark,
+                                  ),
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Colors.white,
+                                  ),
+                                  shape:
+                                      MaterialStateProperty.all<OutlinedBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(kBorderRadius),
+                                    ),
+                                  ),
                                 ),
                                 child: Text(
                                   'Add egg',
@@ -129,6 +139,6 @@ class _MealListCardState extends State<MealListCard> {
         ),
       ),
     );
-    widget.scaffoldKey.currentState.showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

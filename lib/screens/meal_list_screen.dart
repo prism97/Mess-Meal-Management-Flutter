@@ -85,19 +85,16 @@ class _MealListScreenState extends State<MealListScreen> {
                         mealName: 'Breakfast',
                         users: _breakfast,
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       MealListCard(
                         users: _lunch,
                         mealName: 'Lunch',
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       MealListCard(
                         users: _dinner,
                         mealName: 'Dinner',
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
@@ -111,19 +108,16 @@ class _MealListScreenState extends State<MealListScreen> {
                         entries: _guestBreakfast,
                         mealName: 'Guest Breakfast',
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       GuestMealListCard(
                         entries: _guestLunch,
                         mealName: 'Guest Lunch',
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       GuestMealListCard(
                         entries: _guestDinner,
                         mealName: 'Guest Dinner',
                         isMessboy: widget.isMessboy,
-                        scaffoldKey: MealListScreen._scaffoldKey,
                       ),
                       widget.isMessboy
                           ? ManagerListCard(

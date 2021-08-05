@@ -111,11 +111,19 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                         size: 25.0,
                       ),
                     )
-                  : RaisedButton(
-                      textColor: Colors.white,
-                      color: accentColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(kBorderRadius),
+                  : ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          accentColor,
+                        ),
+                        foregroundColor: MaterialStateProperty.all<Color>(
+                          Colors.white,
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(kBorderRadius),
+                          ),
+                        ),
                       ),
                       child: Text('Save'),
                       onPressed: () async {
@@ -172,10 +180,21 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                FlatButton(
-                                  color: primaryColorDark,
-                                  textColor: Colors.white,
-                                  padding: EdgeInsets.all(kBorderRadius),
+                                TextButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      primaryColorDark,
+                                    ),
+                                    foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Colors.white,
+                                    ),
+                                    padding: MaterialStateProperty.all<
+                                        EdgeInsetsGeometry>(
+                                      EdgeInsets.all(kBorderRadius),
+                                    ),
+                                  ),
                                   child: Text('Yes, delete'),
                                   onPressed: () async {
                                     setState(() {
@@ -213,10 +232,21 @@ class _DefaultMealCardState extends State<DefaultMealCard> {
                                 SizedBox(
                                   width: kBorderRadius,
                                 ),
-                                FlatButton(
-                                  color: Colors.white,
-                                  textColor: primaryColorDark,
-                                  padding: EdgeInsets.all(kBorderRadius),
+                                TextButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Colors.white,
+                                    ),
+                                    foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      primaryColorDark,
+                                    ),
+                                    padding: MaterialStateProperty.all<
+                                        EdgeInsetsGeometry>(
+                                      EdgeInsets.all(kBorderRadius),
+                                    ),
+                                  ),
                                   child: Text('No, cancel'),
                                   onPressed: () {
                                     Navigator.of(context).pop();

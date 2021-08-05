@@ -90,11 +90,17 @@ class _AddFundCardState extends State<AddFundCard> {
                             color: Colors.white,
                             size: 40.0,
                           )
-                        : RaisedButton(
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius),
+                        : ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.white,
+                              ),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius),
+                                ),
+                              ),
                             ),
                             child: Text(
                               'Add new fund',

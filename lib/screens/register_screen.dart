@@ -21,7 +21,6 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _loading = false;
   FirestoreDatabase db;
   AuthProvider auth;
@@ -43,7 +42,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final _email = auth.email;
 
     return Scaffold(
-      key: _scaffoldKey,
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Container(
@@ -253,6 +251,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
-    _scaffoldKey.currentState.showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

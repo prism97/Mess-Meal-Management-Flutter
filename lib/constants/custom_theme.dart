@@ -7,7 +7,7 @@ ThemeData themeData = ThemeData(
   primaryColorLight: Colors.purple.shade600,
   accentColor: Colors.purple,
   disabledColor: Colors.purple.shade100,
-  cursorColor: Colors.white,
+  textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.white),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     elevation: 20.0,
     backgroundColor: Colors.purple.shade100,

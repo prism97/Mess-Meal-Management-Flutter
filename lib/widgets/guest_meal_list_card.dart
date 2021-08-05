@@ -9,13 +9,12 @@ class GuestMealListCard extends StatefulWidget {
   final List<Map<String, dynamic>> entries;
   final String mealName;
   final isMessboy;
-  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const GuestMealListCard(
-      {@required this.entries,
-      @required this.mealName,
-      @required this.isMessboy,
-      @required this.scaffoldKey});
+  const GuestMealListCard({
+    @required this.entries,
+    @required this.mealName,
+    @required this.isMessboy,
+  });
 
   @override
   _GuestMealListCardState createState() => _GuestMealListCardState();
@@ -77,12 +76,20 @@ class _GuestMealListCardState extends State<GuestMealListCard> {
                           .copyWith(fontSize: 14),
                     ),
                     trailing: widget.isMessboy
-                        ? RaisedButton(
-                            color: primaryColorDark,
-                            textColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius),
+                        ? ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                primaryColorDark,
+                              ),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                Colors.white,
+                              ),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius),
+                                ),
+                              ),
                             ),
                             child: Text(
                               'Add egg',
@@ -132,6 +139,6 @@ class _GuestMealListCardState extends State<GuestMealListCard> {
         ),
       ),
     );
-    widget.scaffoldKey.currentState.showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

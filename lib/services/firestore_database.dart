@@ -66,7 +66,7 @@ class FirestoreDatabase {
   }
 
   Future<List<Member>> _getActiveUsers() async {
-    List<Member> users = List();
+    List<Member> users = [];
     await _firestoreService.listDocuments(
       path: FirestorePath.users(),
       builder: (data, documentId) {
@@ -548,9 +548,9 @@ class FirestoreDatabase {
     );
 
     Map<String, List<Member>> mealSubscribers = {
-      'breakfast': List<Member>(),
-      'lunch': List<Member>(),
-      'dinner': List<Member>(),
+      'breakfast': [],
+      'lunch': [],
+      'dinner': [],
     };
 
     Meal meal, defaultMeal;
@@ -604,9 +604,9 @@ class FirestoreDatabase {
     );
 
     Map<String, List<Map<String, dynamic>>> guestMealSubscribers = {
-      'breakfast': List<Map<String, dynamic>>(),
-      'lunch': List<Map<String, dynamic>>(),
-      'dinner': List<Map<String, dynamic>>(),
+      'breakfast': [],
+      'lunch': [],
+      'dinner': [],
     };
 
     GuestMeal guestMeal;

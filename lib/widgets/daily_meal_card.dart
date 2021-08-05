@@ -158,15 +158,23 @@ class _DailyMealCardState extends State<DailyMealCard> {
                               ),
                             ),
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             child: Text(
                               'Guest Meal',
                             ),
-                            color: Theme.of(context).accentColor,
-                            textColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(kBorderRadius),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).accentColor,
+                              ),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                Colors.white,
+                              ),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(kBorderRadius),
+                                ),
+                              ),
                             ),
                             onPressed: () {
                               showDialog(
@@ -192,15 +200,25 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                 isManager = snapshot.data.isManager();
                               }
                               return isManager && _checkTimeConstraint()
-                                  ? RaisedButton(
+                                  ? ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                          Theme.of(context).accentColor,
+                                        ),
+                                        foregroundColor:
+                                            MaterialStateProperty.all(
+                                          Colors.white,
+                                        ),
+                                        shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                kBorderRadius),
+                                          ),
+                                        ),
+                                      ),
                                       child: Text(
                                         'Change meal amount',
-                                      ),
-                                      color: Theme.of(context).accentColor,
-                                      textColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            kBorderRadius),
                                       ),
                                       onPressed: () {
                                         showDialog(

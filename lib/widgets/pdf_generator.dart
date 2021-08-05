@@ -9,12 +9,12 @@ import 'package:path_provider/path_provider.dart';
 
 class PdfGenerator {
   static List<List<dynamic>> transformData(List<Map<String, dynamic>> rawData) {
-    List<List<dynamic>> data = List();
+    List<List<dynamic>> data = [];
     int totalCost = 0, serial = 1;
     data.add(['SL No.', 'Teacher ID', 'Name', 'Cost(tk)']);
     for (var entry in rawData) {
       if (entry['name'] != null) {
-        List list = List();
+        List list = [];
         list.add(serial);
         serial++;
         for (var field in entry.values) {
@@ -24,7 +24,7 @@ class PdfGenerator {
         data.add(list);
       }
     }
-    List totalEntry = List();
+    List totalEntry = [];
     totalEntry.add(" ");
     totalEntry.add(" ");
     totalEntry.add("Total");

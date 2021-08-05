@@ -73,13 +73,21 @@ class _ForgotPasswordButtonState extends State<ForgotPasswordButton> {
     );
   }
 
-  RaisedButton _sendButton(BuildContext context) {
-    return RaisedButton(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadius),
+  ElevatedButton _sendButton(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(
+          primaryColorLight,
+        ),
+        foregroundColor: MaterialStateProperty.all<Color>(
+          Colors.white,
+        ),
+        shape: MaterialStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kBorderRadius),
+          ),
+        ),
       ),
-      color: primaryColorLight,
-      textColor: Colors.white,
       onPressed: () async {
         await Provider.of<AuthProvider>(context, listen: false)
             .sendPasswordResetEmail(_email);

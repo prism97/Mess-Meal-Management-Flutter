@@ -125,11 +125,19 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                       size: 40.0,
                                     ),
                                   )
-                                : RaisedButton(
-                                    color: accentColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(kBorderRadius),
+                                : ElevatedButton(
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                        accentColor,
+                                      ),
+                                      shape: MaterialStateProperty.all<
+                                          OutlinedBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              kBorderRadius),
+                                        ),
+                                      ),
                                     ),
                                     child: Text(
                                       'Update Manager',
@@ -152,11 +160,24 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              FlatButton(
-                                                color: primaryColorDark,
-                                                textColor: Colors.white,
-                                                padding: EdgeInsets.all(
-                                                    kBorderRadius),
+                                              TextButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all<
+                                                          Color>(
+                                                    primaryColorDark,
+                                                  ),
+                                                  foregroundColor:
+                                                      MaterialStateProperty.all<
+                                                          Color>(
+                                                    Colors.white,
+                                                  ),
+                                                  padding: MaterialStateProperty
+                                                      .all<EdgeInsetsGeometry>(
+                                                    EdgeInsets.all(
+                                                        kBorderRadius),
+                                                  ),
+                                                ),
                                                 child: Text('Yes, update'),
                                                 onPressed: () {
                                                   // setState(() {
@@ -181,11 +202,24 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                               SizedBox(
                                                 width: kBorderRadius,
                                               ),
-                                              FlatButton(
-                                                color: Colors.white,
-                                                textColor: primaryColorDark,
-                                                padding: EdgeInsets.all(
-                                                    kBorderRadius),
+                                              TextButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all<
+                                                          Color>(
+                                                    Colors.white,
+                                                  ),
+                                                  foregroundColor:
+                                                      MaterialStateProperty.all<
+                                                          Color>(
+                                                    primaryColorDark,
+                                                  ),
+                                                  padding: MaterialStateProperty
+                                                      .all<EdgeInsetsGeometry>(
+                                                    EdgeInsets.all(
+                                                        kBorderRadius),
+                                                  ),
+                                                ),
                                                 child: Text('No, cancel'),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();

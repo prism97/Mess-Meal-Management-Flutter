@@ -14,17 +14,23 @@ class BasicWhiteButton extends StatelessWidget {
         vertical: 8.0,
         horizontal: 20.0,
       ),
-      child: RaisedButton(
-        color: Colors.white,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(
+            Colors.white,
+          ),
+          shape: MaterialStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(kBorderRadius),
+            ),
+          ),
+          elevation: MaterialStateProperty.all<double>(kElevation),
+        ),
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodyText1,
         ),
         onPressed: onPressed,
-        elevation: kElevation,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(kBorderRadius),
-        ),
       ),
     );
   }
