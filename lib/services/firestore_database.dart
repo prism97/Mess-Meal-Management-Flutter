@@ -54,6 +54,7 @@ class FirestoreDatabase {
         data: {
           'uid': user.uid,
           'name': user.name,
+          'assignedFund': 0,
         },
       );
       // update current manager document
@@ -166,6 +167,26 @@ class FirestoreDatabase {
     return _firestoreService.createDocument(
       collectionPath: FirestorePath.managerCost(managerId),
       data: cost.toMap(),
+    );
+  }
+
+  Future<void> updateManagerFund(
+      int amount, Member convener, String managerId, String managerName) async {
+    await _firestoreService.setData(
+      path: FirestorePath.manager(managerId),
+      data: {
+        'assignedFund': FieldValue.increment(amount),
+      },
+      merge: true,
+    );
+    return addFund(
+      Fund(
+        amount: amount * (-1), // deducting from total fund
+        description: "Fund Update for Manager $managerName",
+        date: DateTime.now(),
+        convenerId: convener.uid,
+        convenerName: convener.name,
+      ),
     );
   }
 
@@ -374,6 +395,7 @@ class FirestoreDatabase {
           data: {
             'uid': user.uid,
             'name': user.name,
+            'assignedFund': 0,
           },
         );
         // update current manager document
@@ -503,6 +525,9 @@ class FirestoreDatabase {
       queryBuilder: (query) => query.where('isDeleted', isEqualTo: true),
     );
     for (var user in deletedUsers) {
+      await _firestoreService.deleteData(
+          path: FirestorePath.guestMeals(user.uid));
+      await _firestoreService.deleteData(path: FirestorePath.meals(user.uid));
       await _firestoreService.deleteData(path: FirestorePath.user(user.uid));
     }
     // decrement user count

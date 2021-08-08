@@ -16,8 +16,9 @@ class CurrentManagerCard extends StatefulWidget {
 }
 
 class _CurrentManagerCardState extends State<CurrentManagerCard> {
-  bool _loading = false;
+  bool _loading = false, _fundLoading = false;
   int _workPeriod;
+  int _fund;
   FirestoreDatabase db;
 
   @override
@@ -30,11 +31,13 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
   Widget build(BuildContext context) {
     return StreamBuilder<Map<String, dynamic>>(
       stream: db.currentManagerStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
+      builder: (context, managerSnapshot) {
+        if (managerSnapshot.hasData) {
           _workPeriod = DateTime.now()
-              .difference(DateTime.parse(snapshot.data['startDate']))
+              .difference(DateTime.parse(managerSnapshot.data['startDate']))
               .inDays;
+
+          _fund = 0;
 
           return Card(
             elevation: kElevation,
@@ -61,7 +64,7 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ManagerCostScreen(
-                                managerId: snapshot.data['managerId'],
+                                managerId: managerSnapshot.data['managerId'],
                               ),
                             ),
                           );
@@ -85,7 +88,7 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                         trailing: SizedBox(
                           width: MediaQuery.of(context).size.width / 2,
                           child: Text(
-                            snapshot.data['name'],
+                            managerSnapshot.data['name'],
                             textAlign: TextAlign.right,
                           ),
                         ),
@@ -94,7 +97,7 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                       ListTile(
                         title: Text('Start Date'),
                         trailing: Text(
-                          snapshot.data['startDate']
+                          managerSnapshot.data['startDate']
                               .toString()
                               .substring(0, 10),
                         ),
@@ -108,15 +111,16 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                       Divider(),
                       ListTile(
                         title: Text('Cost until now'),
-                        trailing: Text(snapshot.data['cost'].toString()),
+                        trailing: Text(managerSnapshot.data['cost'].toString()),
                       ),
                       Divider(),
                       StreamBuilder<Member>(
                         stream:
                             Provider.of<AuthProvider>(context, listen: false)
                                 .user,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData && snapshot.data.isConvener) {
+                        builder: (context, userSnapshot) {
+                          if (userSnapshot.hasData &&
+                              userSnapshot.data.isConvener) {
                             return _loading
                                 ? Padding(
                                     padding: const EdgeInsets.all(16.0),
@@ -125,111 +129,247 @@ class _CurrentManagerCardState extends State<CurrentManagerCard> {
                                       size: 40.0,
                                     ),
                                   )
-                                : ElevatedButton(
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                        accentColor,
-                                      ),
-                                      shape: MaterialStateProperty.all<
-                                          OutlinedBorder>(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              kBorderRadius),
+                                : Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                            Colors.white,
+                                          ),
+                                          foregroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                            accentColor,
+                                          ),
+                                          shape: MaterialStateProperty.all<
+                                              OutlinedBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      kBorderRadius),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Update Manager',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .button
-                                          .copyWith(color: Colors.white),
-                                    ),
-                                    onPressed: () async {
-                                      EasyDialog(
-                                        height:
-                                            MediaQuery.of(context).size.height /
+                                        child: Text(
+                                          'Update Fund',
+                                        ),
+                                        onPressed: () {
+                                          EasyDialog(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
                                                 3,
-                                        descriptionPadding: EdgeInsets.only(
-                                            bottom: kBorderRadius),
-                                        description: Text(
-                                            'Are you sure you want to update manager? The current manager has worked for $_workPeriod days.'),
-                                        contentList: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              TextButton(
-                                                style: ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStateProperty.all<
-                                                          Color>(
-                                                    primaryColorDark,
-                                                  ),
-                                                  foregroundColor:
-                                                      MaterialStateProperty.all<
-                                                          Color>(
-                                                    Colors.white,
-                                                  ),
-                                                  padding: MaterialStateProperty
-                                                      .all<EdgeInsetsGeometry>(
-                                                    EdgeInsets.all(
-                                                        kBorderRadius),
-                                                  ),
+                                            title: Text('Update Manager Fund'),
+                                            contentList: [
+                                              TextFormField(
+                                                autovalidateMode:
+                                                    AutovalidateMode
+                                                        .onUserInteraction,
+                                                cursorColor: primaryColorLight,
+                                                keyboardType: TextInputType
+                                                    .numberWithOptions(
+                                                        signed: true),
+                                                style: TextStyle(
+                                                    color: primaryColorDark),
+                                                decoration: InputDecoration(
+                                                  errorStyle: TextStyle(
+                                                      color: accentColor),
+                                                  focusedBorder:
+                                                      Theme.of(context)
+                                                          .inputDecorationTheme
+                                                          .focusedBorder
+                                                          .copyWith(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color:
+                                                                  primaryColorLight,
+                                                            ),
+                                                          ),
+                                                  focusedErrorBorder:
+                                                      Theme.of(context)
+                                                          .inputDecorationTheme
+                                                          .focusedErrorBorder
+                                                          .copyWith(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color:
+                                                                  primaryColorDark,
+                                                            ),
+                                                          ),
+                                                  labelText: 'amount',
+                                                  labelStyle: TextStyle(
+                                                      color: primaryColorDark),
+                                                  hintText:
+                                                      'can be positive/negative',
                                                 ),
-                                                child: Text('Yes, update'),
-                                                onPressed: () {
-                                                  // setState(() {
-                                                  //   _loading = true;
-                                                  // });
-                                                  // db
-                                                  //     .updateManager()
-                                                  //     .whenComplete(
-                                                  //       () => setState(() {
-                                                  //         _loading = false;
-                                                  //       }),
-                                                  //     );
-                                                  Navigator.of(context).pop();
-                                                  showDialog(
-                                                    context: context,
-                                                    barrierDismissible: false,
-                                                    builder: (context) =>
-                                                        ManagerUpdateDialog(),
-                                                  );
+                                                validator: (val) =>
+                                                    int.tryParse(val) == null
+                                                        ? 'Invalid amount'
+                                                        : null,
+                                                onChanged: (val) {
+                                                  _fund = int.tryParse(val);
                                                 },
                                               ),
                                               SizedBox(
-                                                width: kBorderRadius,
+                                                height: 16,
                                               ),
-                                              TextButton(
-                                                style: ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStateProperty.all<
-                                                          Color>(
-                                                    Colors.white,
+                                              _fundLoading
+                                                  ? SpinKitFadingCircle(
+                                                      color: accentColor,
+                                                      size: 40.0,
+                                                    )
+                                                  : TextButton(
+                                                      style: ButtonStyle(
+                                                        backgroundColor:
+                                                            MaterialStateProperty
+                                                                .all<Color>(
+                                                          primaryColorDark,
+                                                        ),
+                                                        foregroundColor:
+                                                            MaterialStateProperty
+                                                                .all<Color>(
+                                                          Colors.white,
+                                                        ),
+                                                        padding:
+                                                            MaterialStateProperty
+                                                                .all<
+                                                                    EdgeInsetsGeometry>(
+                                                          EdgeInsets.all(
+                                                              kBorderRadius),
+                                                        ),
+                                                      ),
+                                                      child: Text('Update'),
+                                                      onPressed: () async {
+                                                        print(_fund);
+                                                        setState(() {
+                                                          _fundLoading = true;
+                                                        });
+                                                        await db
+                                                            .updateManagerFund(
+                                                          _fund,
+                                                          userSnapshot.data,
+                                                          managerSnapshot.data[
+                                                              'managerId'],
+                                                          managerSnapshot
+                                                              .data['name'],
+                                                        );
+                                                        setState(() {
+                                                          _fundLoading = false;
+                                                        });
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                            ],
+                                          ).show(context);
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                            accentColor,
+                                          ),
+                                          shape: MaterialStateProperty.all<
+                                              OutlinedBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      kBorderRadius),
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Update Manager',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .button
+                                              .copyWith(color: Colors.white),
+                                        ),
+                                        onPressed: () async {
+                                          EasyDialog(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
+                                                3,
+                                            descriptionPadding: EdgeInsets.only(
+                                                bottom: kBorderRadius),
+                                            description: Text(
+                                                'Are you sure you want to update manager? The current manager has worked for $_workPeriod days.'),
+                                            contentList: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  TextButton(
+                                                    style: ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        primaryColorDark,
+                                                      ),
+                                                      foregroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        Colors.white,
+                                                      ),
+                                                      padding:
+                                                          MaterialStateProperty.all<
+                                                              EdgeInsetsGeometry>(
+                                                        EdgeInsets.all(
+                                                            kBorderRadius),
+                                                      ),
+                                                    ),
+                                                    child: Text('Yes, update'),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false,
+                                                        builder: (context) =>
+                                                            ManagerUpdateDialog(),
+                                                      );
+                                                    },
                                                   ),
-                                                  foregroundColor:
-                                                      MaterialStateProperty.all<
-                                                          Color>(
-                                                    primaryColorDark,
+                                                  SizedBox(
+                                                    width: kBorderRadius,
                                                   ),
-                                                  padding: MaterialStateProperty
-                                                      .all<EdgeInsetsGeometry>(
-                                                    EdgeInsets.all(
-                                                        kBorderRadius),
+                                                  TextButton(
+                                                    style: ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        Colors.white,
+                                                      ),
+                                                      foregroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        primaryColorDark,
+                                                      ),
+                                                      padding:
+                                                          MaterialStateProperty.all<
+                                                              EdgeInsetsGeometry>(
+                                                        EdgeInsets.all(
+                                                            kBorderRadius),
+                                                      ),
+                                                    ),
+                                                    child: Text('No, cancel'),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
                                                   ),
-                                                ),
-                                                child: Text('No, cancel'),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
+                                                ],
                                               ),
                                             ],
-                                          ),
-                                        ],
-                                      ).show(context);
-                                    },
+                                          ).show(context);
+                                        },
+                                      ),
+                                    ],
                                   );
                           } else {
                             return Container();

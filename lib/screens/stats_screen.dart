@@ -1,7 +1,9 @@
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mess_meal/constants/colors.dart';
+import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/member.dart';
 import 'package:mess_meal/providers/auth_provider.dart';
 import 'package:mess_meal/screens/user_record_screen.dart';
@@ -25,7 +27,8 @@ class _StatsScreenState extends State<StatsScreen> {
   List<int> selectedRecordIndices = [];
   FirestoreDatabase db;
   bool _canGeneratePDF = false;
-  bool _isConvener = false;
+  bool _isConvener = false, _fundLoading = false;
+  int _fund;
 
   @override
   void initState() {
@@ -83,9 +86,9 @@ class _StatsScreenState extends State<StatsScreen> {
           : Container(),
       body: StreamBuilder<Member>(
           stream: Provider.of<AuthProvider>(context, listen: false).user,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              _isConvener = snapshot.data.isConvener;
+          builder: (context, userSnapshot) {
+            if (userSnapshot.hasData) {
+              _isConvener = userSnapshot.data.isConvener;
 
               return _loading
                   ? SpinKitFadingCircle(
@@ -154,6 +157,13 @@ class _StatsScreenState extends State<StatsScreen> {
                                   ),
                                   Divider(),
                                   ListTile(
+                                    title: Text('Total Egg Count'),
+                                    trailing: Text(
+                                      (record['totalEggCount'] ?? 0).toString(),
+                                    ),
+                                    dense: true,
+                                  ),
+                                  ListTile(
                                     title: Text('Per Meal Cost'),
                                     trailing: Text(
                                       record['perMealCost'].toStringAsFixed(2),
@@ -174,6 +184,24 @@ class _StatsScreenState extends State<StatsScreen> {
                                     ),
                                     dense: true,
                                   ),
+                                  ListTile(
+                                    title: Text('Assigned Fund'),
+                                    trailing: Text(
+                                      (record['assignedFund'] ?? 0).toString(),
+                                    ),
+                                    dense: true,
+                                  ),
+                                  ListTile(
+                                    title: Text('Remaining Fund'),
+                                    trailing: Text(
+                                      (record['assignedFund'] == null
+                                              ? 0
+                                              : (record['totalCost'] -
+                                                  record['assignedFund']))
+                                          .toString(),
+                                    ),
+                                    dense: true,
+                                  ),
                                   BasicWhiteButton(
                                     text: "View your data",
                                     onPressed: () {
@@ -188,6 +216,145 @@ class _StatsScreenState extends State<StatsScreen> {
                                       );
                                     },
                                   ),
+                                  _isConvener
+                                      ? ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all<
+                                                    Color>(
+                                              Colors.white,
+                                            ),
+                                            foregroundColor:
+                                                MaterialStateProperty.all<
+                                                    Color>(
+                                              accentColor,
+                                            ),
+                                            shape: MaterialStateProperty.all<
+                                                OutlinedBorder>(
+                                              RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        kBorderRadius),
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Update Fund',
+                                          ),
+                                          onPressed: () {
+                                            EasyDialog(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  3,
+                                              title:
+                                                  Text('Update Manager Fund'),
+                                              contentList: [
+                                                TextFormField(
+                                                  autovalidateMode:
+                                                      AutovalidateMode
+                                                          .onUserInteraction,
+                                                  cursorColor:
+                                                      primaryColorLight,
+                                                  keyboardType: TextInputType
+                                                      .numberWithOptions(
+                                                          signed: true),
+                                                  style: TextStyle(
+                                                      color: primaryColorDark),
+                                                  decoration: InputDecoration(
+                                                    errorStyle: TextStyle(
+                                                        color: accentColor),
+                                                    focusedBorder: Theme.of(
+                                                            context)
+                                                        .inputDecorationTheme
+                                                        .focusedBorder
+                                                        .copyWith(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color:
+                                                                primaryColorLight,
+                                                          ),
+                                                        ),
+                                                    focusedErrorBorder: Theme
+                                                            .of(context)
+                                                        .inputDecorationTheme
+                                                        .focusedErrorBorder
+                                                        .copyWith(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color:
+                                                                primaryColorDark,
+                                                          ),
+                                                        ),
+                                                    labelText: 'amount',
+                                                    labelStyle: TextStyle(
+                                                        color:
+                                                            primaryColorDark),
+                                                    hintText:
+                                                        'can be positive/negative',
+                                                  ),
+                                                  validator: (val) =>
+                                                      int.tryParse(val) == null
+                                                          ? 'Invalid amount'
+                                                          : null,
+                                                  onChanged: (val) {
+                                                    _fund = int.tryParse(val);
+                                                  },
+                                                ),
+                                                SizedBox(
+                                                  height: 16,
+                                                ),
+                                                _fundLoading
+                                                    ? SpinKitFadingCircle(
+                                                        color: accentColor,
+                                                        size: 40.0,
+                                                      )
+                                                    : TextButton(
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            primaryColorDark,
+                                                          ),
+                                                          foregroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            Colors.white,
+                                                          ),
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsetsGeometry>(
+                                                            EdgeInsets.all(
+                                                                kBorderRadius),
+                                                          ),
+                                                        ),
+                                                        child: Text('Update'),
+                                                        onPressed: () async {
+                                                          print(_fund);
+                                                          setState(() {
+                                                            _fundLoading = true;
+                                                          });
+                                                          await db
+                                                              .updateManagerFund(
+                                                            _fund,
+                                                            userSnapshot.data,
+                                                            record['managerId'],
+                                                            record['name'],
+                                                          );
+                                                          setState(() {
+                                                            _fundLoading =
+                                                                false;
+                                                          });
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                              ],
+                                            ).show(context);
+                                          },
+                                        )
+                                      : Container(),
                                   // _isConvener
                                   //     ? BasicWhiteButton(
                                   //         text: "Recalculate stats",
