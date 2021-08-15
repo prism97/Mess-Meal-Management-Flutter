@@ -108,14 +108,14 @@ class FirestoreDatabase {
 
   Future<int> updateManagerSerials() async {
     int userCount = await getUserCount();
-    if (userCount < 5) {
+    if (userCount < 7) {
       return userCount + 1;
     }
 
     final users = await _firestoreService.listDocuments(
       path: FirestorePath.users(),
       builder: (data, documentId) => Member.fromMap(data, documentId),
-      queryBuilder: (query) => query.where('managerSerial', isGreaterThan: 4),
+      queryBuilder: (query) => query.where('managerSerial', isGreaterThan: 6),
     );
 
     Member user;
@@ -129,7 +129,7 @@ class FirestoreDatabase {
       );
     }
 
-    return 5; // new user will always start at serial 5
+    return 7; // new user will always start at serial 7
   }
 
   _setCurrentManager({String uid, String name, String managerId}) async {
