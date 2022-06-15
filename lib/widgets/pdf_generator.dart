@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:open_file/open_file.dart';
@@ -44,6 +45,7 @@ class PdfGenerator {
     );
 
     final pw.Document doc = pw.Document(theme: myTheme);
+    final DateFormat dateFormat = DateFormat.yMMMM();
 
     List<pw.Widget> textWidgets = [];
     for (var entry in managers) {
@@ -81,6 +83,18 @@ class PdfGenerator {
             PdfPageFormat.letter.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         build: (pw.Context context) => <pw.Widget>[
+          pw.Center(
+            child: pw.Text(
+              dateFormat.format(DateTime.now()),
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          pw.Padding(
+            padding: pw.EdgeInsets.only(bottom: 20.0),
+          ),
           pw.Center(
             child: pw.Text(
               "Shahid Smrity Hall Teachers' Block",
