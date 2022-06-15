@@ -1,16 +1,24 @@
-# mess_meal
+# Mess Meal
 
-A new Flutter project.
+A Flutter application for automating meal management and budget calculation in a mess.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Users can update and keep track of their daily meals.
+- Manager can change meal amounts (breakfast, lunch, dinner) for any day.
+- Manager and mess boys can view the list of users who opted to take any meal of a day.
+- Manager can input his expenses and make other changes to the monthly budget.
+- Conveners can add to or deduct from available mess funds.
+- Conveners can end the work period of a manager and assign the role to another user.
+  - This assignment occurs automatically. Users move ahead in a circular list, and the one at the front becomes the manager.
+- Conveners can download the meal data and payable amount for every user during any manager's work period in pdf format.
+- Conveners can merge the details of two or more consecutive managers and get the total calculation in a single pdf document.
+- Conveners can send messages to all the users in the form of push notifications.
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies Used
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- Dart, Flutter Framework
+- Firebase Firestore Database
+- Firebase Authentication
+- Firebase Cloud Messaging
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
