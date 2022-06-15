@@ -64,7 +64,7 @@ class CustomCalendar extends StatelessWidget {
         weekdayStyle: Theme.of(context).textTheme.subtitle1,
         weekendStyle: Theme.of(context).textTheme.subtitle2,
       ),
-      onDaySelected: (date, events) {
+      onDaySelected: (date, events, _) {
         showMealCard(true, DateTime(date.year, date.month, date.day));
       },
       onUnavailableDaySelected: () {
