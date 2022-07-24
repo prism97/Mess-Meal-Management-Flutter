@@ -410,7 +410,9 @@ class FirestoreDatabase {
       if (user.isManager()) {
         await _firestoreService.setData(
           path: FirestorePath.user(user.uid),
-          data: {'managerSerial': userCount},
+          data: {
+            'managerSerial': userCount
+          }, // TODO: needs to happen after cleanup
           merge: true,
         );
       } else if (!user.isDeleted) {
@@ -519,7 +521,7 @@ class FirestoreDatabase {
   }
 
   Future<void> cleanupUserData() async {
-    List<Member> deletedUsers = await _firestoreService.listDocuments(
+    final deletedUsers = await _firestoreService.listDocuments<Member>(
       path: FirestorePath.users(),
       builder: (data, documentId) => Member.fromMap(data, documentId),
       queryBuilder: (query) => query.where('isDeleted', isEqualTo: true),
@@ -837,7 +839,7 @@ class FirestoreDatabase {
       );
 
       // update manager serials
-      final users = await _firestoreService.listDocuments(
+      final users = await _firestoreService.listDocuments<Member>(
         path: FirestorePath.users(),
         builder: (data, documentId) => Member.fromMap(data, documentId),
         queryBuilder: (query) =>

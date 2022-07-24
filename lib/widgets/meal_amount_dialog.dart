@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mess_meal/constants/colors.dart';
 import 'package:mess_meal/constants/numbers.dart';
 import 'package:mess_meal/models/meal_amount.dart';
@@ -99,7 +98,7 @@ class _MealAmountDialogState extends State<MealAmountDialog> {
                       ElevatedButton(
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(
-                            Theme.of(context).accentColor,
+                            Theme.of(context).colorScheme.secondary,
                           ),
                           foregroundColor: MaterialStateProperty.all<Color>(
                             Colors.white,

@@ -12,7 +12,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: Container(
         margin: EdgeInsets.all(10.0),
         child: AppBar(
-          iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          iconTheme:
+              IconThemeData(color: Theme.of(context).colorScheme.secondary),
           title: Text(
             title,
             textAlign: TextAlign.center,

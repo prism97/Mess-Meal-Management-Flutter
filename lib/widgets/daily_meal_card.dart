@@ -164,7 +164,7 @@ class _DailyMealCardState extends State<DailyMealCard> {
                             ),
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).accentColor,
+                                Theme.of(context).colorScheme.secondary,
                               ),
                               foregroundColor: MaterialStateProperty.all<Color>(
                                 Colors.white,
@@ -204,7 +204,9 @@ class _DailyMealCardState extends State<DailyMealCard> {
                                       style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all(
-                                          Theme.of(context).accentColor,
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
                                         ),
                                         foregroundColor:
                                             MaterialStateProperty.all(

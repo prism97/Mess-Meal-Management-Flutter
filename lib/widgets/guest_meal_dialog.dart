@@ -203,7 +203,7 @@ class _GuestMealDialogState extends State<GuestMealDialog> {
                                   style: ButtonStyle(
                                     backgroundColor:
                                         MaterialStateProperty.all<Color>(
-                                      Theme.of(context).accentColor,
+                                      Theme.of(context).colorScheme.secondary,
                                     ),
                                     foregroundColor:
                                         MaterialStateProperty.all<Color>(

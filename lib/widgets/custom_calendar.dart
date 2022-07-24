@@ -55,7 +55,7 @@ class CustomCalendar extends StatelessWidget {
         ),
       ),
       calendarStyle: CalendarStyle(
-        selectedColor: Theme.of(context).accentColor,
+        selectedColor: Theme.of(context).colorScheme.secondary,
         todayColor: Theme.of(context).disabledColor,
         weekdayStyle: Theme.of(context).textTheme.bodyText1,
         weekendStyle: Theme.of(context).textTheme.bodyText2,

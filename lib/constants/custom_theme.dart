@@ -5,7 +5,6 @@ ThemeData themeData = ThemeData(
   fontFamily: 'Montserrat',
   primaryColorDark: Colors.purple.shade900,
   primaryColorLight: Colors.purple.shade600,
-  accentColor: Colors.purple,
   disabledColor: Colors.purple.shade100,
   textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.white),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -90,4 +89,5 @@ ThemeData themeData = ThemeData(
     brightness: Brightness.light,
     elevation: kElevation,
   ),
+  colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.purple),
 );
